@@ -2,7 +2,7 @@ import { PatrolPoint } from "../models/PatrolPoint.js";
 import { Report } from "../models/Report.js";
 
 // * * GET ALL
-export const getAllOutpost = async (req, res) => {
+export const getAllPatrolPoints = async (req, res) => {
   try {
     const patrolPoints = await PatrolPoint.find().sort({ name: 1 });
     if (patrolPoints.length === 0) {

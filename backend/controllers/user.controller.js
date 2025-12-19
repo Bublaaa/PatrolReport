@@ -32,11 +32,36 @@ export const getUserDetail = async (req, res) => {
   }
 };
 
+export const createUser = async (req, res) => {
+  const { firstName, middleName, lastName, position } = req.body;
+  try {
+    if (!firstName || !lastName || !position) {
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required" });
+    }
+    const newUser = new User({
+      firstName,
+      middleName,
+      lastName,
+      position,
+    });
+    await newUser.save();
+    res.status(201).json({
+      success: true,
+      message: "Successfully created user account",
+      user: newUser,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { firstName, middleName, lastName } = req.body;
+  const { firstName, middleName, lastName, position } = req.body;
   try {
-    if (!email || !firstName || !lastName) {
+    if (!position || !firstName || !lastName) {
       return res
         .status(400)
         .json({ success: false, message: "All fields are required" });
@@ -48,10 +73,10 @@ export const updateUser = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
     const updatedUser = await User.findByIdAndUpdate(id, {
-      email,
       firstName,
       middleName,
       lastName,
+      position,
     });
     res.status(200).json({
       success: true,
