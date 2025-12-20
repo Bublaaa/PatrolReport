@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { updateReport } from "../../../backend/controllers/report.controller";
 
 const API_URL =
   import.meta.env.MODE === "development"
