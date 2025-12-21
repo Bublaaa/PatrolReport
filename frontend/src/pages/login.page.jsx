@@ -4,7 +4,7 @@ import { Mail, Lock, Loader } from "lucide-react";
 import { TextInput } from "../components/input.jsx";
 // import { Link } from "react-router-dom";
 import { useAuthStore } from "../stores/auth.store.js";
-import Button from "../components/Button.jsx";
+import Button from "../components/button.jsx";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");

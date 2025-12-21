@@ -88,6 +88,8 @@ function App() {
             </ProtectedRoute>
           }
         >
+          <Route index element={<Navigate to="user" replace />} />
+
           <Route
             path="user"
             element={
