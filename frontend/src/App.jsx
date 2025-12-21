@@ -11,6 +11,11 @@ const AdminDashboard = lazy(() => import("./pages/admin.dashboard.page.jsx"));
 const UserPage = lazy(() =>
   import("./pages/admin.pages/user.dashboard.page.jsx")
 );
+const AddUserPage = lazy(() => import("./pages/admin.pages/add.user.page.jsx"));
+const UserDetailPage = lazy(() =>
+  import("./pages/admin.pages/update.user.page.jsx")
+);
+
 const PatrolPointPage = lazy(() =>
   import("./pages/admin.pages/patrol.point.dashboard.page.jsx")
 );
@@ -100,6 +105,24 @@ function App() {
               </Suspense>
             }
           />
+          <Route
+            path="user/add"
+            element={
+              <Suspense>
+                <AddUserPage />
+              </Suspense>
+            }
+          />
+
+          <Route
+            path="user/:id"
+            element={
+              <Suspense>
+                <UserDetailPage />
+              </Suspense>
+            }
+          />
+
           <Route
             path="patrol-point"
             element={

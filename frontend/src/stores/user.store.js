@@ -9,7 +9,7 @@ const API_URL =
 
 axios.defaults.withCredentials = true;
 
-export const userStore = create((set, get) => ({
+export const useUserStore = create((set, get) => ({
   user: null,
   users: [],
   userDetail: null,
@@ -20,7 +20,7 @@ export const userStore = create((set, get) => ({
   fetchUsers: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}users`);
+      const response = await axios.get(`${API_URL}user/all`);
       set({ users: response.data.users, isLoading: false });
     } catch (error) {
       const errorMessage =
@@ -36,7 +36,7 @@ export const userStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get(`${API_URL}user/${id}`);
-      set({ user: response.data.user, isLoading: false });
+      set({ userDetail: response.data.user, isLoading: false });
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error fetching user detail";
@@ -47,7 +47,8 @@ export const userStore = create((set, get) => ({
       toast.error(errorMessage);
     }
   },
-  createUser: async (firstName, middleName, lastName, position) => {
+  createUser: async (firstName, middleName, lastName) => {
+    const position = "security";
     set({ isLoading: true, error: null });
     try {
       const response = await axios.post(`${API_URL}user/create`, {

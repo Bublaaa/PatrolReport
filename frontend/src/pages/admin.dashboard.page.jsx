@@ -21,9 +21,9 @@ const AdminDashboard = () => {
     }
   };
   return (
-    <div className="w-full flex flex-col h-screen items-end bg-white-shadow">
-      <div className="max-w-3xl w-full mx-auto h-fit">
-        <div className="flex flex-col gap-5 my-4">
+    <div className="w-full h-screen items-end bg-white-shadow">
+      <div className="max-w-3xl w-full mx-auto h-fit p-3">
+        <div className="flex flex-col gap-5">
           <div className="flex flex-row justify-between bg-white rounded-lg bg-white shadow-md px-6 py-4">
             <h5>
               {userDetail.firstName} {userDetail.lastName}
@@ -38,7 +38,7 @@ const AdminDashboard = () => {
           {/* NAVIGATION */}
           <MenuLink links={menuLinks} />
           {/* CONTENT */}
-          <div className="flex justify-center items-start w-full h-full overflow-y-auto scrollbar-hidden py-10">
+          <div className="flex justify-center items-start w-full h-full overflow-y-auto scrollbar-hidden p-2 pb-10">
             <Outlet />
           </div>
         </div>
