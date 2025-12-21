@@ -6,6 +6,18 @@ import { Loader } from "lucide-react";
 
 import LoginPage from "./pages/login.page.jsx";
 
+const AdminDashboard = lazy(() => import("./pages/admin.dashboard.page.jsx"));
+
+const UserPage = lazy(() =>
+  import("./pages/admin.pages/user.dashboard.page.jsx")
+);
+const PatrolPointPage = lazy(() =>
+  import("./pages/admin.pages/patrol.point.dashboard.page.jsx")
+);
+const ReportPage = lazy(() =>
+  import("./pages/admin.pages/report.dashboard.page.jsx")
+);
+
 const ProtectedRoute = ({ children, requiredPosition }) => {
   const { isAuthenticated, userDetail } = useAuthStore();
   const location = useLocation();
@@ -15,7 +27,11 @@ const ProtectedRoute = ({ children, requiredPosition }) => {
   }
 
   if (requiredPosition && userDetail.position !== requiredPosition) {
-    if (userDetail.position === "Admin" && location.pathname !== "/admin") {
+    if (
+      userDetail.position === "admin" &&
+      location.pathname !== "/admin" &&
+      !location.pathname.startsWith("/admin/")
+    ) {
       return <Navigate to="/admin" replace />;
     }
   }
@@ -24,11 +40,13 @@ const ProtectedRoute = ({ children, requiredPosition }) => {
 
 const RedirectAuthenticatedUser = ({ children }) => {
   const { isAuthenticated, userDetail } = useAuthStore();
-
-  if (isAuthenticated && userDetail.position === "Admin") {
-    return <Navigate to="/admin" replace />;
-  } else {
-    return <Navigate to="/login" replace />;
+  if (isAuthenticated) {
+    switch (userDetail.position) {
+      case "admin":
+        return <Navigate to="/admin" replace />;
+      default:
+        return <Navigate to="/login" replace />;
+    }
   }
   return children;
 };
@@ -61,7 +79,7 @@ function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute requiredPosition="Admin">
+            <ProtectedRoute requiredPosition="admin">
               <Suspense
                 fallback={<Loader className="w-6h-6 animate-spin mx-auto" />}
               >

@@ -17,39 +17,6 @@ export const useAuthStore = create((set, get) => ({
   isLoading: false,
   isCheckingAuth: true,
   message: null,
-  //** SIGN UP
-  // signup: async (
-  //   email,
-  //   password,
-  //   firstName,
-  //   middleName,
-  //   lastName,
-  //   position
-  // ) => {
-  //   set({ isLoading: true, error: null });
-  //   try {
-  //     const response = await axios.post(`${API_URL}auth/signup`, {
-  //       email,
-  //       password,
-  //       firstName,
-  //       middleName,
-  //       lastName,
-  //       position,
-  //     });
-  //     set({
-  //       // user: response.data.user,
-  //       // isAuthenticated: false,
-  //       error: response.data.message,
-  //       isLoading: false,
-  //     });
-  //   } catch (error) {
-  //     set({
-  //       error: error.response?.data?.message || "Error signing up",
-  //       isLoading: false,
-  //     });
-  //     throw error;
-  //   }
-  // },
   //** LOGIN
   login: async (username, password) => {
     set({ isLoading: true, error: null });
@@ -60,7 +27,7 @@ export const useAuthStore = create((set, get) => ({
       });
       set({
         isAuthenticated: true,
-        user: response.data.user,
+        userDetail: response.data.user,
         error: null,
         isLoading: false,
       });
@@ -78,7 +45,7 @@ export const useAuthStore = create((set, get) => ({
     try {
       await axios.post(`${API_URL}auth/logout`);
       set({
-        user: null,
+        userDetail: null,
         isAuthenticated: false,
         error: null,
         isLoading: false,
@@ -94,7 +61,7 @@ export const useAuthStore = create((set, get) => ({
     try {
       const response = await axios.get(`${API_URL}auth/check-auth`);
       set({
-        user: response.data.user,
+        userDetail: response.data.user,
         isAuthenticated: true,
         isCheckingAuth: false,
       });
@@ -102,15 +69,20 @@ export const useAuthStore = create((set, get) => ({
       set({ error: null, isCheckingAuth: false, isAuthenticated: false });
     }
   },
-  //** FETCH ALL
-  fetchAllUsers: async () => {
-    set({ isLoading: false, error: null });
+
+  createAuth: async (username, password, userId) => {
+    set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}auth/users`);
-      set({ isLoading: false, users: response.data.users });
+      const response = await axios.post(`${API_URL}auth/create`, {
+        username,
+        password,
+        userId,
+      });
+      set({ isLoading: false });
+      toast.success("Auth created successfully");
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || "Error adding new ingredients";
+        error.response?.data?.message || "Error creating auth";
       set({
         error: errorMessage,
         isLoading: false,
@@ -119,69 +91,41 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  fetchAllSecurities: async () => {
-    set({ isLoading: false, error: null });
-    try {
-      const response = await axios.get(`${API_URL}auth/users`);
-      const securityUsers = response.data.users.filter(
-        (user) => user.position === "security"
-      );
-      set({ isLoading: false, users: securityUsers });
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Error adding new ingredients";
-      set({
-        error: errorMessage,
-        isLoading: false,
-      });
-      toast.error(errorMessage);
-    }
-  },
-  //** FETCH Detail
-  fetchUserDetail: async (id) => {
-    set({ isLoading: false, error: null });
-    try {
-      const response = await axios.get(`${API_URL}auth/user/${id}`);
-      set({ isLoading: false, userDetail: response.data.user });
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Error adding new ingredients";
-      set({
-        error: errorMessage,
-        isLoading: false,
-      });
-      toast.error(errorMessage);
-    }
-  },
-  //** UPDATE USER
-  updateUser: async (id, email, firstName, middleName, lastName) => {
-    set({ isLoading: false, error: null });
+  updateAuth: async (id, username, password, userId) => {
+    set({ isLoading: true, error: null });
     try {
       const response = await axios.put(`${API_URL}auth/update/${id}`, {
-        email,
-        firstName,
-        middleName,
-        lastName,
+        username,
+        password,
+        userId,
       });
-      set({ isLoading: false, userDetail: response.data.user });
-      await get().fetchAllUsers();
-      // toast.success("Success update user detail");
+      set({ isLoading: false });
+      toast.success("Auth updated successfully");
     } catch (error) {
-      set({ error: "Error logging out", isLoading: false });
-      throw error;
+      const errorMessage =
+        error.response?.data?.message || "Error updating auth";
+      set({
+        error: errorMessage,
+        isLoading: false,
+      });
+      toast.error(errorMessage);
     }
   },
-  //** DELETE USER
-  deleteUser: async (id) => {
-    set({ isLoading: false, error: null });
+
+  deleteAuth: async (id) => {
+    set({ isLoading: true, error: null });
     try {
       const response = await axios.delete(`${API_URL}auth/delete/${id}`);
-      set({ isLoading: false, userDetail: response.data.user });
-      await get().fetchAllUsers();
-      toast.success("Success delete account");
+      set({ isLoading: false });
+      toast.success("Auth deleted successfully");
     } catch (error) {
-      set({ error: "Error logging out", isLoading: false });
-      throw error;
+      const errorMessage =
+        error.response?.data?.message || "Error deleting auth";
+      set({
+        error: errorMessage,
+        isLoading: false,
+      });
+      toast.error(errorMessage);
     }
   },
 }));

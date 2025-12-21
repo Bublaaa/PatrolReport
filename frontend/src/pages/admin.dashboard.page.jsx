@@ -1,6 +1,6 @@
 import { useAuthStore } from "../stores/auth.store.js";
 import { Outlet } from "react-router-dom";
-import MenuLink from "../components/menu.link.jsx";
+// import MenuLink from "../components/menu.link.jsx";
 
 const AdminDashboard = () => {
   const menuLinks = [
@@ -10,6 +10,7 @@ const AdminDashboard = () => {
   ];
 
   const { userDetail } = useAuthStore();
+  console.log("Admin Dashboard User Detail:", userDetail);
   return (
     <div className="w-full flex flex-col h-screen items-end">
       {/* CONTENT */}
@@ -18,7 +19,8 @@ const AdminDashboard = () => {
       </div>
       {/* NAVIGATION */}
       <div className="max-w-md w-full mx-auto h-fit">
-        <MenuLink links={links} />
+        <h1>ADMIN</h1>
+        {/* <MenuLink links={links} /> */}
       </div>
     </div>
   );
