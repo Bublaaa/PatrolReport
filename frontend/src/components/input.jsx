@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import * as LucideIcons from "lucide-react";
 
-export default TextInput = ({
+export const TextInput = ({
   icon: Icon,
   value,
   onChange,

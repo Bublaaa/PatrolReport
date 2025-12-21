@@ -10,7 +10,6 @@ const API_URL =
 axios.defaults.withCredentials = true;
 
 export const useAuthStore = create((set, get) => ({
-  user: null,
   users: [],
   userDetail: null,
   isAuthenticated: false,
@@ -19,44 +18,44 @@ export const useAuthStore = create((set, get) => ({
   isCheckingAuth: true,
   message: null,
   //** SIGN UP
-  signup: async (
-    email,
-    password,
-    firstName,
-    middleName,
-    lastName,
-    position
-  ) => {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await axios.post(`${API_URL}auth/signup`, {
-        email,
-        password,
-        firstName,
-        middleName,
-        lastName,
-        position,
-      });
-      set({
-        // user: response.data.user,
-        // isAuthenticated: false,
-        error: response.data.message,
-        isLoading: false,
-      });
-    } catch (error) {
-      set({
-        error: error.response?.data?.message || "Error signing up",
-        isLoading: false,
-      });
-      throw error;
-    }
-  },
+  // signup: async (
+  //   email,
+  //   password,
+  //   firstName,
+  //   middleName,
+  //   lastName,
+  //   position
+  // ) => {
+  //   set({ isLoading: true, error: null });
+  //   try {
+  //     const response = await axios.post(`${API_URL}auth/signup`, {
+  //       email,
+  //       password,
+  //       firstName,
+  //       middleName,
+  //       lastName,
+  //       position,
+  //     });
+  //     set({
+  //       // user: response.data.user,
+  //       // isAuthenticated: false,
+  //       error: response.data.message,
+  //       isLoading: false,
+  //     });
+  //   } catch (error) {
+  //     set({
+  //       error: error.response?.data?.message || "Error signing up",
+  //       isLoading: false,
+  //     });
+  //     throw error;
+  //   }
+  // },
   //** LOGIN
-  login: async (email, password) => {
+  login: async (username, password) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.post(`${API_URL}auth/login`, {
-        email,
+        username,
         password,
       });
       set({
