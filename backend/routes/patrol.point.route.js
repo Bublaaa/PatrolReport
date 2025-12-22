@@ -5,6 +5,7 @@ import {
   createPatrolPoint,
   updatePatrolPoint,
   deletePatrolPoint,
+  generatePatrolPointBarcode,
 } from "../controllers/patrol.point.controller.js";
 
 const router = express.Router();
@@ -23,5 +24,7 @@ router.put("/update/:id", updatePatrolPoint);
 
 // DELETE PATROL POINT
 router.delete("/delete/:id", deletePatrolPoint);
+
+router.post("/generate-qr", generatePatrolPointBarcode);
 
 export default router;

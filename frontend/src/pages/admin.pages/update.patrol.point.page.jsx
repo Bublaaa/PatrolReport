@@ -1,5 +1,11 @@
 import { usePatrolPointStore } from "../../stores/patrol.point.store.js";
-import { Loader, MapPinCheckInside, Plus } from "lucide-react";
+import {
+  Download,
+  Loader,
+  MapPinCheckInside,
+  Plus,
+  SaveIcon,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { requestLocation } from "../../utils/location.js";
@@ -14,6 +20,8 @@ const UpdatePatrolPointPage = () => {
     updatePatrolPoint,
     fetchPatrolPointDetail,
     patrolPointDetail,
+    generateQRCode,
+    qrCode,
     isLoading,
   } = usePatrolPointStore();
   const [PatrolPointData, setPatrolPointData] = useState({
@@ -53,14 +61,26 @@ const UpdatePatrolPointPage = () => {
       PatrolPointData.latitude,
       PatrolPointData.longitude
     );
-    toast.success("Success add new patrol point");
+    toast.success("Success update new patrol point");
     setTimeout(() => {
       navigate(-1);
     }, 1000);
   };
+  const handleDownloadQrCode = () => {
+    if (!qrCode) return;
+
+    const link = document.createElement("a");
+    link.href = qrCode;
+    link.download = PatrolPointData.name + "-qr.png";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   useEffect(() => {
     fetchPatrolPointDetail(id);
+    generateQRCode(id);
     checkLocationPermission();
   }, [id]);
 
@@ -103,50 +123,73 @@ const UpdatePatrolPointPage = () => {
           Recalibrate
         </Button>
       </motion.div>
-      {/* Shift Name */}
-      <TextInput
-        type="text"
-        label={"Patrol Point Name"}
-        placeholder="Outpost Name"
-        value={PatrolPointData.name}
-        onChange={(e) =>
-          setPatrolPointData((prev) => ({
-            ...prev,
-            name: e.target.value,
-          }))
-        }
-      />
-
-      <div className="grid grid-cols-2 gap-5">
-        {/* Start Time Picker */}
-        <div className="flex flex-col gap-2 items-center">
-          <h6>Latitude</h6>
-          {locationGranted === null && (
-            <Loader className="w-6h-6 animate-spin mx-auto" />
+      <div className="grid md:grid-cols-4 grid-cols-1 w-full gap-5">
+        <div className="flex flex-col justify-center items-center md:col-span-1 col-span-1">
+          {qrCode && (
+            <img
+              src={qrCode}
+              alt="Attendance QR Code"
+              className="w-48 h-48 w-full h-auto"
+            />
           )}
-          {locationGranted === true && <p>{PatrolPointData.latitude}</p>}
+          {!qrCode && (
+            <h6 className="text-center text-red-500">QR Code unavailable</h6>
+          )}
+          <Button
+            buttonType="secondary"
+            buttonSize="medium"
+            onClick={handleDownloadQrCode}
+            icon={Download}
+          >
+            Download QR
+          </Button>
         </div>
+        <div className="flex w-full flex-col gap-5 md:col-span-3 col-span-1">
+          <TextInput
+            type="text"
+            label={"Patrol Point Name"}
+            placeholder="Outpost Name"
+            value={PatrolPointData.name}
+            onChange={(e) =>
+              setPatrolPointData((prev) => ({
+                ...prev,
+                name: e.target.value,
+              }))
+            }
+          />
 
-        <div className="flex flex-col gap-2 items-center">
-          <h6>Longitude</h6>
+          <div className="grid grid-cols-2 gap-5">
+            {/* Start Time Picker */}
+            <div className="flex flex-col gap-2 items-center">
+              <h6>Latitude</h6>
+              {locationGranted === null && (
+                <Loader className="w-6h-6 animate-spin mx-auto" />
+              )}
+              {locationGranted === true && <p>{PatrolPointData.latitude}</p>}
+            </div>
+
+            <div className="flex flex-col gap-2 items-center">
+              <h6>Longitude</h6>
+              {locationGranted === null && (
+                <Loader className="w-6h-6 animate-spin mx-auto" />
+              )}
+              {locationGranted === true && <p>{PatrolPointData.longitude}</p>}
+            </div>
+          </div>
           {locationGranted === null && (
-            <Loader className="w-6h-6 animate-spin mx-auto" />
+            <div className="p-2 items-center text-center bg-yellow-100 rounded-lg">
+              <p className="text-yellow-500">Checking location permission</p>
+            </div>
           )}
-          {locationGranted === true && <p>{PatrolPointData.longitude}</p>}
+          {locationGranted === false && (
+            <div className="p-2 items-center text-center bg-red-100 rounded-lg">
+              <p className="text-red-500">
+                ❌ Location permission is required for adding new outpost.
+              </p>
+            </div>
+          )}
         </div>
       </div>
-      {locationGranted === null && (
-        <div className="p-2 items-center text-center bg-yellow-100 rounded-lg">
-          <p className="text-yellow-500">Checking location permission</p>
-        </div>
-      )}
-      {locationGranted === false && (
-        <div className="p-2 items-center text-center bg-red-100 rounded-lg">
-          <p className="text-red-500">
-            ❌ Location permission is required for adding new outpost.
-          </p>
-        </div>
-      )}
       <Button
         type="submit"
         className="ml-auto"
@@ -154,7 +197,7 @@ const UpdatePatrolPointPage = () => {
           PatrolPointData.latitude !== 0 ? "primary" : "disabled"
         }`}
         buttonSize="medium"
-        icon={Plus}
+        icon={SaveIcon}
       >
         Save
       </Button>

@@ -1,5 +1,6 @@
 import { PatrolPoint } from "../models/PatrolPoint.js";
 import { Report } from "../models/Report.js";
+import QRCode from "qrcode";
 
 // * * GET ALL
 export const getAllPatrolPoints = async (req, res) => {
@@ -148,5 +149,40 @@ export const deletePatrolPoint = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const generatePatrolPointBarcode = async (req, res) => {
+  const API_URL =
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:5003/api/"
+      : "/api/";
+  const { id } = req.body;
+  try {
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Patrol Point ID is required" });
+    }
+    const patrolPointUrl = `${API_URL}report/create/${id}`;
+    const qrCodeDataUrl = await QRCode.toDataURL(patrolPointUrl);
+
+    if (!qrCodeDataUrl) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Error generating QR" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Success generate QR code",
+      qrCode: qrCodeDataUrl,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to generate QR Code",
+      error: error.message,
+    });
   }
 };

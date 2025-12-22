@@ -12,6 +12,7 @@ axios.defaults.withCredentials = true;
 export const usePatrolPointStore = create((set, get) => ({
   patrolPoints: [],
   patrolPointDetail: null,
+  qrCode: null,
   error: null,
   isLoading: false,
   message: null,
@@ -104,6 +105,29 @@ export const usePatrolPointStore = create((set, get) => ({
         isLoading: false,
       });
       toast.error(errorMessage);
+    }
+  },
+
+  generateQRCode: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.post(`${API_URL}patrol-point/generate-qr`, {
+        id,
+      });
+      set({
+        qrCode: response.data.qrCode,
+        message: response.data.message,
+        isLoading: false,
+      });
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Error generating QR code";
+      set({
+        error: errorMessage,
+        isLoading: false,
+      });
+      toast.error(errorMessage);
+      return null;
     }
   },
 }));
