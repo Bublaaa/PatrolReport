@@ -19,6 +19,12 @@ const UserDetailPage = lazy(() =>
 const PatrolPointPage = lazy(() =>
   import("./pages/admin.pages/patrol.point.dashboard.page.jsx")
 );
+const AddPatrolPointPage = lazy(() =>
+  import("./pages/admin.pages/add.patrol.point.page.jsx")
+);
+const PatrolPointDetailPage = lazy(() =>
+  import("./pages/admin.pages/update.patrol.point.page.jsx")
+);
 const ReportPage = lazy(() =>
   import("./pages/admin.pages/report.dashboard.page.jsx")
 );
@@ -133,6 +139,23 @@ function App() {
               </Suspense>
             }
           />
+          <Route
+            path="patrol-point/add"
+            element={
+              <Suspense>
+                <AddPatrolPointPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="patrol-point/:id"
+            element={
+              <Suspense>
+                <PatrolPointDetailPage />
+              </Suspense>
+            }
+          />
+
           <Route
             path="report"
             element={

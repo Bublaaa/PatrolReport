@@ -95,6 +95,7 @@ export const usePatrolPointStore = create((set, get) => ({
         `${API_URL}patrol-point/delete/${id}`
       );
       set({ message: response.data.message, isLoading: false });
+      toast.error("Success delete patrol point");
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error deleting patrol point";
