@@ -171,3 +171,60 @@ export const DropdownInput = ({
     </div>
   );
 };
+
+export const ImageInput = ({ label, onFileChange }) => {
+  const [preview, setPreview] = useState(null);
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result);
+        if (onFileChange) onFileChange(file); // Pass file to parent component if needed
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-2 w-full pb-3">
+      {label && (
+        <label className="block text-sm font-medium text-gray-600">
+          {label}
+        </label>
+      )}
+      <label
+        htmlFor="dropzone-file"
+        className="flex flex-col items-center justify-center w-full h-50 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 overflow-hidden"
+      >
+        {preview ? (
+          <img
+            src={preview}
+            alt="Uploaded preview"
+            className="w-full h-50 object-cover rounded-lg"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center p-6">
+            <LucideIcons.Upload className="w-8 h-8 mb-4 text-gray-500" />
+            <p className="mb-2 text-sm text-gray-500">
+              <span className="font-semibold">Click to upload</span> or drag and
+              drop
+            </p>
+            <p className="text-xs text-gray-500">
+              Supported formats: PNG, JPG, GIF
+            </p>
+          </div>
+        )}
+        <input
+          id="dropzone-file"
+          type="file"
+          accept="image/png, image/jpeg, image/gif"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+      </label>
+    </div>
+  );
+};

@@ -153,10 +153,8 @@ export const deletePatrolPoint = async (req, res) => {
 };
 
 export const generatePatrolPointBarcode = async (req, res) => {
-  const API_URL =
-    process.env.NODE_ENV === "development"
-      ? "http://localhost:5003/api/"
-      : "/api/";
+  const URL =
+    process.env.NODE_ENV === "development" ? "http://localhost:5173/" : "/";
   const { id } = req.body;
   try {
     if (!id) {
@@ -164,7 +162,7 @@ export const generatePatrolPointBarcode = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Patrol Point ID is required" });
     }
-    const patrolPointUrl = `${API_URL}report/create/${id}`;
+    const patrolPointUrl = `${URL}report/create/${id}`;
     const qrCodeDataUrl = await QRCode.toDataURL(patrolPointUrl);
 
     if (!qrCodeDataUrl) {

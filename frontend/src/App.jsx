@@ -25,9 +25,12 @@ const AddPatrolPointPage = lazy(() =>
 const PatrolPointDetailPage = lazy(() =>
   import("./pages/admin.pages/update.patrol.point.page.jsx")
 );
+
 const ReportPage = lazy(() =>
   import("./pages/admin.pages/report.dashboard.page.jsx")
 );
+const CreateReportPage = lazy(() => import("./pages/create.report.page.jsx"));
+const ScanPage = lazy(() => import("./pages/scan.page.jsx"));
 
 const ProtectedRoute = ({ children, requiredPosition }) => {
   const { isAuthenticated, userDetail } = useAuthStore();
@@ -85,6 +88,26 @@ function App() {
             <RedirectAuthenticatedUser>
               <LoginPage />
             </RedirectAuthenticatedUser>
+          }
+        />
+        <Route
+          path="/scan"
+          element={
+            <Suspense
+              fallback={<Loader className="w-6h-6 animate-spin mx-auto" />}
+            >
+              <ScanPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="report/create/:id"
+          element={
+            <Suspense
+              fallback={<Loader className="w-6h-6 animate-spin mx-auto" />}
+            >
+              <CreateReportPage />
+            </Suspense>
           }
         />
         <Route

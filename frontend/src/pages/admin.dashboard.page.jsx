@@ -21,7 +21,7 @@ const AdminDashboard = () => {
     }
   };
   return (
-    <div className="w-full h-screen items-end bg-white-shadow">
+    <div className="w-full h-screen items-end bg-white-shadow overflow-y-auto scrollbar-hidden">
       <div className="max-w-3xl w-full mx-auto h-fit p-3">
         <div className="flex flex-col gap-5">
           <div className="flex flex-row justify-between bg-white rounded-lg bg-white shadow-md px-6 py-4">
