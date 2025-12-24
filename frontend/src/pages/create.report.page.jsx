@@ -3,11 +3,17 @@ import { useParams } from "react-router-dom";
 import { usePatrolPointStore } from "../stores/patrol.point.store.js";
 import { useUserStore } from "../stores/user.store.js";
 import { Loader } from "lucide-react";
-import { DropdownInput, TextareaInput, ImageInput } from "../components/Input";
-import toast from "react-hot-toast";
+import {
+  DropdownInput,
+  TextareaInput,
+  ImageInput,
+  CameraInput,
+} from "../components/Input";
 import { requestLocation } from "../utils/location";
-import Button from "../components/button.jsx";
 import { toTitleCase } from "../utils/toTitleCase.js";
+import { compressImages } from "../utils/compressImage.js";
+import toast from "react-hot-toast";
+import Button from "../components/button.jsx";
 
 const CreateReportPage = () => {
   const { id } = useParams();
@@ -15,6 +21,7 @@ const CreateReportPage = () => {
     usePatrolPointStore();
   const { users, fetchUsers } = useUserStore();
   const [locationGranted, setLocationGranted] = useState(null);
+
   const checkLocationPermission = async () => {
     try {
       const coords = await requestLocation();
@@ -29,10 +36,39 @@ const CreateReportPage = () => {
       setLocationGranted(false);
     }
   };
+
+  const downloadFile = (file, filename) => {
+    const url = URL.createObjectURL(file);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting report data:", reportData);
+
+    const compressedImages = await compressImages(reportData.imageUrl);
+
+    for (let i = 0; i < compressedImages.length - 1; i++) {
+      console.log("Before", i, "Size:", reportData.imageUrl[i].size);
+      console.log("After", i, "Size:", compressedImages[i].size);
+      console.log(
+        "Percentage",
+        i,
+        "Size:",
+        ((reportData.imageUrl[i].size - compressedImages[i].size) /
+          reportData.imageUrl[i].size) *
+          100
+      );
+    }
+    const compressed = compressedImages[0];
+    downloadFile(compressed, `compressed-${compressed.name}`);
   };
+
   const [reportData, setReportData] = useState({
     userId: "",
     patrolPointId: "",
@@ -57,9 +93,13 @@ const CreateReportPage = () => {
     }));
   }, [id]);
 
-  const isReportDataValid = Object.values(reportData).every(
-    (value) => value !== "" && value !== null && value !== undefined
-  );
+  const isReportDataValid = Object.values(reportData).map((value) => {
+    value.userId !== "" &&
+      value.report !== "" &&
+      value.patrolPointId !== "" &&
+      value.latitude !== "" &&
+      value.longitude !== "";
+  });
   // console.log("Report Data:", reportData);
   // console.log("Report Data Valid:", isReportDataValid);
   const userOptions = users.map((user) => ({
@@ -149,18 +189,19 @@ const CreateReportPage = () => {
                 }))
               }
             />
-            <ImageInput
-              label="Upload Image"
-              name="imageUrl"
-              value={reportData.imageUrl}
-              onChange={(e) =>
+            <CameraInput
+              label="Upload Report Images"
+              maxFiles={5}
+              onFilesChange={(files) =>
                 setReportData((prev) => ({
                   ...prev,
-                  imageUrl: e.target.files[0],
+                  imageUrl: files,
                 }))
               }
             />
+
             <Button
+              type="submit"
               className="ml-auto"
               buttonSize="medium"
               buttonType={isReportDataValid ? "primary" : "disabled"}

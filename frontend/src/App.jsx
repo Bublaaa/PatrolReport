@@ -53,14 +53,9 @@ const ProtectedRoute = ({ children, requiredPosition }) => {
 };
 
 const RedirectAuthenticatedUser = ({ children }) => {
-  const { isAuthenticated, userDetail } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   if (isAuthenticated) {
-    switch (userDetail.position) {
-      case "admin":
-        return <Navigate to="/admin" replace />;
-      default:
-        return <Navigate to="/login" replace />;
-    }
+    return <Navigate to="/admin" replace />;
   }
   return children;
 };
@@ -111,7 +106,7 @@ function App() {
           }
         />
         <Route
-          path="/admin"
+          path="/admin/*"
           element={
             <ProtectedRoute requiredPosition="admin">
               <Suspense

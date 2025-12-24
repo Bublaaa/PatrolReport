@@ -228,3 +228,81 @@ export const ImageInput = ({ label, onFileChange }) => {
     </div>
   );
 };
+
+export const CameraInput = ({
+  label,
+  onFilesChange,
+  multiple = true,
+  maxFiles = 5,
+}) => {
+  const [previews, setPreviews] = useState([]);
+
+  const handleFileChange = (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+
+    const limitedFiles = files.slice(0, maxFiles);
+
+    const readers = limitedFiles.map(
+      (file) =>
+        new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve({ file, preview: reader.result });
+          reader.readAsDataURL(file);
+        })
+    );
+
+    Promise.all(readers).then((results) => {
+      setPreviews(results.map((r) => r.preview));
+      onFilesChange?.(results.map((r) => r.file));
+    });
+  };
+
+  return (
+    <div className="flex flex-col gap-2 w-full pb-3">
+      {label && (
+        <label className="block text-sm font-medium text-gray-600">
+          {label}
+        </label>
+      )}
+
+      <label
+        htmlFor="camera-input"
+        className="flex flex-col items-center justify-center w-full min-h-[200px] border-gray-300 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50
+        hover:bg-gray-100 transition overflow-hidden"
+      >
+        {previews.length > 0 ? (
+          <div className="grid grid-cols-3 gap-2 p-2 w-full">
+            {previews.map((src, index) => (
+              <img
+                key={index}
+                src={src}
+                alt={`preview-${index}`}
+                className="w-full h-24 object-cover rounded-lg"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center p-6">
+            <LucideIcons.Camera className="w-8 h-8 mb-3 text-gray-500" />
+            <p className="text-sm text-gray-500 text-center">
+              <span className="font-semibold">Open Camera</span>
+              <br />
+              Capture up to {maxFiles} images
+            </p>
+          </div>
+        )}
+
+        <input
+          id="camera-input"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          multiple={multiple}
+          className="hidden"
+          onChange={handleFileChange}
+        />
+      </label>
+    </div>
+  );
+};

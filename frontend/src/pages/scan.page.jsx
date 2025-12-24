@@ -6,11 +6,12 @@ const ScanPage = ({}) => {
   const navigate = useNavigate();
 
   const handleScan = (data) => {
-    if (data) {
-      navigate(data, { replace: true });
-      console.log("Scanned data:", data);
-    }
+    if (!data) return;
+    const url = new URL(data);
+    navigate(url.pathname, { replace: true });
+    console.log("Scanned data:", url.pathname);
   };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
