@@ -43,8 +43,7 @@ export const getReportDetail = async (req, res) => {
 
 //* CREATE
 export const createReport = async (req, res) => {
-  const { userId, patrolPointId, report, imageUrl, latitude, longitude } =
-    req.body;
+  const { userId, patrolPointId, report, latitude, longitude } = req.body;
 
   try {
     if (
@@ -96,7 +95,6 @@ export const createReport = async (req, res) => {
       userId,
       patrolPointId,
       report,
-      imageUrl,
     });
 
     await newReport.save();
@@ -117,7 +115,7 @@ export const createReport = async (req, res) => {
 //* UPDATE
 export const updateReport = async (req, res) => {
   const { id } = req.params;
-  const { userId, patrolPointId, report, imageUrl } = req.body;
+  const { userId, patrolPointId, report } = req.body;
 
   try {
     if (!userId || !patrolPointId || !report) {
@@ -141,7 +139,6 @@ export const updateReport = async (req, res) => {
         userId,
         patrolPointId,
         report,
-        imageUrl,
       },
       { new: true, runValidators: true }
     );

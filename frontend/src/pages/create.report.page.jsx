@@ -14,6 +14,10 @@ import { toTitleCase } from "../utils/toTitleCase.js";
 import { compressImages } from "../utils/compressImage.js";
 import toast from "react-hot-toast";
 import Button from "../components/button.jsx";
+import {
+  saveImagesToIndexedDB,
+  getImagesByReportTempId,
+} from "../../../backend/database/local.database.js";
 
 const CreateReportPage = () => {
   const { id } = useParams();
@@ -50,23 +54,36 @@ const CreateReportPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    const reportTempId = crypto.randomUUID();
     const compressedImages = await compressImages(reportData.imageUrl);
+    const renamedImages = compressedImages.map((file, index) => {
+      return new File([file], `report-${Date.now()}-image-${index + 1}.webp`, {
+        type: file.type,
+        lastModified: Date.now(),
+      });
+    });
 
-    for (let i = 0; i < compressedImages.length - 1; i++) {
+    await saveImagesToIndexedDB(renamedImages, reportTempId);
+
+    for (let i = 0; i < renamedImages.length - 1; i++) {
       console.log("Before", i, "Size:", reportData.imageUrl[i].size);
-      console.log("After", i, "Size:", compressedImages[i].size);
+      console.log("After", i, "Size:", renamedImages[i].size);
       console.log(
         "Percentage",
         i,
         "Size:",
-        ((reportData.imageUrl[i].size - compressedImages[i].size) /
+        ((reportData.imageUrl[i].size - renamedImages[i].size) /
           reportData.imageUrl[i].size) *
           100
       );
     }
-    const compressed = compressedImages[0];
-    downloadFile(compressed, `compressed-${compressed.name}`);
+
+    await getImagesByReportTempId(reportTempId).then((images) => {
+      console.log("Retrieved from IndexedDB:", images);
+    });
+
+    // const compressed = compressedImages[0];
+    // downloadFile(compressed, `compressed-${compressed.name}`);
   };
 
   const [reportData, setReportData] = useState({

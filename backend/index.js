@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import patrolPointRoutes from "./routes/patrol.point.route.js";
 import reportRoutes from "./routes/report.route.js";
+import reportImagesRoutes from "./routes/report.images.route.js";
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/patrol-point", patrolPointRoutes);
 app.use("/api/report", reportRoutes);
+app.use("/api/report-images", reportImagesRoutes);
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "/frontend/dist")));
