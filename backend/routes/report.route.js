@@ -2,6 +2,7 @@ import express from "express";
 import {
   getAllReports,
   getReportDetail,
+  getReportByDate,
   createReport,
   updateReport,
   deleteReport,
@@ -11,6 +12,9 @@ const router = express.Router();
 
 // GET ALL REPORTS
 router.get("/get", getAllReports);
+
+// GET ALL REPORTS
+router.get("/:date", getReportByDate);
 
 // GET REPORT DETAIL
 router.get("/:id", getReportDetail);

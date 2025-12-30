@@ -16,6 +16,31 @@ export const useReportStore = create((set, get) => ({
   isLoading: false,
   message: null,
 
+  fetchReportDetailByDate: async (date) => {
+    set({ isLoading: true, error: null });
+    try {
+      const formattedDate =
+        typeof date === "string" ? date : date.toISOString().split("T")[0];
+
+      const response = await axios.get(`${API_URL}report/${formattedDate}`);
+
+      set({
+        reports: response.data.reports || [],
+        isLoading: false,
+      });
+      if (response.data.reports.length === 0) {
+        toast.error("Report not found");
+      } else {
+        toast.success("Successfully fetch reports");
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Error fetching reports";
+      set({ reports: [], error: errorMessage, isLoading: false });
+      toast.error(errorMessage);
+    }
+  },
+
   fetchReports: async () => {
     set({ isLoading: true, error: null });
     try {

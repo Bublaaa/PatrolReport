@@ -1,6 +1,50 @@
 import { Report } from "../models/Report.js";
 import { PatrolPoint } from "../models/PatrolPoint.js";
 import { User } from "../models/User.js";
+import { formatDateToString } from "../../frontend/src/utils/dateTimeFormatter.js";
+
+//* GET BY DATE
+export const getReportByDate = async (req, res) => {
+  const { date } = req.params;
+  try {
+    if (!date) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Selected date is required" });
+    }
+    // Start of selected day
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    // End of selected day
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const reports = await Report.find({
+      createdAt: {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      },
+    })
+      .populate({
+        path: "userId",
+        select: "firstName lastName",
+      })
+      .populate({
+        path: "patrolPointId",
+        select: "name",
+      })
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      message: "Successfully retrieved report",
+      reports: reports,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 //* GET ALL
 export const getAllReports = async (req, res) => {

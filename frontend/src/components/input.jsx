@@ -306,3 +306,27 @@ export const CameraInput = ({
     </div>
   );
 };
+
+export const DateInput = ({ value, onChange, label, error, ...props }) => (
+  <div className="relative">
+    {label && (
+      <label className="block text-sm font-medium text-gray-600 mb-1">
+        {label}
+      </label>
+    )}
+    <input
+      {...props}
+      value={value}
+      onChange={onChange}
+      type="date"
+      className={`w-full border rounded-lg md:p-3 p-2 bg-white text-dark placeholder:text-sm 
+        md:placeholder:text-base placeholder-gray-400 focus:ring-4 focus:outline-none transition no-spinner
+        ${
+          error
+            ? "border-red-500 focus:ring-red-300"
+            : "border-gray-300 focus:border-accent focus:ring-accent/40"
+        }`}
+    />
+    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+  </div>
+);
