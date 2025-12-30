@@ -1,9 +1,10 @@
 import { ReportImages } from "../models/ReportImages.js";
-import { Report } from "../models/Report";
+import { Report } from "../models/Report.js";
 
 //* CREATE
 export const createReportImages = async (req, res) => {
   const { reportId, fileName, localKey } = req.body;
+  console.log("Parameter", reportId, fileName, localKey);
   try {
     if (!reportId || !fileName || !localKey) {
       return res.status(400).json({
@@ -37,9 +38,25 @@ export const createReportImages = async (req, res) => {
   }
 };
 
+// ** GET ALL
+export const getAllReportImages = async (req, res) => {
+  try {
+    const reportImages = await ReportImages.find();
+    res.status(200).json({
+      success: true,
+      reportImages,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // * GET BY REPORT ID
 export const getReportImagesByReportId = async (req, res) => {
-  const { reportId } = req.body;
+  const { reportId } = req.params;
   try {
     if (!reportId) {
       return res.status(404).json({

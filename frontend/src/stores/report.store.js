@@ -9,7 +9,7 @@ const API_URL =
 
 axios.defaults.withCredentials = true;
 
-export const userReportStore = create((set, get) => ({
+export const useReportStore = create((set, get) => ({
   reports: [],
   reportDetail: null,
   error: null,
@@ -48,25 +48,23 @@ export const userReportStore = create((set, get) => ({
     }
   },
 
-  createReport: async (
-    userId,
-    patrolPointId,
-    report,
-    imageUrl,
-    latitude,
-    longitude
-  ) => {
+  createReport: async (userId, patrolPointId, report, latitude, longitude) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.post(`${API_URL}report/create`, {
         userId,
         patrolPointId,
         report,
-        imageUrl,
         latitude,
         longitude,
       });
-      set({ message: response.data.message, isLoading: false });
+      set({
+        reportDetail: response.data.report,
+        message: response.data.message,
+        isLoading: false,
+      });
+      const createdReport = response.data.report;
+      return createdReport;
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error creating report";
@@ -78,12 +76,11 @@ export const userReportStore = create((set, get) => ({
     }
   },
 
-  updateReport: async (id, report, imageUrl, userId, patrolPointId) => {
+  updateReport: async (id, report, userId, patrolPointId) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.put(`${API_URL}report/update/${id}`, {
         report,
-        imageUrl,
         userId,
         patrolPointId,
       });

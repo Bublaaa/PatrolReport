@@ -13,11 +13,10 @@ export const openDB = () => {
 
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         const store = db.createObjectStore(STORE_NAME, {
-          keyPath: "id",
-          autoIncrement: true,
+          keyPath: "id", // UUID
         });
 
-        store.createIndex("reportTempId", "reportTempId", { unique: false });
+        store.createIndex("reportId", "reportId", { unique: false });
         store.createIndex("createdAt", "createdAt", { unique: false });
       }
     };
@@ -28,23 +27,30 @@ export const openDB = () => {
 };
 
 // * SAVE IMAGES
-export const saveImagesToIndexedDB = async (files, reportTempId) => {
+export const saveImagesToIndexedDB = async (files, reportId) => {
   const db = await openDB();
 
   return new Promise((resolve, reject) => {
-    const tx = db.transaction("report_images", "readwrite");
-    const store = tx.objectStore("report_images");
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
 
-    files.forEach((file, index) => {
+    const savedImageKeys = [];
+
+    files.forEach((file) => {
+      const imageLocalKey = crypto.randomUUID();
+
       store.add({
-        reportTempId,
+        id: imageLocalKey,
+        reportId,
         fileName: file.name,
         blob: file,
         createdAt: Date.now(),
       });
+
+      savedImageKeys.push(imageLocalKey);
     });
 
-    tx.oncomplete = () => resolve(true);
+    tx.oncomplete = () => resolve(savedImageKeys);
     tx.onerror = () => reject(tx.error);
   });
 };

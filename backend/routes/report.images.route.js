@@ -4,13 +4,17 @@ import {
   getReportImagesByReportId,
   updateReportImages,
   deleteReportImages,
+  getAllReportImages,
 } from "../controllers/report.images.controller.js";
+import { get } from "mongoose";
 
 const router = express.Router();
 
 // GET ALL REPORTS
+router.get("/get", getAllReportImages);
 
 // GET REPORT DETAIL
+
 router.get("/:id", getReportImagesByReportId);
 
 // CREATE NEW REPORT

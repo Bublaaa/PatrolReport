@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { usePatrolPointStore } from "../stores/patrol.point.store.js";
+import { useReportImagesStore } from "../stores/report.images.store.js";
+import { useReportStore } from "../stores/report.store.js";
 import { useUserStore } from "../stores/user.store.js";
 import { Loader } from "lucide-react";
 import {
@@ -23,7 +25,9 @@ const CreateReportPage = () => {
   const { id } = useParams();
   const { fetchPatrolPointDetail, isLoading, patrolPointDetail } =
     usePatrolPointStore();
+  const { createReportImages } = useReportImagesStore();
   const { users, fetchUsers } = useUserStore();
+  const { createReport, reportDetail } = useReportStore();
   const [locationGranted, setLocationGranted] = useState(null);
 
   const checkLocationPermission = async () => {
@@ -54,36 +58,64 @@ const CreateReportPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const reportTempId = crypto.randomUUID();
-    const compressedImages = await compressImages(reportData.imageUrl);
-    const renamedImages = compressedImages.map((file, index) => {
-      return new File([file], `report-${Date.now()}-image-${index + 1}.webp`, {
-        type: file.type,
-        lastModified: Date.now(),
-      });
-    });
 
-    await saveImagesToIndexedDB(renamedImages, reportTempId);
-
-    for (let i = 0; i < renamedImages.length - 1; i++) {
-      console.log("Before", i, "Size:", reportData.imageUrl[i].size);
-      console.log("After", i, "Size:", renamedImages[i].size);
-      console.log(
-        "Percentage",
-        i,
-        "Size:",
-        ((reportData.imageUrl[i].size - renamedImages[i].size) /
-          reportData.imageUrl[i].size) *
-          100
+    try {
+      // ** CREATE REPORT
+      const newReport = await createReport(
+        reportData.userId,
+        reportData.patrolPointId,
+        reportData.report,
+        reportData.latitude,
+        reportData.longitude
       );
+      const reportId = newReport._id;
+      console.log(newReport);
+
+      // ** COMPRESS IMAGE
+      const compressedImages = await compressImages(reportData.imageUrl);
+
+      // ** RENAME IMAGES
+      const renamedImages = compressedImages.map((file, index) => {
+        return new File([file], `report-${reportId}-image-${index + 1}.webp`, {
+          type: file.type,
+          lastModified: Date.now(),
+        });
+      });
+
+      // ** SAVE TO INDEXED DB
+      const imageLocalKeys = await saveImagesToIndexedDB(
+        renamedImages,
+        reportId
+      );
+
+      // ** DEBUG COMPRESSION
+      // for (let i = 0; i < renamedImages.length; i++) {
+      //   console.log("Before", i, reportData.imageUrl[i].size);
+      //   console.log("After", i, renamedImages[i].size);
+      //   console.log(
+      //     "Compression %",
+      //     i,
+      //     (
+      //       ((reportData.imageUrl[i].size - renamedImages[i].size) /
+      //         reportData.imageUrl[i].size) *
+      //       100
+      //     ).toFixed(2)
+      //   );
+      // }
+
+      // 6️⃣ Save image metadata to MongoDB
+      await createReportImages(
+        reportId,
+        imageLocalKeys.map((key, i) => ({
+          localKey: key,
+          fileName: renamedImages[i].name,
+        }))
+      );
+
+      toast.success("Report created successfully");
+    } catch (error) {
+      toast.error("Failed to create report: " + error.message);
     }
-
-    await getImagesByReportTempId(reportTempId).then((images) => {
-      console.log("Retrieved from IndexedDB:", images);
-    });
-
-    // const compressed = compressedImages[0];
-    // downloadFile(compressed, `compressed-${compressed.name}`);
   };
 
   const [reportData, setReportData] = useState({
@@ -117,8 +149,7 @@ const CreateReportPage = () => {
       value.latitude !== "" &&
       value.longitude !== "";
   });
-  // console.log("Report Data:", reportData);
-  // console.log("Report Data Valid:", isReportDataValid);
+
   const userOptions = users.map((user) => ({
     label: `${user.firstName} ${user.lastName}`,
     value: user._id,
@@ -187,7 +218,6 @@ const CreateReportPage = () => {
               value={reportData.userId}
               options={userOptions}
               onChange={(e) =>
-                console.log("Selected User ID:", e.target.value) ||
                 setReportData((prev) => ({
                   ...prev,
                   userId: e.target.value,
