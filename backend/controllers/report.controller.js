@@ -2,6 +2,7 @@ import { Report } from "../models/Report.js";
 import { PatrolPoint } from "../models/PatrolPoint.js";
 import { User } from "../models/User.js";
 import { formatDateToString } from "../../frontend/src/utils/dateTimeFormatter.js";
+import { ReportImages } from "../models/ReportImages.js";
 
 //* GET BY DATE
 export const getReportByDate = async (req, res) => {
@@ -69,7 +70,15 @@ export const getAllReports = async (req, res) => {
 export const getReportDetail = async (req, res) => {
   const { id } = req.params;
   try {
-    const report = await Report.findById(id);
+    const report = await Report.findById(id)
+      .populate({
+        path: "userId",
+        select: "firstName lastName",
+      })
+      .populate({
+        path: "patrolPointId",
+        select: "name",
+      });
     if (!report) {
       return res
         .status(404)
@@ -206,6 +215,12 @@ export const deleteReport = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: "Report not found" });
+    }
+    const isReportImagesExist = ReportImages.find({ id });
+    if (isReportImagesExist.length > 0) {
+      for (const image in isReportImagesExist) {
+        await ReportImages.findByIdAndDelete(image.id);
+      }
     }
     await Report.findByIdAndDelete(id);
     res.status(200).json({

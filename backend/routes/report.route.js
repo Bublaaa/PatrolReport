@@ -17,7 +17,7 @@ router.get("/get", getAllReports);
 router.get("/:date", getReportByDate);
 
 // GET REPORT DETAIL
-router.get("/:id", getReportDetail);
+router.get("/get/:id", getReportDetail);
 
 // CREATE NEW REPORT
 router.post("/create", createReport);

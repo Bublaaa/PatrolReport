@@ -6,7 +6,6 @@ import {
   deleteReportImages,
   getAllReportImages,
 } from "../controllers/report.images.controller.js";
-import { get } from "mongoose";
 
 const router = express.Router();
 

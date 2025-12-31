@@ -1,5 +1,6 @@
 import { ReportImages } from "../models/ReportImages.js";
 import { Report } from "../models/Report.js";
+import mongoose from "mongoose";
 
 //* CREATE
 export const createReportImages = async (req, res) => {
@@ -56,15 +57,24 @@ export const getAllReportImages = async (req, res) => {
 
 // * GET BY REPORT ID
 export const getReportImagesByReportId = async (req, res) => {
-  const { reportId } = req.params;
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid report ID",
+    });
+  }
   try {
-    if (!reportId) {
+    const report = await Report.findById(id);
+    if (!report) {
       return res.status(404).json({
         success: false,
-        message: "Report is not found",
+        message: "Report not found",
       });
     }
-    const reportImages = await ReportImages.find({ reportId });
+
+    const reportImages = await ReportImages.find({ reportId: id });
+
     res.status(200).json({
       success: true,
       reportImages,

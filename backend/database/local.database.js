@@ -1,6 +1,6 @@
 // indexedDB.js
 const DB_NAME = "patrol_point_db";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = "report_images";
 
 // * OPEN DB
@@ -10,13 +10,19 @@ export const openDB = () => {
 
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
+      let store;
 
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const store = db.createObjectStore(STORE_NAME, {
-          keyPath: "id", // UUID
-        });
+        store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
+      } else {
+        store = event.target.transaction.objectStore(STORE_NAME);
+      }
 
+      if (!store.indexNames.contains("reportId")) {
         store.createIndex("reportId", "reportId", { unique: false });
+      }
+
+      if (!store.indexNames.contains("createdAt")) {
         store.createIndex("createdAt", "createdAt", { unique: false });
       }
     };
@@ -56,31 +62,31 @@ export const saveImagesToIndexedDB = async (files, reportId) => {
 };
 
 // * GET IMAGES BY REPORT TEMP ID
-export const getImagesByReportTempId = async (reportTempId) => {
+export const getImagesByReportId = async (reportId) => {
   const db = await openDB();
 
   return new Promise((resolve, reject) => {
-    const tx = db.transaction("report_images", "readonly");
-    const store = tx.objectStore("report_images");
-    const index = store.index("reportTempId");
+    const tx = db.transaction(STORE_NAME, "readonly");
+    const store = tx.objectStore(STORE_NAME);
+    const index = store.index("reportId");
 
-    const request = index.getAll(reportTempId);
+    const request = index.getAll(reportId);
 
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () => resolve(request.result || []);
     request.onerror = () => reject(request.error);
   });
 };
 
 // * DELETE IMAGES BY REPORT TEMP ID
-export const deleteImagesByReportTempId = async (reportTempId) => {
+export const deleteImagesByReportId = async (reportId) => {
   const db = await openDB();
 
   return new Promise((resolve, reject) => {
     const tx = db.transaction("report_images", "readwrite");
     const store = tx.objectStore("report_images");
-    const index = store.index("reportTempId");
+    const index = store.index("reportId");
 
-    const request = index.getAllKeys(reportTempId);
+    const request = index.getAllKeys(reportId);
 
     request.onsuccess = () => {
       request.result.forEach((key) => store.delete(key));

@@ -60,7 +60,7 @@ export const useReportStore = create((set, get) => ({
   fetchReportDetail: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}report/${id}`);
+      const response = await axios.get(`${API_URL}report/get/${id}`);
       set({ reportDetail: response.data.report, isLoading: false });
     } catch (error) {
       const errorMessage =

@@ -29,6 +29,9 @@ const PatrolPointDetailPage = lazy(() =>
 const ReportPage = lazy(() =>
   import("./pages/admin.pages/report.dashboard.page.jsx")
 );
+const ReportDetailPage = lazy(() =>
+  import("./pages/admin.pages/report.detail.page.jsx")
+);
 const CreateReportPage = lazy(() => import("./pages/create.report.page.jsx"));
 const ScanPage = lazy(() => import("./pages/scan.page.jsx"));
 
@@ -181,6 +184,14 @@ function App() {
                 fallback={<Loader className="w-6h-6 animate-spin mx-auto" />}
               >
                 <ReportPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="report/:id"
+            element={
+              <Suspense>
+                <ReportDetailPage />
               </Suspense>
             }
           />

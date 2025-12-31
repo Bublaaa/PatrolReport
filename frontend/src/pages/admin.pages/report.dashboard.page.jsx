@@ -1,28 +1,29 @@
-import { DateInput } from "../../components/input";
+import { DateInput, DropdownInput } from "../../components/Input.jsx";
 import {
   splitDateString,
   formatDateToString,
+  formatTime,
 } from "../../utils/dateTimeFormatter.js";
 import { useReportStore } from "../../stores/report.store.js";
 import { Loader } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
-import { Trash2, PenBoxIcon } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { DropdownInput } from "../../components/input";
-import Button from "../../components/button.jsx";
+import { toTitleCase } from "../../utils/toTitleCase.js";
 
 const ReportPageDashboard = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const { isLoading, reports, fetchReportDetailByDate } = useReportStore();
   const [selectedPatrolPoint, setSelectedPatrolPoint] = useState();
   const [selectedUser, setSelectedUser] = useState();
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  const { isLoading, reports, fetchReportDetailByDate, deleteReport } =
+    useReportStore();
   const handleFilterUser = (e) => {
     setSelectedUser(e.target.value);
   };
-
   const handleFilterPatrolPoint = (e) => {
     setSelectedPatrolPoint(e.target.value);
   };
+
   const userOptions = useMemo(() => {
     if (!reports?.length) return [];
 
@@ -83,19 +84,18 @@ const ReportPageDashboard = () => {
   }
 
   return (
-    <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md">
-      <div className="flex flex-row justify-between items-center mb-5">
-        <h5>Patrol Points Dashboard</h5>
-      </div>
-
-      <div className="grid grid-cols-4 justify-between gap-5 items-center">
+    <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md gap-5">
+      <div className="flex flex-row justify-between items-center">
+        <h5>Report Dashboard</h5>
         <DateInput
           label=""
           value={splitDateString(selectedDate)}
           onChange={(e) => setSelectedDate(new Date(e.target.value))}
         />
+      </div>
+      <div className="grid grid-cols-2 justify-between gap-5 items-center">
         <DropdownInput
-          label=""
+          label="Sort by User"
           name="user"
           value={selectedUser}
           options={userOptions}
@@ -103,53 +103,41 @@ const ReportPageDashboard = () => {
           onChange={handleFilterUser}
         />
         <DropdownInput
-          label=""
+          label="Sort by Patrol Point"
           name="patrolPoint"
           value={selectedPatrolPoint}
           options={patrolPointOptions}
           placeholder="Select Point"
           onChange={handleFilterPatrolPoint}
         />
-        <div></div>
       </div>
-      {filteredReports.length === 0 && (
+
+      {filteredReports.length === 0 ? (
         <p className="text-center mt-4">No patrol points found.</p>
+      ) : (
+        <div className="flex flex-col gap-2 w-full justify-between pt-2">
+          <h4 className="text-center">{formatDateToString(selectedDate)}</h4>
+          <div className="grid grid-cols-3 items-center text-center">
+            <h6>Time</h6>
+            <h6>User</h6>
+            <h6>Patrol Point</h6>
+          </div>
+          {filteredReports.length > 0 &&
+            filteredReports.map((report) => (
+              <NavLink
+                to={`/admin/report/${report._id}`}
+                key={report._id}
+                className="grid grid-cols-3 text-center gap-4 px-3 py-2 hover:bg-gray-100 rounded-md justify-between items-center cursor-pointer"
+              >
+                <p>{formatTime(report.createdAt)}</p>
+                <p>
+                  {report.userId.firstName} {report.userId.lastName}
+                </p>
+                <p>{toTitleCase(report.patrolPointId.name)}</p>
+              </NavLink>
+            ))}
+        </div>
       )}
-      <div
-        className="flex flex-col gap-2 w-full justify-between pt-2"
-        onClick={(e) => handleDeleteAction(e)}
-      >
-        {filteredReports.length > 0 &&
-          filteredReports.map((report) => (
-            <div
-              key={report._id}
-              className="grid grid-cols-4 text-center gap-4 px-3 py-2 hover:bg-gray-100 rounded-md justify-between items-center cursor-pointer"
-            >
-              <p>{formatDateToString(report.createdAt)}</p>
-              <p>
-                {report.userId.firstName} {report.userId.lastName}
-              </p>
-              <p>{report.patrolPointId.name}</p>
-              <div className="flex flex-row gap-2">
-                <Button
-                  className="delete-btn"
-                  buttonSize="small"
-                  buttonType="danger"
-                  icon={Trash2}
-                  data-id={report._id}
-                  // data-name={point.name}
-                ></Button>
-                <NavLink to={`/admin/patrol-point/${report._id}`}>
-                  <Button
-                    buttonType="secondary"
-                    buttonSize="icon"
-                    icon={PenBoxIcon}
-                  />
-                </NavLink>
-              </div>
-            </div>
-          ))}
-      </div>
     </div>
   );
 };

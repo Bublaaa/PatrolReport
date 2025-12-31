@@ -113,6 +113,14 @@ const CreateReportPage = () => {
       );
 
       toast.success("Report created successfully");
+      setReportData({
+        userId: "",
+        patrolPointId: "",
+        report: "",
+        imageUrl: "",
+        latitude: "",
+        longitude: "",
+      });
     } catch (error) {
       toast.error("Failed to create report: " + error.message);
     }
