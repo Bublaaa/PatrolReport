@@ -21,9 +21,12 @@
     "dayjs": "^1.11.13",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "googleapis": "^169.0.0",
     "html5-qrcode": "^2.3.8",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.14.1",
+    "multer": "^2.0.2",
+    "pdfkit": "^0.17.2",
     "qrcode": "^1.5.4"
   },
   "devDependencies": {

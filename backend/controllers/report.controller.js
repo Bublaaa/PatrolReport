@@ -1,8 +1,10 @@
 import { Report } from "../models/Report.js";
 import { PatrolPoint } from "../models/PatrolPoint.js";
 import { User } from "../models/User.js";
-import { formatDateToString } from "../../frontend/src/utils/dateTimeFormatter.js";
 import { ReportImages } from "../models/ReportImages.js";
+import { uploadPdfToDrive } from "../services/google.drive.service.js";
+import { generateReportPdf } from "../services/pdf.service.js";
+import fs from "fs";
 
 //* GET BY DATE
 export const getReportByDate = async (req, res) => {
@@ -97,7 +99,17 @@ export const getReportDetail = async (req, res) => {
 //* CREATE
 export const createReport = async (req, res) => {
   const { userId, patrolPointId, report, latitude, longitude } = req.body;
+  const images = req.files?.map((f) => f.path) || [];
 
+  console.log("user id : ", userId);
+  console.log("patrol Point Id : ", patrolPointId);
+  console.log("report :", report);
+  console.log("latitude : ", latitude);
+  console.log("longitude : ", longitude);
+
+  for (const image in images) {
+    console.log(images);
+  }
   try {
     if (
       !userId ||
@@ -140,7 +152,7 @@ export const createReport = async (req, res) => {
         success: false,
         message: `You are too far from the patrol point (${distance.toFixed(
           2
-        )}m). Maximum allowed is 15m.`,
+        )}m). Maximum allowed is 15m. Please recalibrate your position`,
       });
     }
 
@@ -150,7 +162,24 @@ export const createReport = async (req, res) => {
       report,
     });
 
+    // // ===== GENERATE PDF =====
+    // const { filePath, fileName } = await generateReportPdf({
+    //   report: newReport,
+    //   user,
+    //   patrolPoint,
+    //   images,
+    // });
+
+    // // ===== UPLOAD TO GOOGLE DRIVE =====
+    // const { fileId, fileUrl } = await uploadPdfToDrive(filePath, fileName);
+
+    // // ===== SAVE DOCUMENT URL =====
+    // newReport.documentUrl = fileUrl;
+    // newReport.documentFileId = fileId;
+
     await newReport.save();
+
+    // fs.unlinkSync(filePath);
 
     res.status(201).json({
       success: true,

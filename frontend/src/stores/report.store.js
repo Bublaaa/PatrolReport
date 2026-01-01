@@ -73,23 +73,26 @@ export const useReportStore = create((set, get) => ({
     }
   },
 
-  createReport: async (userId, patrolPointId, report, latitude, longitude) => {
+  createReport: async (formData) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.post(`${API_URL}report/create`, {
-        userId,
-        patrolPointId,
-        report,
-        latitude,
-        longitude,
+      // const response = await axios.post(`${API_URL}report/create`, {
+      //   userId,
+      //   patrolPointId,
+      //   report,
+      //   latitude,
+      //   longitude,
+      // });
+      const response = await axios.post(`${API_URL}report/create`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
       set({
         reportDetail: response.data.report,
         message: response.data.message,
         isLoading: false,
       });
-      const createdReport = response.data.report;
-      return createdReport;
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error creating report";

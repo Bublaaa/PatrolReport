@@ -16,6 +16,12 @@ const reportSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    documentUrl: {
+      type: String,
+    },
+    documentFileId: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

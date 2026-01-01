@@ -4,7 +4,7 @@ export const compressImages = async (
     maxWidth = 1280,
     maxHeight = 1280,
     quality = 0.75,
-    minSize = 80 * 1024, // 80KB
+    minSize = 80 * 1024,
   } = {}
 ) => {
   if (!Array.isArray(files)) return [];
@@ -12,22 +12,22 @@ export const compressImages = async (
   const results = [];
 
   for (const file of files) {
-    if (
-      !(file instanceof Blob) ||
-      !file.type.startsWith("image/") ||
-      file.size < minSize
-    ) {
+    if (!(file instanceof Blob) || !file.type.startsWith("image/")) {
       results.push(file);
       continue;
     }
 
-    const compressed = await resizeAndCompress(file, {
-      maxWidth,
-      maxHeight,
-      quality,
-    });
-
-    results.push(compressed);
+    // ✅ Always convert non-WEBP
+    if (file.type !== "image/webp" || file.size >= minSize) {
+      const compressed = await resizeAndCompress(file, {
+        maxWidth,
+        maxHeight,
+        quality,
+      });
+      results.push(compressed);
+    } else {
+      results.push(file);
+    }
   }
 
   return results;
@@ -37,20 +37,18 @@ const resizeAndCompress = (file, { maxWidth, maxHeight, quality }) => {
   return new Promise((resolve) => {
     const reader = new FileReader();
 
-    reader.readAsArrayBuffer(file);
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
 
-    reader.onload = (e) => {
-      const blob = new Blob([e.target.result]);
-      const url = URL.createObjectURL(blob);
+    reader.onload = () => {
       const img = new Image();
 
-      img.src = url;
+      img.onerror = () => resolve(file);
+      img.src = reader.result;
 
       img.onload = () => {
-        let width = img.width;
-        let height = img.height;
+        let { width, height } = img;
 
-        // === SAME LOGIC AS YOUR CODE ===
         if (width > height && width > maxWidth) {
           height = Math.round((height * maxWidth) / width);
           width = maxWidth;
@@ -67,23 +65,20 @@ const resizeAndCompress = (file, { maxWidth, maxHeight, quality }) => {
         ctx.drawImage(img, 0, 0, width, height);
 
         canvas.toBlob(
-          (compressedBlob) => {
-            URL.revokeObjectURL(url);
-
-            // 🛑 GUARANTEE: never increase size
-            if (!compressedBlob || compressedBlob.size >= file.size) {
+          (blob) => {
+            if (!blob || blob.size >= file.size) {
               resolve(file);
               return;
             }
 
             resolve(
-              new File([compressedBlob], file.name.replace(/\.\w+$/, ".webp"), {
+              new File([blob], file.name.replace(/\.\w+$/, ".webp"), {
                 type: "image/webp",
                 lastModified: Date.now(),
               })
             );
           },
-          "image/webp", // 🚀 key improvement
+          "image/webp",
           quality
         );
       };

@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Loader } from "lucide-react";
-import { saveImagesToIndexedDB } from "../../../backend/database/local.database.js";
 import { usePatrolPointStore } from "../stores/patrol.point.store.js";
-import { useReportImagesStore } from "../stores/report.images.store.js";
 import { useReportStore } from "../stores/report.store.js";
 import { useUserStore } from "../stores/user.store.js";
 import { DropdownInput, TextareaInput, CameraInput } from "../components/Input";
@@ -19,7 +17,6 @@ const CreateReportPage = () => {
   // * USE STORE
   const { fetchPatrolPointDetail, isLoading, patrolPointDetail } =
     usePatrolPointStore();
-  const { createReportImages } = useReportImagesStore();
   const { users, fetchUsers } = useUserStore();
   const { createReport, reportDetail } = useReportStore();
 
@@ -29,7 +26,7 @@ const CreateReportPage = () => {
     userId: "",
     patrolPointId: "",
     report: "",
-    imageUrl: "",
+    images: [],
     latitude: "",
     longitude: "",
   });
@@ -64,67 +61,27 @@ const CreateReportPage = () => {
     e.preventDefault();
 
     try {
-      // ** CREATE REPORT
-      const newReport = await createReport(
-        reportData.userId,
-        reportData.patrolPointId,
-        reportData.report,
-        reportData.latitude,
-        reportData.longitude
-      );
-      const reportId = newReport._id;
-      console.log(newReport);
-
+      if (!reportData.images.length) {
+        toast.error("Please upload at least one image");
+        return;
+      }
       // ** COMPRESS IMAGE
-      const compressedImages = await compressImages(reportData.imageUrl);
+      const compressedImages = await compressImages(reportData.images);
 
-      // ** RENAME IMAGES
-      const renamedImages = compressedImages.map((file, index) => {
-        return new File([file], `report-${reportId}-image-${index + 1}.webp`, {
-          type: file.type,
-          lastModified: Date.now(),
-        });
+      const formData = new FormData();
+      formData.append("userId", reportData.userId);
+      formData.append("patrolPointId", reportData.patrolPointId);
+      formData.append("report", reportData.report);
+      formData.append("latitude", reportData.latitude);
+      formData.append("longitude", reportData.longitude);
+
+      compressedImages.forEach((file) => {
+        console.log(file);
+        formData.append("images", file);
       });
 
-      // ** SAVE TO INDEXED DB
-      const imageLocalKeys = await saveImagesToIndexedDB(
-        renamedImages,
-        reportId
-      );
-
-      // ** DEBUG COMPRESSION
-      // for (let i = 0; i < renamedImages.length; i++) {
-      //   console.log("Before", i, reportData.imageUrl[i].size);
-      //   console.log("After", i, renamedImages[i].size);
-      //   console.log(
-      //     "Compression %",
-      //     i,
-      //     (
-      //       ((reportData.imageUrl[i].size - renamedImages[i].size) /
-      //         reportData.imageUrl[i].size) *
-      //       100
-      //     ).toFixed(2)
-      //   );
-      // }
-
-      // 6️⃣ Save image metadata to MongoDB
-      await createReportImages(
-        reportId,
-        imageLocalKeys.map((key, i) => ({
-          localKey: key,
-          fileName: renamedImages[i].name,
-        }))
-      );
-
-      toast.success("Report created successfully");
-      setReportData({
-        userId: "",
-        patrolPointId: "",
-        report: "",
-        imageUrl: "",
-        latitude: "",
-        longitude: "",
-      });
+      // ** CREATE REPORT
+      await createReport(formData);
     } catch (error) {
       toast.error("Failed to create report: " + error.message);
     }
@@ -137,7 +94,7 @@ const CreateReportPage = () => {
       fetchUsers();
       checkLocationPermission();
     }
-  }, [id, fetchPatrolPointDetail]);
+  }, [id, fetchPatrolPointDetail, fetchUsers]);
 
   useEffect(() => {
     setReportData((prev) => ({
@@ -147,13 +104,12 @@ const CreateReportPage = () => {
   }, [id]);
 
   // * REPORT DATA VALIDATION
-  const isReportDataValid = Object.values(reportData).map((value) => {
-    value.userId !== "" &&
-      value.report !== "" &&
-      value.patrolPointId !== "" &&
-      value.latitude !== "" &&
-      value.longitude !== "";
-  });
+  const isReportDataValid =
+    reportData.userId &&
+    reportData.report &&
+    reportData.patrolPointId &&
+    reportData.latitude &&
+    reportData.longitude;
 
   // * POPULATE USER OPTION
   const userOptions = users.map((user) => ({
@@ -178,6 +134,7 @@ const CreateReportPage = () => {
             <div className="flex flex-row justify-between w-full">
               <h5>Current Location</h5>
               <Button
+                type="button"
                 buttonSize="medium"
                 buttonType="primary"
                 onClick={checkLocationPermission}
@@ -248,7 +205,7 @@ const CreateReportPage = () => {
               onFilesChange={(files) =>
                 setReportData((prev) => ({
                   ...prev,
-                  imageUrl: files,
+                  images: files,
                 }))
               }
             />
