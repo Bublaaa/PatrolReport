@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-// Auto add created at & updated at with "{timestamps:true}"
 const userSchema = new mongoose.Schema(
   {
     firstName: {

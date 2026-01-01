@@ -1,34 +1,38 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { Loader } from "lucide-react";
+import { saveImagesToIndexedDB } from "../../../backend/database/local.database.js";
 import { usePatrolPointStore } from "../stores/patrol.point.store.js";
 import { useReportImagesStore } from "../stores/report.images.store.js";
 import { useReportStore } from "../stores/report.store.js";
 import { useUserStore } from "../stores/user.store.js";
-import { Loader } from "lucide-react";
-import {
-  DropdownInput,
-  TextareaInput,
-  ImageInput,
-  CameraInput,
-} from "../components/Input";
+import { DropdownInput, TextareaInput, CameraInput } from "../components/Input";
 import { requestLocation } from "../utils/location";
 import { toTitleCase } from "../utils/toTitleCase.js";
 import { compressImages } from "../utils/compressImage.js";
 import toast from "react-hot-toast";
 import Button from "../components/button.jsx";
-import {
-  saveImagesToIndexedDB,
-  getImagesByReportTempId,
-} from "../../../backend/database/local.database.js";
 
 const CreateReportPage = () => {
+  // * USE PARAMS
   const { id } = useParams();
+  // * USE STORE
   const { fetchPatrolPointDetail, isLoading, patrolPointDetail } =
     usePatrolPointStore();
   const { createReportImages } = useReportImagesStore();
   const { users, fetchUsers } = useUserStore();
   const { createReport, reportDetail } = useReportStore();
+
+  // * USE STATE
   const [locationGranted, setLocationGranted] = useState(null);
+  const [reportData, setReportData] = useState({
+    userId: "",
+    patrolPointId: "",
+    report: "",
+    imageUrl: "",
+    latitude: "",
+    longitude: "",
+  });
 
   const checkLocationPermission = async () => {
     try {
@@ -126,15 +130,7 @@ const CreateReportPage = () => {
     }
   };
 
-  const [reportData, setReportData] = useState({
-    userId: "",
-    patrolPointId: "",
-    report: "",
-    imageUrl: "",
-    latitude: "",
-    longitude: "",
-  });
-
+  // * USE EFFECT - LOAD DATA
   useEffect(() => {
     if (id) {
       fetchPatrolPointDetail(id);
@@ -150,6 +146,7 @@ const CreateReportPage = () => {
     }));
   }, [id]);
 
+  // * REPORT DATA VALIDATION
   const isReportDataValid = Object.values(reportData).map((value) => {
     value.userId !== "" &&
       value.report !== "" &&
@@ -158,6 +155,7 @@ const CreateReportPage = () => {
       value.longitude !== "";
   });
 
+  // * POPULATE USER OPTION
   const userOptions = users.map((user) => ({
     label: `${user.firstName} ${user.lastName}`,
     value: user._id,

@@ -1,21 +1,21 @@
-import { usePatrolPointStore } from "../../stores/patrol.point.store.js";
-import {
-  Download,
-  Loader,
-  MapPinCheckInside,
-  Plus,
-  SaveIcon,
-} from "lucide-react";
 import { useState, useEffect } from "react";
+import { Download, Loader, MapPinCheckInside, SaveIcon } from "lucide-react";
 import { motion } from "framer-motion";
-import { requestLocation } from "../../utils/location.js";
 import { useNavigate, useParams } from "react-router-dom";
-import Button from "../../components/button.jsx";
+import { requestLocation } from "../../utils/location.js";
 import { TextInput } from "../../components/Input.jsx";
+import { usePatrolPointStore } from "../../stores/patrol.point.store.js";
+import Button from "../../components/button.jsx";
 import toast from "react-hot-toast";
 
 const UpdatePatrolPointPage = () => {
+  // * USE PARAMS
   const id = useParams().id;
+
+  // * USE NAVIGATE
+  const navigate = useNavigate();
+
+  // * USE STORE
   const {
     updatePatrolPoint,
     fetchPatrolPointDetail,
@@ -24,13 +24,16 @@ const UpdatePatrolPointPage = () => {
     qrCode,
     isLoading,
   } = usePatrolPointStore();
+
+  // * USE STATE
   const [PatrolPointData, setPatrolPointData] = useState({
     name: "",
     latitude: "",
     longitude: "",
   });
   const [locationGranted, setLocationGranted] = useState(null);
-  const navigate = useNavigate();
+
+  // * CHECK LOCATION PERMISSION HANDLER
   const checkLocationPermission = async () => {
     try {
       const coords = await requestLocation();
@@ -45,6 +48,8 @@ const UpdatePatrolPointPage = () => {
       setLocationGranted(false);
     }
   };
+
+  // * FORM SUBMIT HANDLER
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (PatrolPointData.name.trim() === "") {
@@ -66,6 +71,8 @@ const UpdatePatrolPointPage = () => {
       navigate(-1);
     }, 1000);
   };
+
+  // * LOAD QR CODE HANDLER
   const handleDownloadQrCode = () => {
     if (!qrCode) return;
 
@@ -78,6 +85,7 @@ const UpdatePatrolPointPage = () => {
     document.body.removeChild(link);
   };
 
+  // * USE EFFECT - INITIAL DATA LOAD
   useEffect(() => {
     fetchPatrolPointDetail(id);
     generateQRCode(id);

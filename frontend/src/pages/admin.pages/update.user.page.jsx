@@ -1,20 +1,28 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { User } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { TextInput } from "../../components/Input.jsx";
-import { useEffect, useState } from "react";
 import { useUserStore } from "../../stores/user.store.js";
 import { toast } from "react-hot-toast";
+import { User } from "lucide-react";
 import Button from "../../components/button.jsx";
 
 const UserDetailPage = () => {
+  // * USE PARAMS
   const { id } = useParams();
+
+  // * USE NAVIGATE
+  const navigate = useNavigate();
+
+  // * USE STORE
   const { userDetail, fetchUserDetail, updateUser } = useUserStore();
+
+  // * USE STATE
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
-  const navigate = useNavigate();
 
+  // * USE EFFECT - INITIAL DATA LOAD
   useEffect(() => {
     fetchUserDetail(id);
   }, [id, fetchUserDetail]);
@@ -27,6 +35,7 @@ const UserDetailPage = () => {
     }
   }, [userDetail]);
 
+  // * FORM SUBMIT HANDLER
   const handleSubmit = async (e) => {
     e.preventDefault();
     await updateUser(id, firstName, middleName, lastName, userDetail.position);

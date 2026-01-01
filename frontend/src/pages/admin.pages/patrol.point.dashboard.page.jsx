@@ -1,27 +1,32 @@
-import { NavLink } from "react-router-dom";
-import { Plus, Loader, Trash2, PenBoxIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Plus, Loader, Trash2, PenBoxIcon } from "lucide-react";
+import { NavLink } from "react-router-dom";
 import { usePatrolPointStore } from "../../stores/patrol.point.store.js";
-import Button from "../../components/button";
-import Modal from "../../components/modal";
 import { DeleteConfirmationForm } from "../../components/delete.confirmation";
+import Modal from "../../components/modal";
+import Button from "../../components/button";
 
 const PatrolPointPageDashboard = () => {
+  // * USE STATE
   const [modalState, setModalState] = useState({
     isOpen: false,
     title: "",
     body: "",
   });
+  // * MODAL FUNCTION
+  const openModal = (title, body) =>
+    setModalState({ isOpen: true, title, body });
+  const closeModal = () =>
+    setModalState({ isOpen: false, title: "", body: null });
+
+  // * USE STORE
   const { isLoading, patrolPoints, deletePatrolPoint, fetchPatrolPoints } =
     usePatrolPointStore();
   useEffect(() => {
     fetchPatrolPoints();
   }, []);
 
-  const openModal = (title, body) =>
-    setModalState({ isOpen: true, title, body });
-  const closeModal = () =>
-    setModalState({ isOpen: false, title: "", body: null });
+  // * DELETE ACTION HANDLER
   const handleDeleteAction = (e) => {
     const deleteButton = e.target.closest(".delete-btn");
     if (deleteButton) {

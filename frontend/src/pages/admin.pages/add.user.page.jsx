@@ -8,13 +8,18 @@ import Button from "../../components/button.jsx";
 import toast from "react-hot-toast";
 
 const AddUserPage = () => {
+  // * USE NAVIGATE
+  const navigate = useNavigate();
+
+  // * USE STATE
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
-  const navigate = useNavigate();
 
+  // * USE STORE
   const { createUser, error, isLoading } = useUserStore();
 
+  // * HANDLE CREATE USER
   const handleSignUp = async (e) => {
     e.preventDefault();
     try {

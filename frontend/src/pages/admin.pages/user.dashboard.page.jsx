@@ -8,22 +8,27 @@ import Button from "../../components/button";
 import Modal from "../../components/modal.jsx";
 
 const UserPageDashboard = () => {
+  // * USE STATE
   const [modalState, setModalState] = useState({
     isOpen: false,
     title: "",
     body: "",
   });
-
-  const { isLoading, users, fetchUsers, deleteUser } = useUserStore();
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
+  // * MODAL STATE FUNCTION
   const openModal = (title, body) =>
     setModalState({ isOpen: true, title, body });
   const closeModal = () =>
     setModalState({ isOpen: false, title: "", body: null });
 
+  // * USE STORE
+  const { isLoading, users, fetchUsers, deleteUser } = useUserStore();
+
+  // * USE EFFECT - INITIAL DATA LOAD
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  // * DELETE ACTION HANDLER
   const handleDeleteAction = (e) => {
     const deleteButton = e.target.closest(".delete-btn");
     if (deleteButton) {

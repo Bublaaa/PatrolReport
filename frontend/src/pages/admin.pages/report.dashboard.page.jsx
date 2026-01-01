@@ -1,34 +1,37 @@
+import { useEffect, useState, useMemo } from "react";
+import { Loader } from "lucide-react";
+import { NavLink } from "react-router-dom";
 import { DateInput, DropdownInput } from "../../components/Input.jsx";
+import { useReportStore } from "../../stores/report.store.js";
+import { toTitleCase } from "../../utils/toTitleCase.js";
 import {
   splitDateString,
   formatDateToString,
   formatTime,
 } from "../../utils/dateTimeFormatter.js";
-import { useReportStore } from "../../stores/report.store.js";
-import { Loader } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
-import { NavLink } from "react-router-dom";
-import { toTitleCase } from "../../utils/toTitleCase.js";
 
 const ReportPageDashboard = () => {
+  // * USE STATE
   const [selectedPatrolPoint, setSelectedPatrolPoint] = useState();
   const [selectedUser, setSelectedUser] = useState();
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+  // * USE STORE
   const { isLoading, reports, fetchReportDetailByDate, deleteReport } =
     useReportStore();
   const handleFilterUser = (e) => {
     setSelectedUser(e.target.value);
   };
+
+  // * DATA FILTER HANDLER
   const handleFilterPatrolPoint = (e) => {
     setSelectedPatrolPoint(e.target.value);
   };
 
+  // * POPULATE USER OPTIONS
   const userOptions = useMemo(() => {
     if (!reports?.length) return [];
-
     const map = new Map();
-
     reports.forEach((report) => {
       const user = report.userId;
       if (!map.has(user._id)) {
@@ -38,10 +41,10 @@ const ReportPageDashboard = () => {
         });
       }
     });
-
     return Array.from(map.values());
   }, [reports]);
 
+  // * POPULATE PATROL POINTS OPTION
   const patrolPointOptions = useMemo(() => {
     if (!reports?.length) return [];
     const map = new Map();
@@ -57,6 +60,7 @@ const ReportPageDashboard = () => {
     return Array.from(map.values());
   }, [reports]);
 
+  // * FILTERED REPORT DATA
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
       const reportDate = new Date(report.createdAt);
@@ -75,6 +79,7 @@ const ReportPageDashboard = () => {
     });
   }, [reports, selectedDate, selectedUser, selectedPatrolPoint]);
 
+  // * USE EFFECT - INITIAL DATA LOAD
   useEffect(() => {
     fetchReportDetailByDate(selectedDate);
   }, [selectedDate]);

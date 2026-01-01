@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Loader } from "lucide-react";
-import { TextInput } from "../components/input.jsx";
-// import { Link } from "react-router-dom";
+import { TextInput } from "../components/Input.jsx";
 import { useAuthStore } from "../stores/auth.store.js";
 import Button from "../components/button.jsx";
 
@@ -32,7 +31,7 @@ const LoginPage = () => {
           <TextInput
             icon={Mail}
             type="text"
-            placeholder="UserName"
+            placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />

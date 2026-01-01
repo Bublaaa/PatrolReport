@@ -1,7 +1,6 @@
 import { useAuthStore } from "../stores/auth.store.js";
 import { Outlet } from "react-router-dom";
 import { LucideLogOut } from "lucide-react";
-import { useState } from "react";
 import Button from "../components/button.jsx";
 import MenuLink from "../components/menu.link.jsx";
 
