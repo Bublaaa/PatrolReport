@@ -12,6 +12,8 @@ import {
 import Button from "../../components/button.jsx";
 
 const ReportPageDashboard = () => {
+  const BASE_URL =
+    import.meta.env.MODE === "development" ? "http://localhost:5003/api/" : "";
   // * USE STATE
   const [selectedPatrolPoint, setSelectedPatrolPoint] = useState();
   const [selectedUser, setSelectedUser] = useState();
@@ -23,7 +25,7 @@ const ReportPageDashboard = () => {
     setSelectedUser(e.target.value);
   };
 
-  // * DATA FILTER HANDLER
+  // * FUNCTIONS
   const handleFilterPatrolPoint = (e) => {
     setSelectedPatrolPoint(e.target.value);
   };
@@ -32,6 +34,36 @@ const ReportPageDashboard = () => {
     const result = new Date(date);
     result.setDate(result.getDate() + days);
     return result;
+  };
+
+  const generatePDF = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}report/export/pdf`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          date: selectedDate,
+          userId: selectedUser || null,
+          patrolPointId: selectedPatrolPoint || null,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to generate PDF");
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "patrol-reports.pdf";
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   // * POPULATE USER OPTIONS
@@ -98,6 +130,10 @@ const ReportPageDashboard = () => {
     <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md gap-5">
       <div className="flex flex-row justify-between items-center">
         <h5>Report Dashboard</h5>
+        <Button buttonType="primary" onClick={generatePDF}>
+          Export PDF
+        </Button>
+
         <div className="flex flex-row gap-3">
           <Button
             buttonSize="small"

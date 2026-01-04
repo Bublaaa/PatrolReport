@@ -8,6 +8,7 @@ import {
   deleteReport,
 } from "../controllers/report.controller.js";
 import { uploadReportImages } from "../middlewares/multer.js";
+import { exportReportPDF } from "../controllers/report.controller.js";
 
 const router = express.Router();
 
@@ -23,6 +24,8 @@ router.get("/get/:id", getReportDetail);
 // CREATE NEW REPORT
 // router.post("/create", createReport);
 router.post("/create", uploadReportImages.array("images", 5), createReport);
+
+router.post("/export/pdf", exportReportPDF);
 
 // UPDATE REPORT
 router.put("/update/:id", updateReport);

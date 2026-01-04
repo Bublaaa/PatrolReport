@@ -2,6 +2,7 @@ import { Report } from "../models/Report.js";
 import { PatrolPoint } from "../models/PatrolPoint.js";
 import { User } from "../models/User.js";
 import { ReportImages } from "../models/ReportImages.js";
+import { generateReportPDF } from "../utils/report.pdf.generator.js";
 import { uploadPdfToDrive } from "../services/google.drive.service.js";
 import { generateReportPdf } from "../services/pdf.service.js";
 import fs from "fs";
@@ -256,6 +257,39 @@ export const deleteReport = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// * GENERATE PDF
+export const exportReportPDF = async (req, res) => {
+  try {
+    const { date, userId, patrolPointId } = req.body;
+
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
+    const query = {
+      createdAt: { $gte: start, $lte: end },
+    };
+
+    if (userId) query.userId = userId;
+    if (patrolPointId) query.patrolPointId = patrolPointId;
+
+    const reports = await Report.find(query)
+      .populate("userId", "firstName lastName")
+      .populate("patrolPointId", "name")
+      .sort({ createdAt: 1 });
+
+    if (!reports.length) {
+      return res.status(404).json({ message: "No reports found" });
+    }
+    generateReportPDF(reports, res);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
