@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { ReceiptPoundSterlingIcon } from "lucide-react";
 
 const API_URL =
   import.meta.env.MODE === "development"
@@ -76,13 +77,6 @@ export const useReportStore = create((set, get) => ({
   createReport: async (formData) => {
     set({ isLoading: true, error: null });
     try {
-      // const response = await axios.post(`${API_URL}report/create`, {
-      //   userId,
-      //   patrolPointId,
-      //   report,
-      //   latitude,
-      //   longitude,
-      // });
       const response = await axios.post(`${API_URL}report/create`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -93,6 +87,8 @@ export const useReportStore = create((set, get) => ({
         message: response.data.message,
         isLoading: false,
       });
+      const reportDetail = response.data.report;
+      return reportDetail;
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error creating report";

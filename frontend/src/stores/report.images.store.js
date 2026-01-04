@@ -59,7 +59,7 @@ export const useReportImagesStore = create((set, get) => ({
           isLoading: false,
         });
         toast.error(errorMessage);
-        return; // ⬅️ VERY IMPORTANT
+        return;
       }
 
       await Promise.all(

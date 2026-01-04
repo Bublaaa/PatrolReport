@@ -7,11 +7,7 @@ const reportImagesSchema = new mongoose.Schema(
       ref: "Report",
       required: true,
     },
-    fileName: {
-      type: String,
-      required: true,
-    },
-    localKey: {
+    filePath: {
       type: String,
       required: true,
     },

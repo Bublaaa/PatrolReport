@@ -10,6 +10,7 @@ import { toTitleCase } from "../utils/toTitleCase.js";
 import { compressImages } from "../utils/compressImage.js";
 import toast from "react-hot-toast";
 import Button from "../components/button.jsx";
+import { useReportImagesStore } from "../stores/report.images.store.js";
 
 const CreateReportPage = () => {
   // * USE PARAMS
@@ -18,18 +19,20 @@ const CreateReportPage = () => {
   const { fetchPatrolPointDetail, isLoading, patrolPointDetail } =
     usePatrolPointStore();
   const { users, fetchUsers } = useUserStore();
-  const { createReport, reportDetail } = useReportStore();
+  const { createReport } = useReportStore();
 
   // * USE STATE
-  const [locationGranted, setLocationGranted] = useState(null);
-  const [reportData, setReportData] = useState({
+  const initialReportData = {
     userId: "",
     patrolPointId: "",
     report: "",
     images: [],
     latitude: "",
     longitude: "",
-  });
+  };
+  const [cameraKey, setCameraKey] = useState(0);
+  const [locationGranted, setLocationGranted] = useState(null);
+  const [reportData, setReportData] = useState(initialReportData);
 
   const checkLocationPermission = async () => {
     try {
@@ -57,6 +60,11 @@ const CreateReportPage = () => {
     URL.revokeObjectURL(url);
   };
 
+  const resetReportData = () => {
+    setReportData(initialReportData);
+    setCameraKey((k) => k + 1);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -81,7 +89,11 @@ const CreateReportPage = () => {
       });
 
       // ** CREATE REPORT
-      await createReport(formData);
+      const newReport = await createReport(formData);
+      if (newReport?._id) {
+        resetReportData();
+        toast.success("Report submitted successfully");
+      }
     } catch (error) {
       toast.error("Failed to create report: " + error.message);
     }
@@ -200,6 +212,7 @@ const CreateReportPage = () => {
               }
             />
             <CameraInput
+              key={cameraKey}
               label="Upload Report Images"
               maxFiles={5}
               onFilesChange={(files) =>

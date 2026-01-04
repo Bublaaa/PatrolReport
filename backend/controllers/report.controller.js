@@ -100,16 +100,6 @@ export const getReportDetail = async (req, res) => {
 export const createReport = async (req, res) => {
   const { userId, patrolPointId, report, latitude, longitude } = req.body;
   const images = req.files?.map((f) => f.path) || [];
-
-  console.log("user id : ", userId);
-  console.log("patrol Point Id : ", patrolPointId);
-  console.log("report :", report);
-  console.log("latitude : ", latitude);
-  console.log("longitude : ", longitude);
-
-  for (const image in images) {
-    console.log(images);
-  }
   try {
     if (
       !userId ||
@@ -176,6 +166,14 @@ export const createReport = async (req, res) => {
     // // ===== SAVE DOCUMENT URL =====
     // newReport.documentUrl = fileUrl;
     // newReport.documentFileId = fileId;
+
+    if (req.files?.length > 0) {
+      const imageDocs = req.files.map((file) => ({
+        reportId: newReport._id,
+        filePath: file.path,
+      }));
+      await ReportImages.insertMany(imageDocs);
+    }
 
     await newReport.save();
 

@@ -5,24 +5,27 @@ import {
   updateReportImages,
   deleteReportImages,
   getAllReportImages,
+  deleteAllReportImages,
 } from "../controllers/report.images.controller.js";
 
 const router = express.Router();
 
-// GET ALL REPORTS
+// GET ALL REPORT IMAGES
 router.get("/get", getAllReportImages);
 
-// GET REPORT DETAIL
-
+// GET REPORT IMAGES  DETAIL
 router.get("/:id", getReportImagesByReportId);
 
-// CREATE NEW REPORT
+// CREATE NEW REPORT IMAGES
 router.post("/create", createReportImages);
 
-// UPDATE REPORT
+// UPDATE REPORT IMAGES
 router.put("/update/:id", updateReportImages);
 
-// DELETE REPORT
+// DELETE REPORT IMAGES
 router.delete("/delete/:id", deleteReportImages);
+
+// DELETE ALL REPORT  IMAGES
+router.delete("/delete-all", deleteAllReportImages);
 
 export default router;

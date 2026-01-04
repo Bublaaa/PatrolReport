@@ -1,11 +1,11 @@
 import { ReportImages } from "../models/ReportImages.js";
 import { Report } from "../models/Report.js";
+import fs from "fs";
 import mongoose from "mongoose";
 
 //* CREATE
 export const createReportImages = async (req, res) => {
   const { reportId, fileName, localKey } = req.body;
-  console.log("Parameter", reportId, fileName, localKey);
   try {
     if (!reportId || !fileName || !localKey) {
       return res.status(400).json({
@@ -144,5 +144,30 @@ export const deleteReportImages = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// * DELETE ALL
+export const deleteAllReportImages = async (req, res) => {
+  try {
+    const images = await ReportImages.find();
+
+    // for (const img of images) {
+    //   if (fs.existsSync(img.filePath)) {
+    //     fs.unlinkSync(img.filePath);
+    //   }
+    // }
+
+    await ReportImages.deleteMany();
+
+    return res.status(200).json({
+      success: true,
+      message: "All report images deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
