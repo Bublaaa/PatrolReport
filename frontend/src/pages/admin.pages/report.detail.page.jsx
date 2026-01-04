@@ -9,15 +9,15 @@ import { ChevronLeft, Loader, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toTitleCase } from "../../utils/toTitleCase.js";
 import { useReportImagesStore } from "../../stores/report.images.store.js";
-import { getImagesByReportId } from "../../../../backend/database/local.database.js";
 
 const ReportDetailPage = () => {
+  const BASE_URL =
+    import.meta.env.MODE === "development" ? "http://localhost:5003/" : "";
   // * USE NAVIGATE
   const navigate = useNavigate();
   // * USE PARAMS
   const { id } = useParams();
   // * USE STATE
-  const [images, setImages] = useState([]);
   const [modalState, setModalState] = useState({
     isOpen: false,
     title: "",
@@ -59,21 +59,6 @@ const ReportDetailPage = () => {
     fetchReportDetail(id);
     fetchReportImagesByReportId(id);
   }, []);
-
-  // * LOAD THE IMAGES FORM INDEXED DB
-  useEffect(() => {
-    const loadImages = async () => {
-      const imgs = await getImagesByReportId(id);
-      setImages(
-        imgs.map((img) => ({
-          ...img,
-          url: URL.createObjectURL(img.blob),
-        }))
-      );
-    };
-
-    loadImages();
-  }, [id]);
 
   if (isLoading || !reportDetail) {
     return <Loader className="w-6 h-6 animate-spin mx-auto" />;
@@ -136,21 +121,33 @@ const ReportDetailPage = () => {
             {reportDetail.report}
           </div>
         </div>
+
         <div className="flex flex-col gap-2">
-          <h6>Images : </h6>
-          {images.length === 0 && (
+          <h6>Document / Images</h6>
+
+          {reportDetail.documentUrl ? (
+            <a
+              href={reportDetail.documentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline"
+            >
+              View Report Document (PDF)
+            </a>
+          ) : reportImages.length === 0 ? (
             <p className="text-center mt-4">No patrol images found.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {reportImages.map((img) => (
+                <img
+                  key={img._id}
+                  src={`${BASE_URL}${img.filePath}`}
+                  alt={img.filePath}
+                  className="rounded object-cover"
+                />
+              ))}
+            </div>
           )}
-          <div className="flex flex-wrap gap-2">
-            {images.map((img) => (
-              <img
-                key={img.id}
-                src={URL.createObjectURL(img.blob)}
-                alt={img.fileName}
-                className="rounded object-cover"
-              />
-            ))}
-          </div>
         </div>
       </div>
     </motion.div>

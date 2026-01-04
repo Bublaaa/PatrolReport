@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Loader } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { DateInput, DropdownInput } from "../../components/Input.jsx";
 import { useReportStore } from "../../stores/report.store.js";
@@ -9,6 +9,7 @@ import {
   formatDateToString,
   formatTime,
 } from "../../utils/dateTimeFormatter.js";
+import Button from "../../components/button.jsx";
 
 const ReportPageDashboard = () => {
   // * USE STATE
@@ -17,8 +18,7 @@ const ReportPageDashboard = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   // * USE STORE
-  const { isLoading, reports, fetchReportDetailByDate, deleteReport } =
-    useReportStore();
+  const { isLoading, reports, fetchReportDetailByDate } = useReportStore();
   const handleFilterUser = (e) => {
     setSelectedUser(e.target.value);
   };
@@ -26,6 +26,12 @@ const ReportPageDashboard = () => {
   // * DATA FILTER HANDLER
   const handleFilterPatrolPoint = (e) => {
     setSelectedPatrolPoint(e.target.value);
+  };
+
+  const addDays = (date, days) => {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
   };
 
   // * POPULATE USER OPTIONS
@@ -92,11 +98,27 @@ const ReportPageDashboard = () => {
     <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md gap-5">
       <div className="flex flex-row justify-between items-center">
         <h5>Report Dashboard</h5>
-        <DateInput
-          label=""
-          value={splitDateString(selectedDate)}
-          onChange={(e) => setSelectedDate(new Date(e.target.value))}
-        />
+        <div className="flex flex-row gap-3">
+          <Button
+            buttonSize="small"
+            buttonType="secondary"
+            icon={ChevronLeft}
+            onClick={() => setSelectedDate(addDays(selectedDate, -1))}
+          />
+
+          <DateInput
+            label=""
+            value={splitDateString(selectedDate)}
+            onChange={(e) => setSelectedDate(new Date(e.target.value))}
+          />
+
+          <Button
+            buttonSize="small"
+            buttonType="secondary"
+            icon={ChevronRight}
+            onClick={() => setSelectedDate(addDays(selectedDate, 1))}
+          />
+        </div>
       </div>
       <div className="grid grid-cols-2 justify-between gap-5 items-center">
         <DropdownInput
