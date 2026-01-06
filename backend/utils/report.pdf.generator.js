@@ -60,14 +60,12 @@ const drawImageCell = async (doc, x, y, w, h, imagePath, options = {}) => {
     backgroundColor = null,
   } = options;
 
-  // Background
   if (backgroundColor) {
     doc.save();
     doc.rect(x, y, w, h).fill(backgroundColor);
     doc.restore();
   }
 
-  // Border
   doc.rect(x, y, w, h).stroke(borderColor);
 
   if (!imagePath || !fs.existsSync(imagePath)) {
@@ -81,16 +79,13 @@ const drawImageCell = async (doc, x, y, w, h, imagePath, options = {}) => {
     return;
   }
 
-  let imageBuffer;
   let img;
-
   try {
-    const ext = imagePath.split(".").pop().toLowerCase();
+    const ext = path.extname(imagePath).toLowerCase();
 
-    if (ext === "webp") {
-      // 🔥 Convert WEBP → PNG
-      imageBuffer = await sharp(imagePath).png().toBuffer();
-      img = doc.openImage(imageBuffer);
+    if (ext === ".webp") {
+      const buffer = await sharp(imagePath).png().toBuffer();
+      img = doc.openImage(buffer);
     } else {
       img = doc.openImage(imagePath);
     }
@@ -105,7 +100,6 @@ const drawImageCell = async (doc, x, y, w, h, imagePath, options = {}) => {
     return;
   }
 
-  // Layout calc
   const maxWidth = w - padding * 2;
   const maxHeight = h - padding * 2;
   const ratio = img.width / img.height;
@@ -118,22 +112,16 @@ const drawImageCell = async (doc, x, y, w, h, imagePath, options = {}) => {
     imgWidth = imgHeight * ratio;
   }
 
-  let imgX = x + padding;
-  let imgY = y + padding;
+  let imgX = x + (w - imgWidth) / 2;
+  let imgY = y + (h - imgHeight) / 2;
 
-  if (align === "center") imgX = x + (w - imgWidth) / 2;
-  if (align === "right") imgX = x + w - imgWidth - padding;
-
-  if (valign === "center") imgY = y + (h - imgHeight) / 2;
-  if (valign === "bottom") imgY = y + h - imgHeight - padding;
-
-  doc.image(imageBuffer || imagePath, imgX, imgY, {
+  doc.image(img, imgX, imgY, {
     width: imgWidth,
     height: imgHeight,
   });
 };
 
-export const generateReportPDF = (reports, res, imagesByReportId) => {
+export const generateReportPDF = async (reports, res, imagesByReportId) => {
   const doc = new PDFDocument({ size: "A4", margin: 40 });
 
   const PAGE_WIDTH = doc.page.width;
@@ -169,7 +157,9 @@ export const generateReportPDF = (reports, res, imagesByReportId) => {
   drawDivider(doc);
 
   /* ---------- REPORT LIST ---------- */
-  reports.forEach((report, index) => {
+  for (let index = 0; index < reports.length; index++) {
+    const report = reports[index];
+
     const patrolPoint = toTitleCase(report.patrolPointId?.name ?? "-");
 
     doc
@@ -242,18 +232,17 @@ export const generateReportPDF = (reports, res, imagesByReportId) => {
     let imgY = Y;
     let colIndex = 0;
 
-    images.forEach((image) => {
+    for (const image of images) {
       const fullPath = path.resolve(process.cwd(), image.filePath);
-      drawImageCell(
+
+      await drawImageCell(
         doc,
         imgX,
         imgY,
         COLUMN_WIDTH,
         IMAGE_CELL_HEIGHT,
         fullPath,
-        {
-          backgroundColor: "#f9fafb",
-        }
+        { backgroundColor: "#f9fafb" }
       );
 
       colIndex++;
@@ -269,11 +258,11 @@ export const generateReportPDF = (reports, res, imagesByReportId) => {
           imgY = doc.page.margins.top;
         }
       }
-    });
+    }
 
     doc.y = imgY + IMAGE_CELL_HEIGHT + 20;
     if (doc.y > 700) doc.addPage();
-  });
+  }
 
   doc.end();
 };
