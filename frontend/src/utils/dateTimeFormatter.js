@@ -16,7 +16,7 @@ export const formatDateToString = (dateString) => {
 
 export const splitDateString = (date) => {
   if (!date) return "";
-  return date.toISOString().split("T")[0];
+  return new date.toISOString().split("T")[0];
 };
 
 export const formatTime = (dateString) => {

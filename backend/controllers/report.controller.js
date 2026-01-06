@@ -6,23 +6,20 @@ import { generateReportPDF } from "../utils/report.pdf.generator.js";
 import { uploadPdfToDrive } from "../services/google.drive.service.js";
 import { generateReportPdf } from "../services/pdf.service.js";
 import fs from "fs";
+import { report } from "process";
 
 //* GET BY DATE
 export const getReportByDate = async (req, res) => {
-  const { date } = req.params;
   try {
+    const { date } = req.params;
     if (!date) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Selected date is required" });
+      return res.status(400).json({
+        success: false,
+        message: "Selected date is required",
+      });
     }
-    // Start of selected day
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    // End of selected day
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
+    const startOfDay = new Date(`${date}T00:00:00+07:00`);
+    const endOfDay = new Date(`${date}T23:59:59.999+07:00`);
 
     const reports = await Report.find({
       createdAt: {
@@ -43,10 +40,13 @@ export const getReportByDate = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Successfully retrieved report",
-      reports: reports,
+      reports,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -286,7 +286,23 @@ export const exportReportPDF = async (req, res) => {
     if (!reports.length) {
       return res.status(404).json({ message: "No reports found" });
     }
-    generateReportPDF(reports, res);
+
+    const reportIds = reports.map((report) => report._id);
+    const reportImagesByReportId = await ReportImages.find({
+      reportId: { $in: reportIds },
+    });
+
+    const imagesByReportId = {};
+
+    reportImagesByReportId.forEach((image) => {
+      const key = image.reportId.toString();
+      if (!imagesByReportId[key]) {
+        imagesByReportId[key] = [];
+      }
+      imagesByReportId[key].push(image);
+    });
+
+    generateReportPDF(reports, res, imagesByReportId);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });

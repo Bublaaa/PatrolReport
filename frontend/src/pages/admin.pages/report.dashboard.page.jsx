@@ -5,22 +5,24 @@ import { DateInput, DropdownInput } from "../../components/Input.jsx";
 import { useReportStore } from "../../stores/report.store.js";
 import { toTitleCase } from "../../utils/toTitleCase.js";
 import {
-  splitDateString,
   formatDateToString,
   formatTime,
 } from "../../utils/dateTimeFormatter.js";
 import Button from "../../components/button.jsx";
 
 const ReportPageDashboard = () => {
-  const BASE_URL =
-    import.meta.env.MODE === "development" ? "http://localhost:5003/api/" : "";
   // * USE STATE
   const [selectedPatrolPoint, setSelectedPatrolPoint] = useState();
   const [selectedUser, setSelectedUser] = useState();
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const now = new Date();
+    const wib = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    return wib.toISOString().split("T")[0]; // "YYYY-MM-DD"
+  });
 
   // * USE STORE
-  const { isLoading, reports, fetchReportDetailByDate } = useReportStore();
+  const { isLoading, reports, fetchReportDetailByDate, generatePDF } =
+    useReportStore();
   const handleFilterUser = (e) => {
     setSelectedUser(e.target.value);
   };
@@ -29,37 +31,45 @@ const ReportPageDashboard = () => {
   const handleFilterPatrolPoint = (e) => {
     setSelectedPatrolPoint(e.target.value);
   };
-
-  const addDays = (date, days) => {
-    const result = new Date(date);
-    result.setDate(result.getDate() + days);
-    return result;
+  const toIndonesiaDateKey = (date) => {
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Jakarta",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date(date));
   };
 
-  const generatePDF = async () => {
+  const parseDate = (dateStr) => {
+    const [y, m, d] = dateStr.split("-");
+    return new Date(y, m - 1, d);
+  };
+  const addDays = (dateStr, days) => {
+    const date = parseDate(dateStr);
+    date.setDate(date.getDate() + days);
+
+    const wib = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+    return wib.toISOString().split("T")[0];
+  };
+
+  const handleGeneratePDF = async () => {
     try {
-      const res = await fetch(`${BASE_URL}report/export/pdf`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          date: selectedDate,
-          userId: selectedUser || null,
-          patrolPointId: selectedPatrolPoint || null,
-        }),
-      });
+      const res = await generatePDF(selectedDate);
 
-      if (!res.ok) throw new Error("Failed to generate PDF");
+      const disposition = res.headers["content-disposition"];
+      const filenameMatch = disposition?.match(/filename="?(.+)"?/);
+      const filename = filenameMatch?.[1] || "patrol-report.pdf";
 
-      const blob = await res.blob();
+      const blob = new Blob([res.data], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = "patrol-reports.pdf";
+      a.download = filename;
+      document.body.appendChild(a);
       a.click();
 
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error(error);
@@ -100,20 +110,19 @@ const ReportPageDashboard = () => {
 
   // * FILTERED REPORT DATA
   const filteredReports = useMemo(() => {
+    if (!reports?.length) return [];
+
+    const selectedKey = toIndonesiaDateKey(selectedDate);
+
     return reports.filter((report) => {
-      const reportDate = new Date(report.createdAt);
-      const selected = new Date(selectedDate);
+      const reportKey = toIndonesiaDateKey(report.createdAt);
 
-      reportDate.setHours(0, 0, 0, 0);
-      selected.setHours(0, 0, 0, 0);
-
-      const matchDate = reportDate.getTime() === selected.getTime();
-      const matchUser = !selectedUser || report.userId._id === selectedUser;
-      const matchPatrolPoint =
-        !selectedPatrolPoint ||
-        report.patrolPointId._id === selectedPatrolPoint;
-
-      return matchDate && matchUser && matchPatrolPoint;
+      return (
+        reportKey === selectedKey &&
+        (!selectedUser || report.userId._id === selectedUser) &&
+        (!selectedPatrolPoint ||
+          report.patrolPointId._id === selectedPatrolPoint)
+      );
     });
   }, [reports, selectedDate, selectedUser, selectedPatrolPoint]);
 
@@ -130,7 +139,7 @@ const ReportPageDashboard = () => {
     <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md gap-5">
       <div className="flex flex-row justify-between items-center">
         <h5>Report Dashboard</h5>
-        <Button buttonType="primary" onClick={generatePDF}>
+        <Button buttonType="primary" onClick={handleGeneratePDF}>
           Export PDF
         </Button>
 
@@ -143,9 +152,8 @@ const ReportPageDashboard = () => {
           />
 
           <DateInput
-            label=""
-            value={splitDateString(selectedDate)}
-            onChange={(e) => setSelectedDate(new Date(e.target.value))}
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
           />
 
           <Button

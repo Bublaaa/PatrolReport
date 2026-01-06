@@ -120,6 +120,32 @@ export const useReportStore = create((set, get) => ({
     }
   },
 
+  generatePDF: async (selectedDate) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.post(
+        `${API_URL}report/export/pdf`,
+        {
+          date: selectedDate,
+        },
+        {
+          responseType: "blob",
+        }
+      );
+      set({ isLoading: false });
+      return response;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to generate PDF";
+      set({
+        error: errorMessage,
+        isLoading: false,
+      });
+      toast.error(errorMessage);
+      throw error;
+    }
+  },
+
   deleteReport: async (id) => {
     set({ isLoading: true, error: null });
     try {
