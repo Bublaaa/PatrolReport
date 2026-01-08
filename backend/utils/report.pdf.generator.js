@@ -242,7 +242,7 @@ const renderReportBlock = async (doc, report, images) => {
   });
 
   doc.y += 15;
-  renderTextBlock(doc, report.text, USABLE_WIDTH);
+  renderTextBlock(doc, report.text.replace(/\r\n|\r/g, "\n"), USABLE_WIDTH);
   doc.y += 8;
 
   ensureSpace(doc, IMAGE_HEIGHT + 60);
