@@ -2,50 +2,65 @@ import PDFDocument from "pdfkit";
 import fs from "fs";
 import path from "path";
 import sharp from "sharp";
-
 import { toTitleCase } from "../../frontend/src/utils/toTitleCase.js";
-import {
-  formatDateToString,
-  formatTime,
-} from "../../frontend/src/utils/dateTimeFormatter.js";
+import { formatDateToString } from "../../frontend/src/utils/dateTimeFormatter.js";
 
-const drawDivider = (doc) => {
-  doc.moveTo(40, doc.y).lineTo(555, doc.y).strokeColor("#9ca3af").stroke();
-  doc.moveDown(1);
+// * CONSTANT
+const PAGE_MARGIN = 40;
+const PAGE_WIDTH = 595.28;
+const PAGE_HEIGHT = 841.89;
+
+const USABLE_WIDTH = PAGE_WIDTH - PAGE_MARGIN * 2;
+const ROW_HEIGHT = 25;
+
+const COLS = {
+  time: USABLE_WIDTH / 3,
+  user: USABLE_WIDTH / 3,
+  point: USABLE_WIDTH / 3,
 };
 
-const drawCell = (doc, x, y, w, h, text, options = {}) => {
+const IMAGE_COLS = 3;
+const IMAGE_HEIGHT = 120;
+const IMAGE_GAP = 10;
+
+const DEFAULT_BORDER_COLOR = "#9ca3af";
+const DEFAULT_TEXT_COLOR = "#111827";
+
+// * HELPER FUNCTIONS
+const drawDivider = (doc) => {
+  doc
+    .moveTo(40, doc.y)
+    .lineTo(555, doc.y)
+    .strokeColor(DEFAULT_BORDER_COLOR)
+    .stroke();
+  doc.moveDown(1);
+};
+const ensureSpace = (doc, height) => {
+  if (doc.y + height > PAGE_HEIGHT - PAGE_MARGIN) {
+    doc.addPage();
+    doc.y = PAGE_MARGIN;
+  }
+};
+
+const drawTextCell = (doc, x, y, w, h, text, options = {}) => {
   const {
+    isHeader = false,
     align = "center",
-    valign = "center",
     fontSize = 10,
     font = "Helvetica",
+    headerFont = "Helvetica-Bold",
     padding = 6,
-    textColor = "#111827",
-    borderColor = "#9ca3af",
-    backgroundColor = null,
+    textColor = DEFAULT_TEXT_COLOR,
+    borderColor = DEFAULT_BORDER_COLOR,
   } = options;
 
-  // Background
-  if (backgroundColor) {
-    doc.save();
-    doc.rect(x, y, w, h).fill(backgroundColor);
-    doc.restore();
-  }
-
-  // Border
   doc.rect(x, y, w, h).stroke(borderColor);
 
-  // Vertical alignment
-  let textY = y + padding;
-  if (valign === "center") textY = y + h / 2 - fontSize / 2;
-  if (valign === "bottom") textY = y + h - fontSize - padding;
-
   doc
-    .font(font)
+    .font(isHeader ? headerFont : font)
     .fontSize(fontSize)
     .fillColor(textColor)
-    .text(text ?? "-", x + padding, textY, {
+    .text(text ?? "-", x + padding, y + padding, {
       width: w - padding * 2,
       align,
     });
@@ -56,14 +71,14 @@ const drawImageCell = async (doc, x, y, w, h, imagePath, options = {}) => {
     align = "center",
     valign = "center",
     padding = 6,
-    borderColor = "#9ca3af",
+    borderColor = DEFAULT_BORDER_COLOR,
     backgroundColor = null,
   } = options;
 
+  doc.save();
+
   if (backgroundColor) {
-    doc.save();
     doc.rect(x, y, w, h).fill(backgroundColor);
-    doc.restore();
   }
 
   doc.rect(x, y, w, h).stroke(borderColor);
@@ -71,14 +86,15 @@ const drawImageCell = async (doc, x, y, w, h, imagePath, options = {}) => {
   if (!imagePath || !fs.existsSync(imagePath)) {
     doc
       .fontSize(9)
-      .fillColor("#9ca3af")
-      .text("Image not found", x, y + h / 2 - 5, {
-        width: w,
+      .fillColor(DEFAULT_BORDER_COLOR)
+      .text("Image not found", x + padding, y + h / 2 - 5, {
+        width: w - padding * 2,
         align: "center",
       });
+
+    doc.restore();
     return;
   }
-
   let img;
   try {
     const ext = path.extname(imagePath).toLowerCase();
@@ -93,175 +109,213 @@ const drawImageCell = async (doc, x, y, w, h, imagePath, options = {}) => {
     doc
       .fontSize(9)
       .fillColor("#ef4444")
-      .text("Unsupported image", x, y + h / 2 - 5, {
-        width: w,
+      .text("Unsupported image", x + padding, y + h / 2 - 5, {
+        width: w - padding * 2,
         align: "center",
       });
+    doc.restore();
     return;
   }
 
-  const maxWidth = w - padding * 2;
-  const maxHeight = h - padding * 2;
+  const maxW = w - padding * 2;
+  const maxH = h - padding * 2;
   const ratio = img.width / img.height;
 
-  let imgWidth = maxWidth;
-  let imgHeight = imgWidth / ratio;
+  let iw = maxW;
+  let ih = iw / ratio;
 
-  if (imgHeight > maxHeight) {
-    imgHeight = maxHeight;
-    imgWidth = imgHeight * ratio;
+  if (ih > maxH) {
+    ih = maxH;
+    iw = ih * ratio;
   }
 
-  let imgX = x + (w - imgWidth) / 2;
-  let imgY = y + (h - imgHeight) / 2;
+  let ix = x + padding;
+  if (align === "center") ix = x + (w - iw) / 2;
+  if (align === "right") ix = x + w - iw - padding;
 
-  doc.image(img, imgX, imgY, {
-    width: imgWidth,
-    height: imgHeight,
+  let iy = y + padding;
+  if (valign === "center") iy = y + (h - ih) / 2;
+  if (valign === "bottom") iy = y + h - ih - padding;
+
+  doc.image(img, ix, iy, {
+    width: iw,
+    height: ih,
   });
+
+  doc.restore();
 };
 
-export const generateReportPDF = async (reports, res, imagesByReportId) => {
-  const doc = new PDFDocument({ size: "A4", margin: 40 });
+const renderTextBlock = (doc, text, width) => {
+  const lines = String(text).split("\n");
+  const bulletRegex = /^(\s*)([-•]|\d+\.)\s+(.*)$/;
 
-  const PAGE_WIDTH = doc.page.width;
-  const START_X = doc.page.margins.left;
-  const USABLE_WIDTH =
-    PAGE_WIDTH - doc.page.margins.left - doc.page.margins.right;
+  const padding = 8;
+  const borderColor = DEFAULT_BORDER_COLOR;
 
-  const COLUMN_WIDTH = USABLE_WIDTH / 3;
-  const ROW_HEIGHT = 22;
+  let blockStartY = doc.y;
 
-  const IMAGE_COLS = 3;
-  const IMAGE_CELL_HEIGHT = 110;
-  const IMAGE_GAP = 10;
+  const drawBorder = (startY, endY) => {
+    doc
+      .rect(PAGE_MARGIN, startY - padding, width, endY - startY + padding * 2)
+      .stroke(borderColor);
+  };
+
+  for (const line of lines) {
+    if (doc.y > PAGE_HEIGHT - PAGE_MARGIN - 40) {
+      drawBorder(blockStartY, doc.y);
+      doc.addPage();
+      doc.y = PAGE_MARGIN;
+      blockStartY = doc.y;
+    }
+
+    const match = line.match(bulletRegex);
+
+    if (match) {
+      const [, indent, bullet, content] = match;
+      const bulletX = PAGE_MARGIN + indent.length * 4;
+      const textX = bulletX + 12;
+
+      doc.text(bullet, bulletX, doc.y);
+      doc.text(content, textX, doc.y, {
+        width: width - (textX - PAGE_MARGIN),
+      });
+    } else {
+      doc.text(line, PAGE_MARGIN + padding, doc.y, {
+        width: width - padding * 2,
+      });
+    }
+  }
+
+  drawBorder(blockStartY, doc.y);
+};
+
+const renderReportBlock = async (doc, report, images) => {
+  ensureSpace(doc, 120);
+
+  let y = doc.y + ROW_HEIGHT;
+
+  // HEADER
+  doc.font("Helvetica-Bold").fontSize(12).text(`Report - ${report.id}`);
+  doc.moveDown(0.5);
+  drawTextCell(doc, PAGE_MARGIN, y, COLS.time, ROW_HEIGHT, "Time", {
+    isHeader: true,
+  });
+  drawTextCell(doc, PAGE_MARGIN + COLS.time, y, COLS.user, ROW_HEIGHT, "User", {
+    isHeader: true,
+  });
+  drawTextCell(
+    doc,
+    PAGE_MARGIN + COLS.time + COLS.user,
+    y,
+    COLS.point,
+    ROW_HEIGHT,
+    "Patrol Point",
+    { isHeader: true }
+  );
+
+  // VALUES
+  y += ROW_HEIGHT;
+  drawTextCell(doc, PAGE_MARGIN, y, COLS.time, ROW_HEIGHT, report.time);
+  drawTextCell(
+    doc,
+    PAGE_MARGIN + COLS.time,
+    y,
+    COLS.user,
+    ROW_HEIGHT,
+    report.user
+  );
+  drawTextCell(
+    doc,
+    PAGE_MARGIN + COLS.time + COLS.user,
+    y,
+    COLS.point,
+    ROW_HEIGHT,
+    toTitleCase(report.point)
+  );
+
+  doc.y = y + ROW_HEIGHT;
+
+  /* ----- REPORT TEXT ----- */
+  drawTextCell(doc, PAGE_MARGIN, doc.y, USABLE_WIDTH, ROW_HEIGHT, "Report", {
+    isHeader: true,
+    align: "left",
+  });
+
+  doc.y += 15;
+  renderTextBlock(doc, report.text, USABLE_WIDTH);
+  doc.y += 8;
+
+  ensureSpace(doc, IMAGE_HEIGHT + 60);
+
+  drawTextCell(doc, PAGE_MARGIN, doc.y, USABLE_WIDTH, ROW_HEIGHT, "Images", {
+    isHeader: true,
+  });
+  doc.y += 8;
+
+  let x = PAGE_MARGIN;
+  let col = 0;
+  for (const img of images) {
+    ensureSpace(doc, IMAGE_HEIGHT + 20);
+    await drawImageCell(
+      doc,
+      x,
+      doc.y,
+      USABLE_WIDTH / IMAGE_COLS,
+      IMAGE_HEIGHT,
+      path.resolve(process.cwd(), img.filePath)
+    );
+    x += USABLE_WIDTH / IMAGE_COLS;
+    col++;
+
+    if (col === IMAGE_COLS) {
+      col = 0;
+      x = PAGE_MARGIN;
+      doc.y += IMAGE_HEIGHT + IMAGE_GAP;
+    }
+  }
+  doc.y += IMAGE_HEIGHT + 30;
+};
+
+/* ===================== CONTROLLER ===================== */
+
+export const generateReportPDF = async (res, reports, imagesByReportId) => {
+  const doc = new PDFDocument({ size: "A4", margin: PAGE_MARGIN });
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
     "Content-Disposition",
-    "attachment; filename=patrol-reports.pdf"
+    "attachment; filename=patrol-report.pdf"
   );
 
   doc.pipe(res);
-
-  /* ---------- HEADER ---------- */
   const dateString = new Date(reports[0]?.createdAt).toLocaleString();
 
   doc.font("Helvetica-Bold").fontSize(14).text("Report Patrol");
   doc
     .font("Helvetica")
-    .fontSize(11)
+    .fontSize(10)
     .text(`Date : ${formatDateToString(dateString)}`);
 
   doc.moveDown(1);
   drawDivider(doc);
 
-  /* ---------- REPORT LIST ---------- */
-  for (let index = 0; index < reports.length; index++) {
-    const report = reports[index];
-
-    const patrolPoint = toTitleCase(report.patrolPointId?.name ?? "-");
-
-    doc
-      .font("Helvetica-Bold")
-      .fontSize(12)
-      .text(`Report - ${index + 1}`);
-    doc.moveDown(0.5);
-
-    let Y = doc.y;
-
-    // Header row
-    drawCell(doc, START_X, Y, COLUMN_WIDTH, ROW_HEIGHT, "Time");
-    drawCell(doc, START_X + COLUMN_WIDTH, Y, COLUMN_WIDTH, ROW_HEIGHT, "User");
-    drawCell(
+  for (const report of reports) {
+    await renderReportBlock(
       doc,
-      START_X + COLUMN_WIDTH * 2,
-      Y,
-      COLUMN_WIDTH,
-      ROW_HEIGHT,
-      "Patrol Point"
+      {
+        id: report._id,
+        time: new Date(report.createdAt).toLocaleTimeString("id-ID", {
+          timeZone: "Asia/Jakarta",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        user: `${report.userId.firstName} ${report.userId.lastName}`,
+        point: report.patrolPointId.name,
+        text: report.report,
+      },
+      imagesByReportId[report._id.toString()] || []
     );
-
-    // Values
-    Y += ROW_HEIGHT;
-    drawCell(
-      doc,
-      START_X,
-      Y,
-      COLUMN_WIDTH,
-      ROW_HEIGHT,
-      formatTime(new Date(report.createdAt))
-    );
-    drawCell(
-      doc,
-      START_X + COLUMN_WIDTH,
-      Y,
-      COLUMN_WIDTH,
-      ROW_HEIGHT,
-      `${report.userId?.firstName ?? ""} ${report.userId?.lastName ?? ""}`
-    );
-    drawCell(
-      doc,
-      START_X + COLUMN_WIDTH * 2,
-      Y,
-      COLUMN_WIDTH,
-      ROW_HEIGHT,
-      patrolPoint
-    );
-
-    // Description
-    Y += ROW_HEIGHT;
-    drawCell(doc, START_X, Y, USABLE_WIDTH, ROW_HEIGHT, "Report", {
-      align: "left",
-    });
-
-    Y += ROW_HEIGHT;
-    drawCell(doc, START_X, Y, USABLE_WIDTH, ROW_HEIGHT, report.report, {
-      align: "left",
-    });
-
-    // Images
-    Y += ROW_HEIGHT;
-    drawCell(doc, START_X, Y, USABLE_WIDTH, ROW_HEIGHT, "Images");
-
-    Y += ROW_HEIGHT;
-
-    const images = imagesByReportId[report._id.toString()] || [];
-
-    let imgX = START_X;
-    let imgY = Y;
-    let colIndex = 0;
-
-    for (const image of images) {
-      const fullPath = path.resolve(process.cwd(), image.filePath);
-
-      await drawImageCell(
-        doc,
-        imgX,
-        imgY,
-        COLUMN_WIDTH,
-        IMAGE_CELL_HEIGHT,
-        fullPath,
-        { backgroundColor: "#f9fafb" }
-      );
-
-      colIndex++;
-      imgX += COLUMN_WIDTH;
-
-      if (colIndex === IMAGE_COLS) {
-        colIndex = 0;
-        imgX = START_X;
-        imgY += IMAGE_CELL_HEIGHT + IMAGE_GAP;
-
-        if (imgY > doc.page.height - 150) {
-          doc.addPage();
-          imgY = doc.page.margins.top;
-        }
-      }
-    }
-
-    doc.y = imgY + IMAGE_CELL_HEIGHT + 20;
-    if (doc.y > 700) doc.addPage();
+    drawDivider(doc);
   }
 
   doc.end();

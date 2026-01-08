@@ -302,7 +302,7 @@ export const exportReportPDF = async (req, res) => {
       imagesByReportId[key].push(image);
     });
 
-    generateReportPDF(reports, res, imagesByReportId);
+    generateReportPDF(res, reports, imagesByReportId);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
