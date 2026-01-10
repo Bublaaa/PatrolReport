@@ -280,15 +280,24 @@ const renderReportBlock = async (doc, report, images) => {
 
 export const generateReportPDF = async (res, reports, imagesByReportId) => {
   const doc = new PDFDocument({ size: "A4", margin: PAGE_MARGIN });
+  const reportDate = reports[0]?.createdAt ?? new Date();
+
+  const dateString = new Date(reportDate)
+    .toLocaleDateString("id-ID", {
+      timeZone: "Asia/Jakarta",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
+    .replace(/\//g, "-");
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
     "Content-Disposition",
-    "attachment; filename=patrol-report.pdf"
+    `attachment; filename=${dateString}-report.pdf`
   );
 
   doc.pipe(res);
-  const dateString = new Date(reports[0]?.createdAt).toLocaleString();
 
   doc.font("Helvetica-Bold").fontSize(14).text("Report Patrol");
   doc

@@ -9,6 +9,7 @@ import userRoutes from "./routes/user.route.js";
 import patrolPointRoutes from "./routes/patrol.point.route.js";
 import reportRoutes from "./routes/report.route.js";
 import reportImagesRoutes from "./routes/report.images.route.js";
+import { startReportCron } from "./services/scheduler.js";
 
 dotenv.config();
 
@@ -37,6 +38,8 @@ if (process.env.NODE_ENV === "production") {
     res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
   });
 }
+
+startReportCron();
 
 app.listen(port, () => {
   connection();
