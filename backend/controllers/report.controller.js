@@ -5,7 +5,6 @@ import { ReportImages } from "../models/ReportImages.js";
 import { generateReportPDF } from "../utils/report.pdf.generator.js";
 import { uploadPdfToDrive } from "../services/google.drive.service.js";
 import { generateReportPdf } from "../services/pdf.service.js";
-import fs from "fs";
 import { report } from "process";
 
 //* GET BY DATE
@@ -274,9 +273,6 @@ export const exportReportPDF = async (req, res) => {
     const query = {
       createdAt: { $gte: start, $lte: end },
     };
-
-    if (userId) query.userId = userId;
-    if (patrolPointId) query.patrolPointId = patrolPointId;
 
     const reports = await Report.find(query)
       .populate("userId", "firstName lastName")

@@ -3,13 +3,14 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
-import { connection } from "./database/connection.js";
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import patrolPointRoutes from "./routes/patrol.point.route.js";
 import reportRoutes from "./routes/report.route.js";
 import reportImagesRoutes from "./routes/report.images.route.js";
+import { connection } from "./database/connection.js";
 import { startReportCron } from "./services/scheduler.js";
+import driveUploadRoutes from "./routes/drive.upload.route.js";
 
 dotenv.config();
 
@@ -28,6 +29,8 @@ app.use("/api/user", userRoutes);
 app.use("/api/patrol-point", patrolPointRoutes);
 app.use("/api/report", reportRoutes);
 app.use("/api/report-images", reportImagesRoutes);
+
+app.use("/api/drive", driveUploadRoutes);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
