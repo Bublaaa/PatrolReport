@@ -18,7 +18,33 @@ oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 const drive = google.drive({ version: "v3", auth: oAuth2Client });
 
 // ** CREATE
-export const uploadToDrive = async (req, res) => {
+export const uploadToDrive = async (file) => {
+  try {
+    if (!file) {
+      throw new Error("File not found");
+    }
+    const response = await drive.files.create({
+      requestBody: {
+        name: file.originalName,
+        parents: ["1e98vZugtTswuNjf-z1-q_sLTQxi7htVc"],
+      },
+      media: {
+        mimeType: file.mimeType,
+        body: fs.createReadStream(file.path),
+      },
+      fields: "id, name, webContentLink, webViewLink",
+    });
+    return {
+      fileId: response.data.id,
+      fileName: response.data.name,
+      viewLink: response.data.webViewLink,
+    };
+  } catch (error) {
+    throw new Error(`Drive upload failed: ${error.message}`);
+  }
+};
+
+export const uploadToDriveWithMulter = async (req, res) => {
   try {
     const file = req.file;
     if (!file) {
@@ -26,7 +52,7 @@ export const uploadToDrive = async (req, res) => {
     }
     const response = await drive.files.create({
       requestBody: {
-        name: file.originalname,
+        name: file.originalName,
         parents: ["1e98vZugtTswuNjf-z1-q_sLTQxi7htVc"],
       },
       media: {
@@ -43,6 +69,11 @@ export const uploadToDrive = async (req, res) => {
       viewLink: response.data.webViewLink,
       message: "Success upload file",
     });
+    return {
+      fileId: response.data.id,
+      fileName: response.data.name,
+      viewLink: response.data.webViewLink,
+    };
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

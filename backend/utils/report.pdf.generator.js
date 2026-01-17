@@ -6,6 +6,12 @@ import { toTitleCase } from "../../frontend/src/utils/toTitleCase.js";
 import { formatDateToString } from "../../frontend/src/utils/dateTimeFormatter.js";
 
 // * CONSTANT
+const PDF_DIR = path.join(process.cwd(), "uploads", "report-pdf");
+
+if (!fs.existsSync(PDF_DIR)) {
+  fs.mkdirSync(PDF_DIR, { recursive: true });
+}
+
 const PAGE_MARGIN = 40;
 const PAGE_WIDTH = 595.28;
 const PAGE_HEIGHT = 841.89;
@@ -242,7 +248,15 @@ const renderReportBlock = async (doc, report, images) => {
   });
 
   doc.y += 15;
-  renderTextBlock(doc, report.text.replace(/\r\n|\r/g, "\n"), USABLE_WIDTH);
+  renderTextBlock(
+    doc,
+    report.text
+      .replace(/\r\n|\r/g, "\n")
+      .replace(/Ð/g, "\n")
+      .replace(/\u00A0/g, " ")
+      .replace(/[\u200B-\u200D]/g, ""),
+    USABLE_WIDTH
+  );
   doc.y += 8;
 
   ensureSpace(doc, IMAGE_HEIGHT + 60);
@@ -276,9 +290,8 @@ const renderReportBlock = async (doc, report, images) => {
   doc.y += IMAGE_HEIGHT + 30;
 };
 
-/* ===================== CONTROLLER ===================== */
-
-export const generateReportPDF = async (res, reports, imagesByReportId) => {
+// * GENERATE TO DOWNLOAD
+export const generateDownloadPDF = async (res, reports, imagesByReportId) => {
   const doc = new PDFDocument({ size: "A4", margin: PAGE_MARGIN });
   const reportDate = reports[0]?.createdAt ?? new Date();
 
@@ -328,4 +341,66 @@ export const generateReportPDF = async (res, reports, imagesByReportId) => {
   }
 
   doc.end();
+};
+
+//* GENERATE TO UPLOAD
+export const generateUploadPDF = async (reports, imagesByReportId) => {
+  const reportDate = reports[0]?.createdAt ?? new Date();
+
+  const dateString = new Date(reportDate)
+    .toLocaleDateString("id-ID", {
+      timeZone: "Asia/Jakarta",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
+    .replace(/\//g, "-");
+  const fileName = `${dateString}-report.pdf`;
+  const filePath = path.join(PDF_DIR, fileName);
+
+  const doc = new PDFDocument({ size: "A4", margin: PAGE_MARGIN });
+  const writeStream = fs.createWriteStream(filePath);
+
+  doc.pipe(writeStream);
+
+  doc.font("Helvetica-Bold").fontSize(14).text("Report Patrol");
+  doc
+    .font("Helvetica")
+    .fontSize(10)
+    .text(`Date : ${formatDateToString(dateString)}`);
+
+  doc.moveDown(1);
+  drawDivider(doc);
+
+  for (const report of reports) {
+    await renderReportBlock(
+      doc,
+      {
+        id: report._id,
+        time: new Date(report.createdAt).toLocaleTimeString("id-ID", {
+          timeZone: "Asia/Jakarta",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        user: `${report.userId.firstName} ${report.userId.lastName}`,
+        point: report.patrolPointId.name,
+        text: report.report,
+      },
+      imagesByReportId[report._id.toString()] || []
+    );
+    drawDivider(doc);
+  }
+
+  doc.end();
+
+  await new Promise((resolve, reject) => {
+    writeStream.on("finish", resolve);
+    writeStream.on("error", reject);
+  });
+
+  return {
+    path: filePath,
+    originalName: fileName,
+    mimetype: "application/pdf",
+  };
 };

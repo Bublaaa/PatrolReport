@@ -120,7 +120,7 @@ export const useReportStore = create((set, get) => ({
     }
   },
 
-  generatePDF: async (selectedDate) => {
+  downloadPDF: async (selectedDate) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.post(

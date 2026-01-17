@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Loader } from "lucide-react";
+import { ChevronLeft, ChevronRight, DownloadIcon, Loader } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { DateInput, DropdownInput } from "../../components/Input.jsx";
 import { useReportStore } from "../../stores/report.store.js";
@@ -17,11 +17,11 @@ const ReportPageDashboard = () => {
   const [selectedDate, setSelectedDate] = useState(() => {
     const now = new Date();
     const wib = new Date(now.getTime() + 7 * 60 * 60 * 1000);
-    return wib.toISOString().split("T")[0]; // "YYYY-MM-DD"
+    return wib.toISOString().split("T")[0];
   });
 
   // * USE STORE
-  const { isLoading, reports, fetchReportDetailByDate, generatePDF } =
+  const { isLoading, reports, fetchReportDetailByDate, downloadPDF } =
     useReportStore();
   const handleFilterUser = (e) => {
     setSelectedUser(e.target.value);
@@ -54,13 +54,14 @@ const ReportPageDashboard = () => {
 
   const handleGeneratePDF = async () => {
     try {
-      const res = await generatePDF(selectedDate);
+      const res = await downloadPDF(selectedDate);
 
       const disposition = res.headers["content-disposition"];
       const filenameMatch = disposition?.match(/filename="?(.+)"?/);
       const filename = filenameMatch?.[1] || "patrol-report.pdf";
 
       const blob = new Blob([res.data], { type: "application/pdf" });
+      console.log(blob);
       const url = window.URL.createObjectURL(blob);
 
       const a = document.createElement("a");
@@ -139,9 +140,24 @@ const ReportPageDashboard = () => {
     <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md gap-5">
       <div className="flex flex-row justify-between items-center">
         <h5>Report Dashboard</h5>
-        <Button buttonType="primary" onClick={handleGeneratePDF}>
-          Export PDF
-        </Button>
+        {filteredReports.length !== 0 && filteredReports.at(-1).documentUrl ? (
+          <a
+            href={filteredReports.at(-1).documentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            buttonType="secondary"
+          >
+            View Report Document (PDF)
+          </a>
+        ) : (
+          <Button
+            buttonType="primary"
+            onClick={handleGeneratePDF}
+            icon={DownloadIcon}
+          >
+            Download PDF
+          </Button>
+        )}
 
         <div className="flex flex-row gap-3">
           <Button

@@ -2,9 +2,8 @@ import { Report } from "../models/Report.js";
 import { PatrolPoint } from "../models/PatrolPoint.js";
 import { User } from "../models/User.js";
 import { ReportImages } from "../models/ReportImages.js";
-import { generateReportPDF } from "../utils/report.pdf.generator.js";
+import { generateDownloadPDF } from "../utils/report.pdf.generator.js";
 import { uploadPdfToDrive } from "../services/google.drive.service.js";
-import { generateReportPdf } from "../services/pdf.service.js";
 import { report } from "process";
 
 //* GET BY DATE
@@ -260,7 +259,7 @@ export const deleteReport = async (req, res) => {
 };
 
 // * GENERATE PDF
-export const exportReportPDF = async (req, res) => {
+export const downloadPDF = async (req, res) => {
   try {
     const { date, userId, patrolPointId } = req.body;
 
@@ -298,7 +297,7 @@ export const exportReportPDF = async (req, res) => {
       imagesByReportId[key].push(image);
     });
 
-    generateReportPDF(res, reports, imagesByReportId);
+    generateDownloadPDF(res, reports, imagesByReportId);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
