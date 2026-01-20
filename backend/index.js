@@ -9,7 +9,7 @@ import patrolPointRoutes from "./routes/patrol.point.route.js";
 import reportRoutes from "./routes/report.route.js";
 import reportImagesRoutes from "./routes/report.images.route.js";
 import { connection } from "./database/connection.js";
-import { startReportCron } from "./services/scheduler.js";
+import { startDailyReport } from "./services/scheduler.js";
 import driveUploadRoutes from "./routes/drive.upload.route.js";
 
 dotenv.config();
@@ -42,7 +42,8 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-startReportCron();
+startDailyReport();
+cleanReportFiles();
 
 app.listen(port, () => {
   connection();
