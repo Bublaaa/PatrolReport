@@ -1,5 +1,6 @@
 import { User } from "../models/User.js";
 import { Report } from "../models/Report.js";
+import { Auth } from "../models/Auth.js";
 
 export const getAllUser = async (req, res) => {
   try {
@@ -104,6 +105,14 @@ export const deleteUser = async (req, res) => {
         message: "Schedule data for that user account still exist",
       });
     }
+    const isAdmin = await Auth.findOne({ userId: id });
+    if (isAdmin) {
+      return res.status(400).json({
+        success: false,
+        message: "User is still registered as admin",
+      });
+    }
+
     await User.findByIdAndDelete(id);
 
     res.status(200).json({

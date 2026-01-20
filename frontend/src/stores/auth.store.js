@@ -70,6 +70,24 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
+  //* FETCH ADMIN
+  getAllAuth: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.get(`${API_URL}auth/get`);
+      set({ users: response.data.auths, isLoading: false });
+      toast.success("Admin fetched successfully");
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Error fetching auth";
+      set({
+        error: errorMessage,
+        isLoading: false,
+      });
+      toast.error(errorMessage);
+    }
+  },
+
   createAuth: async (username, password, userId) => {
     set({ isLoading: true, error: null });
     try {

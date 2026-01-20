@@ -32,6 +32,10 @@ const ReportPage = lazy(() =>
 const ReportDetailPage = lazy(() =>
   import("./pages/admin.pages/report.detail.page.jsx")
 );
+const SettingPage = lazy(() =>
+  import("./pages/admin.pages/setting.dashboard.page.jsx")
+);
+
 const CreateReportPage = lazy(() => import("./pages/create.report.page.jsx"));
 const ScanPage = lazy(() => import("./pages/scan.page.jsx"));
 
@@ -192,6 +196,17 @@ function App() {
             element={
               <Suspense>
                 <ReportDetailPage />
+              </Suspense>
+            }
+          />
+
+          <Route
+            path="setting"
+            element={
+              <Suspense
+                fallback={<Loader className="w-6h-6 animate-spin mx-auto" />}
+              >
+                <SettingPage />
               </Suspense>
             }
           />

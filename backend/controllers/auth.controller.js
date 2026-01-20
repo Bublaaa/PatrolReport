@@ -165,7 +165,9 @@ export const deleteAuth = async (req, res) => {
 
 export const getAllAuths = async (req, res) => {
   try {
-    const auths = await Auth.find().select("-password");
+    const auths = await Auth.find()
+      .populate("userId", "firstName middleName lastName position")
+      .select("-password");
     res.status(200).json({
       success: true,
       auths,

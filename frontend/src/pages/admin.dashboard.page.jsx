@@ -9,6 +9,7 @@ const AdminDashboard = () => {
     { label: "User", icon: "Users", href: "/admin/user" },
     { label: "Patrol Point", icon: "MapPin", href: "/admin/patrol-point" },
     { label: "Report", icon: "ClipboardList", href: "/admin/report" },
+    { label: "Setting", icon: "Settings", href: "/admin/setting" },
   ];
   const { userDetail, logout } = useAuthStore();
   const handleLogout = async (e) => {
