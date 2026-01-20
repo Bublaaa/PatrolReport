@@ -140,25 +140,6 @@ const ReportPageDashboard = () => {
     <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md gap-5">
       <div className="flex flex-row justify-between items-center">
         <h5>Report Dashboard</h5>
-        {filteredReports.length !== 0 && filteredReports.at(-1).documentUrl ? (
-          <a
-            href={filteredReports.at(-1).documentUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            buttonType="secondary"
-          >
-            View Report Document (PDF)
-          </a>
-        ) : (
-          <Button
-            buttonType="primary"
-            onClick={handleGeneratePDF}
-            icon={DownloadIcon}
-          >
-            Download PDF
-          </Button>
-        )}
-
         <div className="flex flex-row gap-3">
           <Button
             buttonSize="small"
@@ -198,7 +179,6 @@ const ReportPageDashboard = () => {
           onChange={handleFilterPatrolPoint}
         />
       </div>
-
       {filteredReports.length === 0 ? (
         <p className="text-center mt-4">No patrol points found.</p>
       ) : (
@@ -223,6 +203,31 @@ const ReportPageDashboard = () => {
                 <p>{toTitleCase(report.patrolPointId.name)}</p>
               </NavLink>
             ))}
+        </div>
+      )}
+      {filteredReports.length > 0 && filteredReports.at(-1).documentUrl && (
+        <div className="flex flex-row gap-5 items-center pt-3">
+          <p>PDF file generated</p>
+          <a
+            href={filteredReports.at(-1).documentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            buttonType="secondary"
+          >
+            View Report Document (PDF)
+          </a>
+        </div>
+      )}
+      {filteredReports.length > 0 && !filteredReports.at(-1).documentUrl && (
+        <div className="flex flex-row gap-5 items-center pt-3">
+          <p>PDF file not generated yet</p>
+          <Button
+            buttonType="primary"
+            onClick={handleGeneratePDF}
+            icon={DownloadIcon}
+          >
+            Download PDF
+          </Button>
         </div>
       )}
     </div>

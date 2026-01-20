@@ -130,7 +130,7 @@ const ReportDetailPage = () => {
               href={reportDetail.documentUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 underline"
+              buttonType="secondary"
             >
               View Report Document (PDF)
             </a>
@@ -144,6 +144,14 @@ const ReportDetailPage = () => {
                   src={`${BASE_URL}${img.filePath}`}
                   alt={img.filePath}
                   className="rounded object-cover"
+                  onError={(e) => {
+                    e.currentTarget.replaceWith(
+                      Object.assign(document.createElement("span"), {
+                        innerText: "Image not available",
+                        className: "text-gray-400 text-sm",
+                      })
+                    );
+                  }}
                 />
               ))}
             </div>

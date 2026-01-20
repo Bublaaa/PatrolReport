@@ -3,6 +3,7 @@ import { Plus, Loader, Trash2, PenBoxIcon } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { usePatrolPointStore } from "../../stores/patrol.point.store.js";
 import { DeleteConfirmationForm } from "../../components/delete.confirmation";
+import { toTitleCase } from "../../utils/toTitleCase.js";
 import Modal from "../../components/modal";
 import Button from "../../components/button";
 
@@ -79,7 +80,7 @@ const PatrolPointPageDashboard = () => {
               key={point._id}
               className="flex flex-row gap-4 px-3 py-2 hover:bg-gray-100 rounded-md justify-between items-center cursor-pointer"
             >
-              <p>{point.name}</p>
+              <p>{toTitleCase(point.name)}</p>
               <div className="flex flex-row gap-2">
                 <Button
                   className="delete-btn"
