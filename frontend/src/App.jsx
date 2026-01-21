@@ -35,6 +35,9 @@ const ReportDetailPage = lazy(() =>
 const SettingPage = lazy(() =>
   import("./pages/admin.pages/setting.dashboard.page.jsx")
 );
+const UpdateDriveLinkPage = lazy(() =>
+  import("./pages/admin.pages/update.drive.link.page.jsx")
+);
 
 const CreateReportPage = lazy(() => import("./pages/create.report.page.jsx"));
 const ScanPage = lazy(() => import("./pages/scan.page.jsx"));
@@ -207,6 +210,14 @@ function App() {
                 fallback={<Loader className="w-6h-6 animate-spin mx-auto" />}
               >
                 <SettingPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="setting/drive-link/update"
+            element={
+              <Suspense>
+                <UpdateDriveLinkPage />
               </Suspense>
             }
           />

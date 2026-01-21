@@ -11,6 +11,6 @@ const router = express.Router();
 router.get("/get", getAllSystemSettings);
 router.get("/get-drive-id", getDriveFolderId);
 router.post("/create-drive-id", createDriveFolderId);
-router.put("/update-drive-id/:id", updateDriveFolderId);
+router.put("/update-drive-id/", updateDriveFolderId);
 
 export default router;

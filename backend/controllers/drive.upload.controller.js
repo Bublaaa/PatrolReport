@@ -2,6 +2,7 @@ import { google } from "googleapis";
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
+import { SystemSetting } from "../models/SystemSetting.js";
 
 dotenv.config();
 //* OAUTH
@@ -16,9 +17,11 @@ const oAuth2Client = new google.auth.OAuth2(
 );
 oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 const drive = google.drive({ version: "v3", auth: oAuth2Client });
+const DEFAULT_FOLDER_ID = "1e98vZugtTswuNjf-z1-q_sLTQxi7htVc";
 
 // ** CREATE
 export const uploadToDrive = async (file) => {
+  const folderId = await getDriveFolderId();
   try {
     if (!file) {
       throw new Error("File not found");
@@ -26,7 +29,7 @@ export const uploadToDrive = async (file) => {
     const response = await drive.files.create({
       requestBody: {
         name: file.originalName,
-        parents: ["1e98vZugtTswuNjf-z1-q_sLTQxi7htVc"],
+        parents: [folderId],
       },
       media: {
         mimeType: file.mimeType,
@@ -89,6 +92,21 @@ export const deleteFromDrive = async (req, res) => {
     const response = await drive.files.delete({ fileId: fileId });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// * UTILS
+export const getDriveFolderId = async () => {
+  try {
+    const folderId = await SystemSetting.findOne({
+      key: "GOOGLE_DRIVE_REPORT_FOLDER_ID",
+    });
+    if (!folderId) {
+      return DEFAULT_FOLDER_ID;
+    }
+    return folderId.value;
+  } catch (error) {
+    throw new Error(`Get drive folder ID failed: ${error.message}`);
   }
 };
 

@@ -41,6 +41,7 @@ export const useSystemSettingStore = create((set, get) => ({
     }
   },
   updateDriveFolderId: async (link) => {
+    console.log("Updating drive folder ID with link:", link);
     set({ isLoading: true, error: null });
     try {
       const response = await axios.put(
