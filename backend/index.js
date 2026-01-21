@@ -8,6 +8,7 @@ import userRoutes from "./routes/user.route.js";
 import patrolPointRoutes from "./routes/patrol.point.route.js";
 import reportRoutes from "./routes/report.route.js";
 import reportImagesRoutes from "./routes/report.images.route.js";
+import systemSettingRoutes from "./routes/system.setting.route.js";
 import { connection } from "./database/connection.js";
 import { startDailyReport, cleanReportFiles } from "./services/scheduler.js";
 import driveUploadRoutes from "./routes/drive.upload.route.js";
@@ -31,6 +32,7 @@ app.use("/api/report", reportRoutes);
 app.use("/api/report-images", reportImagesRoutes);
 
 app.use("/api/drive", driveUploadRoutes);
+app.use("/api/system-setting", systemSettingRoutes);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
