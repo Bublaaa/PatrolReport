@@ -35,6 +35,9 @@ const ReportDetailPage = lazy(() =>
 const SettingPage = lazy(() =>
   import("./pages/admin.pages/setting.dashboard.page.jsx")
 );
+const AddAdminAccountPage = lazy(() =>
+  import("./pages/admin.pages/add.admin.account.jsx")
+);
 const UpdateDriveLinkPage = lazy(() =>
   import("./pages/admin.pages/update.drive.link.page.jsx")
 );
@@ -218,6 +221,14 @@ function App() {
             element={
               <Suspense>
                 <UpdateDriveLinkPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="setting/account/create/:id"
+            element={
+              <Suspense>
+                <AddAdminAccountPage />
               </Suspense>
             }
           />

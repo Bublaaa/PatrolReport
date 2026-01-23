@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
-import { TextInput } from "../../components/Input.jsx";
+import { TextInput, DropdownInput } from "../../components/Input.jsx";
 import { useUserStore } from "../../stores/user.store.js";
 import { toast } from "react-hot-toast";
 import { User } from "lucide-react";
 import Button from "../../components/button.jsx";
 
 const UserDetailPage = () => {
+  const positionOptions = [
+    { label: "Admin", value: "admin" },
+    { label: "Security", value: "security" },
+  ];
+
   // * USE PARAMS
   const { id } = useParams();
 
@@ -21,6 +26,7 @@ const UserDetailPage = () => {
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [selectedPosition, setSelectedPosition] = useState();
 
   // * USE EFFECT - INITIAL DATA LOAD
   useEffect(() => {
@@ -32,17 +38,22 @@ const UserDetailPage = () => {
       setFirstName(userDetail.firstName);
       setMiddleName(userDetail.middleName);
       setLastName(userDetail.lastName);
+      setSelectedPosition(userDetail.position);
     }
   }, [userDetail]);
 
   // * FORM SUBMIT HANDLER
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await updateUser(id, firstName, middleName, lastName, userDetail.position);
+    await updateUser(id, firstName, middleName, lastName, selectedPosition);
     toast.success("User updated");
     setTimeout(() => {
       navigate(-1);
     }, 1000);
+  };
+
+  const handleSelectPosition = (e) => {
+    setSelectedPosition(e.target.value);
   };
 
   return (
@@ -53,7 +64,7 @@ const UserDetailPage = () => {
       className=" w-full bg-white bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden mx-2"
     >
       <div className="p-8">
-        <h2 className="mb-6 text-center bg-clip-text">Update Account</h2>
+        <h4 className="mb-6 text-center bg-clip-text">Update Account</h4>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           <TextInput
@@ -77,6 +88,14 @@ const UserDetailPage = () => {
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
           />
+          {/* <DropdownInput
+            label=""
+            name="position"
+            value={selectedPosition}
+            options={positionOptions}
+            placeholder="Select Position"
+            onChange={handleSelectPosition}
+          /> */}
 
           <Button
             buttonSize="full"

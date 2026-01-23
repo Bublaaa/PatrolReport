@@ -153,6 +153,15 @@ export const deleteAuth = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Auth not found" });
     }
+    const adminCount = await Auth.countDocuments();
+
+    if (adminCount <= 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot delete the last admin account",
+      });
+    }
+
     await Auth.findByIdAndDelete(id);
     res.status(200).json({
       success: true,

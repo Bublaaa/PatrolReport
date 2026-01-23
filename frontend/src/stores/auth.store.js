@@ -98,6 +98,7 @@ export const useAuthStore = create((set, get) => ({
       });
       set({ isLoading: false });
       toast.success("Auth created successfully");
+      return response.data;
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error creating auth";
@@ -132,6 +133,7 @@ export const useAuthStore = create((set, get) => ({
 
   deleteAuth: async (id) => {
     set({ isLoading: true, error: null });
+    console.log("Deleting auth with id:", id);
     try {
       const response = await axios.delete(`${API_URL}auth/delete/${id}`);
       set({ isLoading: false });

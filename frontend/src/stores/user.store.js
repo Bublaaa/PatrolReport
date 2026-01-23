@@ -78,6 +78,7 @@ export const useUserStore = create((set, get) => ({
         position,
       });
       set({ message: response.data.message, isLoading: false });
+      return response.data;
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error updating user";
