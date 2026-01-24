@@ -147,7 +147,7 @@ const ReportDetailPage = () => {
                   onError={(e) => {
                     e.currentTarget.replaceWith(
                       Object.assign(document.createElement("span"), {
-                        innerText: "Image not available",
+                        innerText: img.filePath,
                         className: "text-gray-400 text-sm",
                       })
                     );

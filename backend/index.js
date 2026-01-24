@@ -18,6 +18,7 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5003;
 const __dirname = path.resolve();
+const ROOT_DIR = process.cwd();
 
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
@@ -34,7 +35,8 @@ app.use("/api/report-images", reportImagesRoutes);
 app.use("/api/drive", driveUploadRoutes);
 app.use("/api/system-setting", systemSettingRoutes);
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(ROOT_DIR, "uploads")));
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "/frontend/dist")));
