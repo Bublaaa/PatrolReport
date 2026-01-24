@@ -12,7 +12,10 @@ import { useReportImagesStore } from "../../stores/report.images.store.js";
 
 const ReportDetailPage = () => {
   const BASE_URL =
-    import.meta.env.MODE === "development" ? "http://localhost:5003/" : "";
+    import.meta.env.MODE === "development"
+      ? "http://localhost:5003/"
+      : `${import.meta.env.CLIENT_URL}/`;
+
   // * USE NAVIGATE
   const navigate = useNavigate();
   // * USE PARAMS
@@ -141,13 +144,17 @@ const ReportDetailPage = () => {
               {reportImages.map((img) => (
                 <img
                   key={img._id}
-                  src={`${BASE_URL}${img.filePath}`}
+                  src={`${BASE_URL}uploads/${
+                    img.filePath.split("/uploads/")[1]
+                  }`}
                   alt={img.filePath}
                   className="rounded object-cover"
                   onError={(e) => {
                     e.currentTarget.replaceWith(
                       Object.assign(document.createElement("span"), {
-                        innerText: img.filePath,
+                        innerText: `${BASE_URL}uploads/${
+                          img.filePath.split("/uploads/")[1]
+                        }`,
                         className: "text-gray-400 text-sm",
                       })
                     );
