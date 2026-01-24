@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { use } from "react";
 
 const API_URL =
   import.meta.env.MODE === "development"
@@ -107,6 +108,7 @@ export const useAuthStore = create((set, get) => ({
         isLoading: false,
       });
       toast.error(errorMessage);
+      throw error;
     }
   },
 
@@ -133,7 +135,6 @@ export const useAuthStore = create((set, get) => ({
 
   deleteAuth: async (id) => {
     set({ isLoading: true, error: null });
-    console.log("Deleting auth with id:", id);
     try {
       const response = await axios.delete(`${API_URL}auth/delete/${id}`);
       set({ isLoading: false });

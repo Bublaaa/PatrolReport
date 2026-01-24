@@ -87,6 +87,7 @@ export const useUserStore = create((set, get) => ({
         isLoading: false,
       });
       toast.error(errorMessage);
+      throw error;
     }
   },
 

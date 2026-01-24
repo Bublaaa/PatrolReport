@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Loader, LockIcon } from "lucide-react";
 import { motion } from "framer-motion";
@@ -13,9 +13,11 @@ import toast from "react-hot-toast";
 const AddAdminAccountPage = () => {
   // * USE PARAMS
   const { id } = useParams();
+  const navigate = useNavigate();
 
   //* USE STORE
-  const { userDetail, isLoading, fetchUserDetail, updateUser } = useUserStore();
+  const { userDetail, isLoading, fetchUserDetail, updateUser, fetchUsers } =
+    useUserStore();
   const { createAuth, error } = useAuthStore();
 
   //* USE STATE
@@ -29,22 +31,19 @@ const AddAdminAccountPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Button clicked");
     try {
-      const newAdmin = await createAuth(username, password, id);
-      const updatedUser = await updateUser(
+      await createAuth(username, password, id);
+      await updateUser(
         id,
         userDetail.firstName,
         userDetail.middleName,
         userDetail.lastName,
         "admin"
       );
-
-      if (updatedUser && newAdmin) {
-        toast.success("Admin account created successfully");
-        await fetchUsers();
-        await getAllAuth();
-        navigate(-1);
-      }
+      toast.success("Admin account created successfully");
+      navigate(-1);
+      await fetchUsers();
     } catch (err) {
       console.error("Login failed:", err);
     }

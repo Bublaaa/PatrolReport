@@ -104,6 +104,11 @@ export const createAuth = async (req, res) => {
       userId,
     });
     await newAuth.save();
+    res.status(201).json({
+      success: true,
+      message: "Auth created successfully",
+      auth: newAuth,
+    });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }

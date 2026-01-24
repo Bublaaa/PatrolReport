@@ -61,7 +61,6 @@ export const createUser = async (req, res) => {
 export const updateUser = async (req, res) => {
   const { id } = req.params;
   const { firstName, middleName, lastName, position } = req.body;
-  console.log("Update User Body:", req.body);
   try {
     if (!position || !firstName || !lastName) {
       return res
