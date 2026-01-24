@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
-import { TextInput } from "../../components/Input";
+import { TextInput } from "../../components/input.jsx";
 import { useUserStore } from "../../stores/user.store.js";
 import { toast } from "react-hot-toast";
 import { User } from "lucide-react";
