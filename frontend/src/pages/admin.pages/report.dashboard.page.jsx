@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, DownloadIcon, Loader } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { DateInput, DropdownInput } from "../../components/Input.jsx";
+import { DateInput, DropdownInput } from "../../components/Input";
 import { useReportStore } from "../../stores/report.store.js";
 import { toTitleCase } from "../../utils/toTitleCase.js";
 import {
