@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Loader, LockIcon } from "lucide-react";
 import { motion } from "framer-motion";
-import { TextInput } from "../../components/input.jsx";
+import { TextInput } from "../../components/inputs.jsx";
 import { User } from "lucide-react";
 import { useUserStore } from "../../stores/user.store.js";
 import { useAuthStore } from "../../stores/auth.store";

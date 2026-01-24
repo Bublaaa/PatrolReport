@@ -3,7 +3,7 @@ import { Download, Loader, MapPinCheckInside, SaveIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import { requestLocation } from "../../utils/location.js";
-import { TextInput } from "../../components/input.jsx";
+import { TextInput } from "../../components/inputs.jsx";
 import { usePatrolPointStore } from "../../stores/patrol.point.store.js";
 import Button from "../../components/button.jsx";
 import toast from "react-hot-toast";

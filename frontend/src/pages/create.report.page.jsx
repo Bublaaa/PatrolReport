@@ -8,7 +8,7 @@ import {
   DropdownInput,
   TextareaInput,
   CameraInput,
-} from "../../components/input.jsx";
+} from "../components/inputs.jsx";
 import { requestLocation } from "../utils/location";
 import { toTitleCase } from "../utils/toTitleCase.js";
 import { compressImages } from "../utils/compressImage.js";
