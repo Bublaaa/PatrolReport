@@ -3,7 +3,7 @@ import { useAuthStore } from "../../stores/auth.store";
 import { useUserStore } from "../../stores/user.store";
 import { useSystemSettingStore } from "../../stores/system.setting.store";
 import { useEffect, useState } from "react";
-import { Trash2, PenBoxIcon, Plus } from "lucide-react";
+import { PenBoxIcon, Plus } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { toTitleCase } from "../../utils/toTitleCase";
 import { DeleteConfirmationForm } from "../../components/delete.confirmation.jsx";

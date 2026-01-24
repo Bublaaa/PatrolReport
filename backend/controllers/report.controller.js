@@ -3,8 +3,6 @@ import { PatrolPoint } from "../models/PatrolPoint.js";
 import { User } from "../models/User.js";
 import { ReportImages } from "../models/ReportImages.js";
 import { generateDownloadPDF } from "../utils/report.pdf.generator.js";
-import { uploadPdfToDrive } from "../services/google.drive.service.js";
-import { report } from "process";
 
 //* GET BY DATE
 export const getReportByDate = async (req, res) => {
