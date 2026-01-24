@@ -14,7 +14,7 @@ const ReportDetailPage = () => {
   const BASE_URL =
     import.meta.env.MODE === "development"
       ? "http://localhost:5003/"
-      : `${import.meta.env.CLIENT_URL}/`;
+      : `${import.meta.env.VITE_API_URL}/`;
 
   // * USE NAVIGATE
   const navigate = useNavigate();
