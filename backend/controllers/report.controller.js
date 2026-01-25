@@ -131,14 +131,14 @@ export const createReport = async (req, res) => {
       latitude,
       longitude,
       patrolPoint.latitude,
-      patrolPoint.longitude
+      patrolPoint.longitude,
     );
 
     if (distance > 15) {
       return res.status(403).json({
         success: false,
         message: `You are too far from the patrol point (${distance.toFixed(
-          2
+          2,
         )}m). Maximum allowed is 15m. Please recalibrate your position`,
       });
     }
@@ -149,32 +149,24 @@ export const createReport = async (req, res) => {
       report,
     });
 
-    // // ===== GENERATE PDF =====
-    // const { filePath, fileName } = await generateReportPdf({
-    //   report: newReport,
-    //   user,
-    //   patrolPoint,
-    //   images,
-    // });
-
-    // // ===== UPLOAD TO GOOGLE DRIVE =====
-    // const { fileId, fileUrl } = await uploadPdfToDrive(filePath, fileName);
-
-    // // ===== SAVE DOCUMENT URL =====
-    // newReport.documentUrl = fileUrl;
-    // newReport.documentFileId = fileId;
-
     if (req.files?.length > 0) {
       const imageDocs = req.files.map((file) => ({
         reportId: newReport._id,
-        filePath: file.path,
+        filePath: `/uploads/report-images/${file.filename}`,
       }));
+
       await ReportImages.insertMany(imageDocs);
     }
 
-    await newReport.save();
+    // if (req.files?.length > 0) {
+    //   const imageDocs = req.files.map((file) => ({
+    //     reportId: newReport._id,
+    //     filePath: file.path,
+    //   }));
+    //   await ReportImages.insertMany(imageDocs);
+    // }
 
-    // fs.unlinkSync(filePath);
+    await newReport.save();
 
     res.status(201).json({
       success: true,
@@ -217,7 +209,7 @@ export const updateReport = async (req, res) => {
         patrolPointId,
         report,
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     res.status(200).json({

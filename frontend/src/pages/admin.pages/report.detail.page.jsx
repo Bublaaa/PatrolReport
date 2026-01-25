@@ -12,9 +12,7 @@ import { useReportImagesStore } from "../../stores/report.images.store.js";
 
 const ReportDetailPage = () => {
   const BASE_URL =
-    import.meta.env.MODE === "development"
-      ? "http://localhost:5003/"
-      : "https://patrol-report-mzu3.onrender.com/";
+    import.meta.env.MODE === "development" ? "http://localhost:5003" : "";
 
   // * USE NAVIGATE
   const navigate = useNavigate();
@@ -51,7 +49,7 @@ const ReportDetailPage = () => {
             closeModal();
             fetchReportDetail(id);
           }}
-        />
+        />,
       );
       return;
     }
@@ -144,22 +142,24 @@ const ReportDetailPage = () => {
               {reportImages.map((img) => (
                 <img
                   key={img._id}
-                  src={`${BASE_URL}uploads/${
-                    img.filePath.split("/uploads/")[1]
-                  }`}
-                  alt={img.filePath}
+                  src={`${BASE_URL}${img.filePath}`}
+                  alt={`${BASE_URL}${img.filePath}`}
                   className="rounded object-cover"
-                  onError={(e) => {
-                    e.currentTarget.replaceWith(
-                      Object.assign(document.createElement("span"), {
-                        innerText: `${BASE_URL}uploads/${
-                          img.filePath.split("/uploads/")[1]
-                        }`,
-                        className: "text-gray-400 text-sm",
-                      })
-                    );
-                  }}
                 />
+                // <img
+                //   key={img._id}
+                //   src={`${BASE_URL}${img.filePath}`}
+                //   alt={`${BASE_URL}${img.filePath}`}
+                //   className="rounded object-cover"
+                //   // onError={(e) => {
+                //   //   e.currentTarget.replaceWith(
+                //   //     Object.assign(document.createElement("span"), {
+                //   //       innerText: `${BASE_URL}uploads/${img.filePath}`,
+                //   //       className: "text-gray-400 text-sm",
+                //   //     }),
+                //   //   );
+                //   // }}
+                // />
               ))}
             </div>
           )}
