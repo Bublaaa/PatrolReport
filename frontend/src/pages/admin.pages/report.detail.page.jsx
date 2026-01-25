@@ -78,7 +78,10 @@ const ReportDetailPage = () => {
         title={modalState.title}
         body={modalState.body}
       />
-      <div className="flex flex-row justify-between items-center">
+      <div
+        className="flex flex-row justify-between items-center"
+        onClick={(e) => handleDeleteAction(e)}
+      >
         <Button
           buttonSize="medium"
           buttonType="secondary"
@@ -92,13 +95,10 @@ const ReportDetailPage = () => {
           buttonType="danger"
           icon={Trash2}
           data-id={id}
-          data-name={id.slice(0, 5)}
+          data-name={id.slice(-5)}
         ></Button>
       </div>
-      <div
-        className="flex flex-col gap-5"
-        onClick={(e) => handleDeleteAction(e)}
-      >
+      <div className="flex flex-col gap-5">
         <div className="flex flex-row gap-2 items-center">
           <h6>Date : </h6>
           <p>
