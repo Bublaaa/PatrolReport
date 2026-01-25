@@ -256,7 +256,7 @@ const renderReportBlock = async (doc, report, images) => {
   let row = 0;
 
   for (const img of images) {
-    ensureSpace(doc, IMAGE_HEIGHT + 20);
+    ensureSpace(doc, IMAGE_HEIGHT + 40);
 
     await drawImageCell(
       doc,
