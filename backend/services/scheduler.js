@@ -42,7 +42,7 @@ export const startDailyReport = () => {
     },
     {
       timezone: "Asia/Jakarta",
-    }
+    },
   );
 };
 
@@ -76,7 +76,7 @@ export const cleanReportFiles = () => {
     },
     {
       timezone: "Asia/Jakarta",
-    }
+    },
   );
 };
 
@@ -231,7 +231,7 @@ const updateTodayReports = async (documentUrl, documentFileId) => {
           documentFileId,
           updatedAt: new Date(),
         },
-      }
+      },
     );
     console.log("Matched:", result.matchedCount);
     console.log("Modified:", result.modifiedCount);
