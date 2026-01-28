@@ -1,7 +1,6 @@
 import { google } from "googleapis";
 import dotenv from "dotenv";
 import fs from "fs";
-import path from "path";
 import { SystemSetting } from "../models/SystemSetting.js";
 
 dotenv.config();

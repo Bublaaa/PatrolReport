@@ -1,10 +1,13 @@
 import multer from "multer";
 import fs from "fs";
+import path from "path";
 import crypto from "crypto";
 
 // * DIRECTORY
-const uploadDir = "uploads/report-images";
-const uploadPDFDir = "uploads/report-pdf";
+const ROOT_DIR = process.cwd();
+
+const uploadDir = path.join(ROOT_DIR, "uploads/report-images");
+const uploadPDFDir = path.join(ROOT_DIR, "uploads/report-pdf");
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -46,10 +49,17 @@ const pdfStorage = multer.diskStorage({
   },
 
   filename: (req, file, cb) => {
-    const date = new Date().toISOString().split("T")[0];
-    const unique = crypto.randomBytes(4).toString("hex");
+    const dateString = new Date(reportDate)
+      .toLocaleDateString("id-ID", {
+        timeZone: "Asia/Jakarta",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+      .replace(/\//g, "-");
+    // const unique = crypto.randomBytes(4).toString("hex");
 
-    cb(null, `report-${date}-${unique}.pdf`);
+    cb(null, `${dateString}-report.pdf`);
   },
 });
 

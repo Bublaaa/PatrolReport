@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Loader, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { TextInput } from "../../components/Input.jsx";
+import { TextInput } from "../../components/inputs.jsx";
 import { useState } from "react";
 import { useUserStore } from "../../stores/user.store.js";
 import Button from "../../components/button.jsx";

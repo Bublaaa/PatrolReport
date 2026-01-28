@@ -1,5 +1,5 @@
 import { FolderCog, Loader } from "lucide-react";
-import { TextInput } from "../../components/Input.jsx";
+import { TextInput } from "../../components/inputs.jsx";
 import { motion } from "framer-motion";
 import { useSystemSettingStore } from "../../stores/system.setting.store.js";
 import { useState, useEffect } from "react";

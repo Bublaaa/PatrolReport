@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Loader } from "lucide-react";
-import { TextInput } from "../components/Input.jsx";
+import { TextInput } from "../components/inputs.jsx";
 import { useAuthStore } from "../stores/auth.store.js";
 import Button from "../components/button.jsx";
 
