@@ -9,7 +9,7 @@ const ScanPage = ({}) => {
     if (!data) return;
     const url = new URL(data);
     navigate(url.pathname, { replace: true });
-    console.log("Scanned data:", url.pathname);
+    // console.log("Scanned data:", url.pathname);
   };
 
   return (

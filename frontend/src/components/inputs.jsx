@@ -264,7 +264,7 @@ export const CameraInput = ({ label, onFilesChange, maxFiles = 5 }) => {
       <label
         htmlFor="camera-input"
         className="flex flex-col items-center justify-center w-full min-h-[200px]
-        border-2 border-dashed rounded-lg cursor-pointer bg-gray-50
+        border-gray-300 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50
         hover:bg-gray-100 transition overflow-hidden"
       >
         {items.length > 0 ? (
