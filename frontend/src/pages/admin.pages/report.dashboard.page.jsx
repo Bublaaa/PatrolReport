@@ -61,7 +61,6 @@ const ReportPageDashboard = () => {
       const filename = filenameMatch?.[1] || "patrol-report.pdf";
 
       const blob = new Blob([res.data], { type: "application/pdf" });
-      console.log(blob);
       const url = window.URL.createObjectURL(blob);
 
       const a = document.createElement("a");

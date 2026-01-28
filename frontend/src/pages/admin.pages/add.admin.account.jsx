@@ -31,7 +31,6 @@ const AddAdminAccountPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Button clicked");
     try {
       await createAuth(username, password, id);
       await updateUser(
@@ -39,7 +38,7 @@ const AddAdminAccountPage = () => {
         userDetail.firstName,
         userDetail.middleName,
         userDetail.lastName,
-        "admin"
+        "admin",
       );
       toast.success("Admin account created successfully");
       navigate(-1);

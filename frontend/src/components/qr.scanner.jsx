@@ -26,7 +26,7 @@ const QrScanner = ({ onScanSuccess }) => {
           cameras.find(
             (cam) =>
               cam.label.toLowerCase().includes("back") ||
-              cam.label.toLowerCase().includes("environment")
+              cam.label.toLowerCase().includes("environment"),
           ) || cameras[1];
         await scannerRef.current.start(
           camera.id,
@@ -45,8 +45,8 @@ const QrScanner = ({ onScanSuccess }) => {
           async (errorMessage) => {
             console.warn("QR Scan Error:", errorMessage);
             // await stopScanner();
-            console.log(cameras);
-          }
+            // console.log(cameras);
+          },
         );
       } catch (error) {
         console.error("Error starting scanner:", error);

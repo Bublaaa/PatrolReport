@@ -27,7 +27,7 @@ const AddUserPage = () => {
       toast.success("User created");
       navigate(-1);
     } catch (error) {
-      console.log(error);
+      toast.error(error);
     }
   };
   return (

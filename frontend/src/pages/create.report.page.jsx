@@ -32,6 +32,7 @@ const CreateReportPage = () => {
     images: [],
     latitude: "",
     longitude: "",
+    accuracy: "",
   };
   const [cameraKey, setCameraKey] = useState(0);
   const [locationGranted, setLocationGranted] = useState(null);
@@ -45,6 +46,7 @@ const CreateReportPage = () => {
         ...prev,
         latitude: coords.latitude,
         longitude: coords.longitude,
+        accuracy: coords.accuracy,
       }));
     } catch (error) {
       toast.error("Location permission denied");
@@ -85,9 +87,9 @@ const CreateReportPage = () => {
       formData.append("report", reportData.report);
       formData.append("latitude", reportData.latitude);
       formData.append("longitude", reportData.longitude);
+      formData.append("accuracy", reportData.accuracy);
 
       compressedImages.forEach((file) => {
-        console.log(file);
         formData.append("images", file);
       });
 

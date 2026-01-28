@@ -3,6 +3,7 @@ import { PatrolPoint } from "../models/PatrolPoint.js";
 import { User } from "../models/User.js";
 import { ReportImages } from "../models/ReportImages.js";
 import { generateDownloadPDF } from "../utils/report.pdf.generator.js";
+import { isWithinPatrolRadius } from "../../frontend/src/utils/location.js";
 
 //* GET BY DATE
 export const getReportByDate = async (req, res) => {
@@ -95,7 +96,8 @@ export const getReportDetail = async (req, res) => {
 
 //* CREATE
 export const createReport = async (req, res) => {
-  const { userId, patrolPointId, report, latitude, longitude } = req.body;
+  const { userId, patrolPointId, report, latitude, longitude, accuracy } =
+    req.body;
   const images = req.files?.map((f) => f.path) || [];
   try {
     if (
@@ -133,15 +135,31 @@ export const createReport = async (req, res) => {
       patrolPoint.latitude,
       patrolPoint.longitude,
     );
+    const isAllowedRadius = isWithinPatrolRadius({
+      userLat: latitude,
+      userLon: longitude,
+      pointLat: patrolPoint.latitude,
+      pointLon: patrolPoint.longitude,
+      gpsAccuracy: accuracy,
+    });
+    const allowedRadius = isAllowedRadius.allowedRadius || 15;
 
-    if (distance > 15) {
+    if (distance > allowedRadius) {
       return res.status(403).json({
         success: false,
-        message: `You are too far from the patrol point (${distance.toFixed(
-          2,
-        )}m). Maximum allowed is 15m. Please recalibrate your position`,
+        message: `Too far from patrol point.
+     Distance: ${Math.round(isAllowedRadius.distance)}m
+     GPS accuracy: ±${Math.round(accuracy)}m`,
       });
     }
+    // if (distance > 15) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     message: `You are too far from the patrol point (${distance.toFixed(
+    //       2,
+    //     )}m). Maximum allowed is 15m. Please recalibrate your position`,
+    //   });
+    // }
 
     const newReport = new Report({
       userId,

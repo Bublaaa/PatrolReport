@@ -38,7 +38,6 @@ export const login = async (req, res) => {
       user: user,
     });
   } catch (error) {
-    console.log("Error in login ", error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -49,11 +48,11 @@ export const logout = async (req, res) => {
 };
 
 export const checkAuth = async (req, res) => {
-  console.log("CHECK AUTH DEBUG:", {
-    userId: req.userId,
-    cookies: req.cookies,
-    authHeader: req.headers.authorization,
-  });
+  // console.log("CHECK AUTH DEBUG:", {
+  //   userId: req.userId,
+  //   cookies: req.cookies,
+  //   authHeader: req.headers.authorization,
+  // });
 
   try {
     const user = await User.findById(req.userId);
@@ -69,7 +68,6 @@ export const checkAuth = async (req, res) => {
       user,
     });
   } catch (error) {
-    console.log("Error in check auth", error);
     res.status(500).json({
       success: false,
       message: error.message,
