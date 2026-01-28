@@ -14,7 +14,6 @@ import { toTitleCase } from "../utils/toTitleCase.js";
 import { compressImages } from "../utils/compressImage.js";
 import toast from "react-hot-toast";
 import Button from "../components/button.jsx";
-import { useReportImagesStore } from "../stores/report.images.store.js";
 
 const CreateReportPage = () => {
   // * USE PARAMS

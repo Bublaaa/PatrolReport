@@ -3,7 +3,6 @@ import fs from "fs";
 import path from "path";
 import sharp from "sharp";
 import { toTitleCase } from "../../frontend/src/utils/toTitleCase.js";
-import { formatDateToString } from "../../frontend/src/utils/dateTimeFormatter.js";
 
 // * CONSTANT
 const PDF_DIR = path.join(process.cwd(), "uploads", "report-pdf");
@@ -305,10 +304,7 @@ export const generateDownloadPDF = async (res, reports, imagesByReportId) => {
   doc.pipe(res);
 
   doc.font("Helvetica-Bold").fontSize(14).text("Report Patrol");
-  doc
-    .font("Helvetica")
-    .fontSize(10)
-    .text(`Date : ${formatDateToString(dateString)}`);
+  doc.font("Helvetica").fontSize(10).text(`Date : ${dateString}`);
 
   doc.moveDown(1);
   drawDivider(doc);
@@ -356,10 +352,7 @@ export const generateUploadPDF = async (reports, imagesByReportId) => {
   doc.pipe(writeStream);
 
   doc.font("Helvetica-Bold").fontSize(14).text("Report Patrol");
-  doc
-    .font("Helvetica")
-    .fontSize(10)
-    .text(`Date : ${formatDateToString(dateString)}`);
+  doc.font("Helvetica").fontSize(10).text(`Date : ${dateString}`);
 
   doc.moveDown(1);
   drawDivider(doc);
