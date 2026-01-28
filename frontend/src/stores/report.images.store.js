@@ -48,7 +48,6 @@ export const useReportImagesStore = create((set, get) => ({
   },
 
   createReportImages: async (reportId, images) => {
-    console.log("Store parameter images:", images);
     set({ isLoading: true, error: null });
 
     try {
@@ -68,8 +67,8 @@ export const useReportImagesStore = create((set, get) => ({
             reportId,
             fileName: img.fileName,
             localKey: img.localKey,
-          })
-        )
+          }),
+        ),
       );
 
       set({ isLoading: false });
@@ -108,7 +107,7 @@ export const useReportImagesStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.delete(
-        `${API_URL}report-images/delete/${id}`
+        `${API_URL}report-images/delete/${id}`,
       );
       set({ message: response.data.message, isLoading: false });
     } catch (error) {

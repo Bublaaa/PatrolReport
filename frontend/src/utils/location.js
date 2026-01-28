@@ -1,26 +1,39 @@
-export const requestLocation = () => {
+export const requestLocation = ({
+  maxAccuracy = 50, // meters
+  timeout = 15000, // total time
+} = {}) => {
   return new Promise((resolve, reject) => {
-    navigator.permissions
-      .query({ name: "geolocation" })
-      .then((permissionStatus) => {
-        if (
-          permissionStatus.state === "granted" ||
-          permissionStatus.state === "prompt"
-        ) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => resolve(position.coords),
-            (error) => reject(error),
-            {
-              enableHighAccuracy: true,
-              timeout: 3000,
-              maximumAge: 0,
-            }
-          );
-        } else {
-          reject(new Error("❌ Location access is required for attendance."));
-        }
-      })
-      .catch((error) => reject(error));
+    if (!("geolocation" in navigator)) {
+      return reject(new Error("Geolocation not supported"));
+    }
+
+    const startTime = Date.now();
+
+    const tryGetLocation = () => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude, accuracy } = position.coords;
+
+          // Acceptable accuracy
+          if (accuracy <= maxAccuracy) {
+            return resolve(position.coords);
+          }
+
+          if (Date.now() - startTime < timeout) {
+            setTimeout(tryGetLocation, 1000);
+          } else {
+            resolve(position.coords);
+          }
+        },
+        (error) => reject(error),
+        {
+          enableHighAccuracy: true,
+          maximumAge: 0,
+        },
+      );
+    };
+
+    tryGetLocation();
   });
 };
 
@@ -36,3 +49,47 @@ export const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c * 1000; // returns distance in meters
 };
+
+export const isWithinPatrolRadius = ({
+  userLat,
+  userLon,
+  pointLat,
+  pointLon,
+  gpsAccuracy,
+}) => {
+  const distance = calculateDistance(userLat, userLon, pointLat, pointLon);
+  const BASE_RADIUS = 15;
+  const allowedRadius = Math.max(BASE_RADIUS, gpsAccuracy);
+
+  return {
+    distance,
+    allowedRadius,
+    valid: distance <= allowedRadius,
+  };
+};
+
+// export const requestLocation = () => {
+//   return new Promise((resolve, reject) => {
+//     navigator.permissions
+//       .query({ name: "geolocation" })
+//       .then((permissionStatus) => {
+//         if (
+//           permissionStatus.state === "granted" ||
+//           permissionStatus.state === "prompt"
+//         ) {
+//           navigator.geolocation.getCurrentPosition(
+//             (position) => resolve(position.coords),
+//             (error) => reject(error),
+//             {
+//               enableHighAccuracy: true,
+//               timeout: 3000,
+//               maximumAge: 0,
+//             }
+//           );
+//         } else {
+//           reject(new Error("❌ Location access is required for attendance."));
+//         }
+//       })
+//       .catch((error) => reject(error));
+//   });
+// };

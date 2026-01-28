@@ -41,14 +41,13 @@ export const useSystemSettingStore = create((set, get) => ({
     }
   },
   updateDriveFolderId: async (link) => {
-    console.log("Updating drive folder ID with link:", link);
     set({ isLoading: true, error: null });
     try {
       const response = await axios.put(
         `${API_URL}system-setting/update-drive-id`,
         {
           link,
-        }
+        },
       );
       set({ message: response.data.message, isLoading: false });
       toast.success("Drive folder ID updated successfully");
@@ -66,7 +65,7 @@ export const useSystemSettingStore = create((set, get) => ({
         `${API_URL}system-setting/create-drive-id`,
         {
           link,
-        }
+        },
       );
       set({ message: response.data.message, isLoading: false });
       toast.success("Drive folder ID created successfully");
