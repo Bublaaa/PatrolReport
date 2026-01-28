@@ -1,6 +1,5 @@
 import { ReportImages } from "../models/ReportImages.js";
 import { Report } from "../models/Report.js";
-import fs from "fs";
 import mongoose from "mongoose";
 
 //* CREATE

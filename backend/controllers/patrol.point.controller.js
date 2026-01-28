@@ -154,7 +154,9 @@ export const deletePatrolPoint = async (req, res) => {
 
 export const generatePatrolPointBarcode = async (req, res) => {
   const URL =
-    process.env.NODE_ENV === "development" ? "http://localhost:5173/" : "/";
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:5173/"
+      : process.env.CLIENT_URL;
   const { id } = req.body;
   try {
     if (!id) {

@@ -12,7 +12,8 @@ import { useReportImagesStore } from "../../stores/report.images.store.js";
 
 const ReportDetailPage = () => {
   const BASE_URL =
-    import.meta.env.MODE === "development" ? "http://localhost:5003/" : "";
+    import.meta.env.MODE === "development" ? "http://localhost:5003" : "";
+
   // * USE NAVIGATE
   const navigate = useNavigate();
   // * USE PARAMS
@@ -48,7 +49,7 @@ const ReportDetailPage = () => {
             closeModal();
             fetchReportDetail(id);
           }}
-        />
+        />,
       );
       return;
     }
@@ -77,7 +78,10 @@ const ReportDetailPage = () => {
         title={modalState.title}
         body={modalState.body}
       />
-      <div className="flex flex-row justify-between items-center">
+      <div
+        className="flex flex-row justify-between items-center"
+        onClick={(e) => handleDeleteAction(e)}
+      >
         <Button
           buttonSize="medium"
           buttonType="secondary"
@@ -91,13 +95,10 @@ const ReportDetailPage = () => {
           buttonType="danger"
           icon={Trash2}
           data-id={id}
-          data-name={id.slice(0, 5)}
+          data-name={id.slice(-5)}
         ></Button>
       </div>
-      <div
-        className="flex flex-col gap-5"
-        onClick={(e) => handleDeleteAction(e)}
-      >
+      <div className="flex flex-col gap-5">
         <div className="flex flex-row gap-2 items-center">
           <h6>Date : </h6>
           <p>
@@ -142,17 +143,23 @@ const ReportDetailPage = () => {
                 <img
                   key={img._id}
                   src={`${BASE_URL}${img.filePath}`}
-                  alt={img.filePath}
+                  alt={`${BASE_URL}${img.filePath}`}
                   className="rounded object-cover"
-                  onError={(e) => {
-                    e.currentTarget.replaceWith(
-                      Object.assign(document.createElement("span"), {
-                        innerText: "Image not available",
-                        className: "text-gray-400 text-sm",
-                      })
-                    );
-                  }}
                 />
+                // <img
+                //   key={img._id}
+                //   src={`${BASE_URL}${img.filePath}`}
+                //   alt={`${BASE_URL}${img.filePath}`}
+                //   className="rounded object-cover"
+                //   // onError={(e) => {
+                //   //   e.currentTarget.replaceWith(
+                //   //     Object.assign(document.createElement("span"), {
+                //   //       innerText: `${BASE_URL}uploads/${img.filePath}`,
+                //   //       className: "text-gray-400 text-sm",
+                //   //     }),
+                //   //   );
+                //   // }}
+                // />
               ))}
             </div>
           )}

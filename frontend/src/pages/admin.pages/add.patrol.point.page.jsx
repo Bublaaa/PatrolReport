@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Loader, MapPinCheckInside, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { requestLocation } from "../../utils/location.js";
-import { TextInput } from "../../components/Input.jsx";
+import { TextInput } from "../../components/inputs.jsx";
 import { usePatrolPointStore } from "../../stores/patrol.point.store.js";
 import Button from "../../components/button.jsx";
 import toast from "react-hot-toast";

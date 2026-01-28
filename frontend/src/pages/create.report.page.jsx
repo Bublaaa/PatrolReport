@@ -4,13 +4,16 @@ import { Loader } from "lucide-react";
 import { usePatrolPointStore } from "../stores/patrol.point.store.js";
 import { useReportStore } from "../stores/report.store.js";
 import { useUserStore } from "../stores/user.store.js";
-import { DropdownInput, TextareaInput, CameraInput } from "../components/Input";
+import {
+  DropdownInput,
+  TextareaInput,
+  CameraInput,
+} from "../components/inputs.jsx";
 import { requestLocation } from "../utils/location";
 import { toTitleCase } from "../utils/toTitleCase.js";
 import { compressImages } from "../utils/compressImage.js";
 import toast from "react-hot-toast";
 import Button from "../components/button.jsx";
-import { useReportImagesStore } from "../stores/report.images.store.js";
 
 const CreateReportPage = () => {
   // * USE PARAMS

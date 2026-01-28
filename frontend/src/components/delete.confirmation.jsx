@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "react-hot-toast";
-import { TextInput } from "./Input";
+import { TextInput } from "./inputs.jsx";
 import Button from "./button.jsx";
 import { Trash2Icon } from "lucide-react";
 

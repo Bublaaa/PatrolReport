@@ -3,7 +3,6 @@ import fs from "fs";
 import path from "path";
 import sharp from "sharp";
 import { toTitleCase } from "../../frontend/src/utils/toTitleCase.js";
-import { formatDateToString } from "../../frontend/src/utils/dateTimeFormatter.js";
 
 // * CONSTANT
 const PDF_DIR = path.join(process.cwd(), "uploads", "report-pdf");
@@ -72,7 +71,7 @@ const drawTextCell = (doc, x, y, w, h, text, options = {}) => {
     });
 };
 
-const drawImageCell = async (doc, x, y, w, h, imagePath, options = {}) => {
+const drawImageCell = async (doc, x, y, w, h, filePath, options = {}) => {
   const {
     align = "center",
     valign = "center",
@@ -81,44 +80,38 @@ const drawImageCell = async (doc, x, y, w, h, imagePath, options = {}) => {
     backgroundColor = null,
   } = options;
 
-  doc.save();
+  const imagePath = path.join(process.cwd(), filePath);
 
-  if (backgroundColor) {
-    doc.rect(x, y, w, h).fill(backgroundColor);
-  }
+  doc.save();
 
   doc.rect(x, y, w, h).stroke(borderColor);
 
-  if (!imagePath || !fs.existsSync(imagePath)) {
+  if (!fs.existsSync(imagePath)) {
     doc
       .fontSize(9)
       .fillColor(DEFAULT_BORDER_COLOR)
-      .text("Image not found", x + padding, y + h / 2 - 5, {
-        width: w - padding * 2,
+      .text("Image not found", x, y + h / 2 - 5, {
+        width: w,
         align: "center",
       });
-
     doc.restore();
     return;
   }
+
   let img;
   try {
     const ext = path.extname(imagePath).toLowerCase();
-
     if (ext === ".webp") {
       const buffer = await sharp(imagePath).png().toBuffer();
       img = doc.openImage(buffer);
     } else {
       img = doc.openImage(imagePath);
     }
-  } catch (err) {
-    doc
-      .fontSize(9)
-      .fillColor("#ef4444")
-      .text("Unsupported image", x + padding, y + h / 2 - 5, {
-        width: w - padding * 2,
-        align: "center",
-      });
+  } catch {
+    doc.text("Unsupported image", x, y + h / 2 - 5, {
+      width: w,
+      align: "center",
+    });
     doc.restore();
     return;
   }
@@ -129,25 +122,15 @@ const drawImageCell = async (doc, x, y, w, h, imagePath, options = {}) => {
 
   let iw = maxW;
   let ih = iw / ratio;
-
   if (ih > maxH) {
     ih = maxH;
     iw = ih * ratio;
   }
 
-  let ix = x + padding;
-  if (align === "center") ix = x + (w - iw) / 2;
-  if (align === "right") ix = x + w - iw - padding;
+  const ix = x + (w - iw) / 2;
+  const iy = y + (h - ih) / 2;
 
-  let iy = y + padding;
-  if (valign === "center") iy = y + (h - ih) / 2;
-  if (valign === "bottom") iy = y + h - ih - padding;
-
-  doc.image(img, ix, iy, {
-    width: iw,
-    height: ih,
-  });
-
+  doc.image(img, ix, iy, { width: iw, height: ih });
   doc.restore();
 };
 
@@ -216,7 +199,7 @@ const renderReportBlock = async (doc, report, images) => {
     COLS.point,
     ROW_HEIGHT,
     "Patrol Point",
-    { isHeader: true }
+    { isHeader: true },
   );
 
   // VALUES
@@ -228,7 +211,7 @@ const renderReportBlock = async (doc, report, images) => {
     y,
     COLS.user,
     ROW_HEIGHT,
-    report.user
+    report.user,
   );
   drawTextCell(
     doc,
@@ -236,7 +219,7 @@ const renderReportBlock = async (doc, report, images) => {
     y,
     COLS.point,
     ROW_HEIGHT,
-    toTitleCase(report.point)
+    toTitleCase(report.point),
   );
 
   doc.y = y + ROW_HEIGHT;
@@ -255,7 +238,7 @@ const renderReportBlock = async (doc, report, images) => {
       .replace(/Ð/g, "\n")
       .replace(/\u00A0/g, " ")
       .replace(/[\u200B-\u200D]/g, ""),
-    USABLE_WIDTH
+    USABLE_WIDTH,
   );
   doc.y += 8;
 
@@ -266,28 +249,36 @@ const renderReportBlock = async (doc, report, images) => {
   });
   doc.y += 8;
 
+  let startY = doc.y;
   let x = PAGE_MARGIN;
   let col = 0;
+  let row = 0;
+
   for (const img of images) {
-    ensureSpace(doc, IMAGE_HEIGHT + 20);
+    ensureSpace(doc, IMAGE_HEIGHT + 40);
+
     await drawImageCell(
       doc,
       x,
-      doc.y,
+      startY,
       USABLE_WIDTH / IMAGE_COLS,
       IMAGE_HEIGHT,
-      path.resolve(process.cwd(), img.filePath)
+      img.filePath,
     );
+
     x += USABLE_WIDTH / IMAGE_COLS;
     col++;
 
     if (col === IMAGE_COLS) {
+      row++;
       col = 0;
       x = PAGE_MARGIN;
-      doc.y += IMAGE_HEIGHT + IMAGE_GAP;
+      startY += IMAGE_HEIGHT;
     }
   }
-  doc.y += IMAGE_HEIGHT + 30;
+
+  doc.y += IMAGE_HEIGHT * (row + 1) + 50;
+  row = 0;
 };
 
 // * GENERATE TO DOWNLOAD
@@ -307,16 +298,13 @@ export const generateDownloadPDF = async (res, reports, imagesByReportId) => {
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
     "Content-Disposition",
-    `attachment; filename=${dateString}-report.pdf`
+    `attachment; filename=${dateString}-report.pdf`,
   );
 
   doc.pipe(res);
 
   doc.font("Helvetica-Bold").fontSize(14).text("Report Patrol");
-  doc
-    .font("Helvetica")
-    .fontSize(10)
-    .text(`Date : ${formatDateToString(dateString)}`);
+  doc.font("Helvetica").fontSize(10).text(`Date : ${dateString}`);
 
   doc.moveDown(1);
   drawDivider(doc);
@@ -335,7 +323,7 @@ export const generateDownloadPDF = async (res, reports, imagesByReportId) => {
         point: report.patrolPointId.name,
         text: report.report,
       },
-      imagesByReportId[report._id.toString()] || []
+      imagesByReportId[report._id.toString()] || [],
     );
     drawDivider(doc);
   }
@@ -364,10 +352,7 @@ export const generateUploadPDF = async (reports, imagesByReportId) => {
   doc.pipe(writeStream);
 
   doc.font("Helvetica-Bold").fontSize(14).text("Report Patrol");
-  doc
-    .font("Helvetica")
-    .fontSize(10)
-    .text(`Date : ${formatDateToString(dateString)}`);
+  doc.font("Helvetica").fontSize(10).text(`Date : ${dateString}`);
 
   doc.moveDown(1);
   drawDivider(doc);
@@ -386,7 +371,7 @@ export const generateUploadPDF = async (reports, imagesByReportId) => {
         point: report.patrolPointId.name,
         text: report.report,
       },
-      imagesByReportId[report._id.toString()] || []
+      imagesByReportId[report._id.toString()] || [],
     );
     drawDivider(doc);
   }

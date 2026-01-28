@@ -235,7 +235,7 @@ function App() {
         </Route>
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
-      <Toaster />
+      <Toaster position="top-right" />
     </div>
   );
 }

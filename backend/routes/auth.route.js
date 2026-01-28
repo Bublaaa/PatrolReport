@@ -20,8 +20,4 @@ router.post("/create", createAuth);
 router.put("/update", updateAuth);
 router.delete("/delete/:id", deleteAuth);
 
-// router.post("/verify-email", verifyEmail);
-// router.post("/forgot-password", forgotPassword);
-// router.post("/reset-password/:token", resetPassword);
-
 export default router;
