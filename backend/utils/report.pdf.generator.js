@@ -298,8 +298,15 @@ export const generateDownloadPDF = async (res, reports, imagesByReportId) => {
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
     "Content-Disposition",
-    `attachment; filename=${dateString}-report.pdf`,
+    `attachment; filename="${dateString}-report.pdf"`,
   );
+
+  doc.on("error", (err) => {
+    console.error("PDF generation error:", err);
+    if (!res.headersSent) {
+      res.status(500).json({ message: "Failed to generate PDF" });
+    }
+  });
 
   doc.pipe(res);
 
