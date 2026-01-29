@@ -99,7 +99,6 @@ export const getReportDetail = async (req, res) => {
 export const createReport = async (req, res) => {
   const { userId, patrolPointId, report, latitude, longitude, accuracy } =
     req.body;
-  const images = req.files?.map((f) => f.path) || [];
   try {
     if (
       !userId ||
@@ -153,14 +152,6 @@ export const createReport = async (req, res) => {
      GPS accuracy: ±${Math.round(accuracy)}m`,
       });
     }
-    // if (distance > 15) {
-    //   return res.status(403).json({
-    //     success: false,
-    //     message: `You are too far from the patrol point (${distance.toFixed(
-    //       2,
-    //     )}m). Maximum allowed is 15m. Please recalibrate your position`,
-    //   });
-    // }
 
     const newReport = new Report({
       userId,
@@ -176,15 +167,6 @@ export const createReport = async (req, res) => {
 
       await ReportImages.insertMany(imageDocs);
     }
-
-    // if (req.files?.length > 0) {
-    //   const imageDocs = req.files.map((file) => ({
-    //     reportId: newReport._id,
-    //     filePath: file.path,
-    //   }));
-    //   await ReportImages.insertMany(imageDocs);
-    // }
-
     await newReport.save();
 
     res.status(201).json({

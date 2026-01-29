@@ -5,9 +5,7 @@ import { Report } from "../models/Report.js";
 import { ReportImages } from "../models/ReportImages.js";
 import { generateUploadPDF } from "../utils/report.pdf.generator.js";
 import { uploadToDrive } from "../controllers/drive.upload.controller.js";
-
-// * CONSTANT
-const PDF_DIR = path.join(process.cwd(), "uploads/report-pdf");
+import { REPORT_PDF_DIR } from "../utils/storage.path.js";
 
 // * FLAGS
 let isGeneratingRunning = false;
@@ -152,7 +150,7 @@ async function deleteLocalPDF(reports) {
         })
         .replace(/\//g, "-");
       const fileName = `${dateString}-report.pdf`;
-      const filePath = path.join(PDF_DIR, fileName);
+      const filePath = path.join(REPORT_PDF_DIR, fileName);
       if (fs.existsSync(filePath)) {
         await fs.promises.unlink(filePath);
       }
