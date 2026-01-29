@@ -285,15 +285,19 @@ export const downloadPDF = async (req, res) => {
       .populate("userId", "firstName lastName")
       .populate("patrolPointId", "name")
       .sort({ createdAt: 1 });
-
+    console.log("Request Body: ", date, userId, patrolPointId);
+    console.log("Reports: ", reports);
     if (!reports.length) {
+      console.log("No reports found for the specified date");
       return res.status(404).json({ message: "No reports found" });
     }
 
     const reportIds = reports.map((report) => report._id);
+    console.log("Report IDs: ", reportIds);
     const reportImagesByReportId = await ReportImages.find({
       reportId: { $in: reportIds },
     });
+    console.log("Report Images: ", reportImagesByReportId);
 
     const imagesByReportId = {};
 
@@ -304,6 +308,7 @@ export const downloadPDF = async (req, res) => {
       }
       imagesByReportId[key].push(image);
     });
+    console.log("Images by Report ID: ", imagesByReportId);
 
     generateDownloadPDF(res, reports, imagesByReportId);
   } catch (error) {
