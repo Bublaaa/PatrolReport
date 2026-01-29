@@ -295,10 +295,13 @@ export const generateDownloadPDF = async (res, reports, imagesByReportId) => {
     })
     .replace(/\//g, "-");
 
+  const filename = `${dateString}-report.pdf`;
+  const encodedFilename = encodeURIComponent(filename);
+
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
     "Content-Disposition",
-    `attachment; filename="${dateString}-report.pdf"`,
+    `attachment; filename="${filename}"; filename*=UTF-8''${encodedFilename}`,
   );
 
   doc.on("error", (err) => {
