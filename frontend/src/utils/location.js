@@ -59,7 +59,8 @@ export const isWithinPatrolRadius = ({
 }) => {
   const distance = calculateDistance(userLat, userLon, pointLat, pointLon);
   const BASE_RADIUS = 15;
-  const allowedRadius = Math.max(BASE_RADIUS, gpsAccuracy);
+  // const allowedRadius = Math.max(BASE_RADIUS, gpsAccuracy);
+  const allowedRadius = BASE_RADIUS + gpsAccuracy;
 
   return {
     distance,
