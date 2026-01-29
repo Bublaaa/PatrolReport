@@ -4,7 +4,7 @@ import { User } from "../models/User.js";
 import { ReportImages } from "../models/ReportImages.js";
 import { generateDownloadPDF } from "../utils/report.pdf.generator.js";
 import { isWithinPatrolRadius } from "../../frontend/src/utils/location.js";
-import { zonedTimeToUtc } from "date-fns-tz";
+import { fromZonedTime } from "date-fns-tz";
 
 //* GET BY DATE
 export const getReportByDate = async (req, res) => {
@@ -272,8 +272,8 @@ export const downloadPDF = async (req, res) => {
   try {
     const { date, userId, patrolPointId } = req.body;
 
-    const start = zonedTimeToUtc(`${date} 00:00:00`, "Asia/Jakarta");
-    const end = zonedTimeToUtc(`${date} 23:59:59.999`, "Asia/Jakarta");
+    const start = fromZonedTime(`${date} 00:00:00`, "Asia/Jakarta");
+    const end = fromZonedTime(`${date} 23:59:59.999`, "Asia/Jakarta");
 
     const reports = await Report.find({
       createdAt: { $gte: start, $lte: end },
@@ -281,7 +281,6 @@ export const downloadPDF = async (req, res) => {
       .populate("userId", "firstName lastName")
       .populate("patrolPointId", "name")
       .sort({ createdAt: 1 });
-
     if (!reports.length) {
       return res.status(404).json({ message: "No reports found" });
     }
