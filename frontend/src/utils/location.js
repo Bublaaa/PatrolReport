@@ -1,3 +1,5 @@
+const roundCoord = (value, digits = 6) => Number(value.toFixed(digits));
+
 export const requestLocation = ({
   maxAccuracy = 50, // meters
   timeout = 15000, // total time
@@ -12,17 +14,24 @@ export const requestLocation = ({
     const tryGetLocation = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const { latitude, longitude, accuracy } = position.coords;
+          let { latitude, longitude, accuracy } = position.coords;
 
+          latitude = roundCoord(latitude);
+          longitude = roundCoord(longitude);
+          const coords = {
+            latitude,
+            longitude,
+            accuracy,
+          };
           // Acceptable accuracy
           if (accuracy <= maxAccuracy) {
-            return resolve(position.coords);
+            return resolve(coords);
           }
 
           if (Date.now() - startTime < timeout) {
             setTimeout(tryGetLocation, 1000);
           } else {
-            resolve(position.coords);
+            resolve(coords);
           }
         },
         (error) => reject(error),
@@ -55,17 +64,17 @@ export const isWithinPatrolRadius = ({
   userLon,
   pointLat,
   pointLon,
-  gpsAccuracy,
+  gpsAccuracy = 0,
 }) => {
-  const distance = calculateDistance(userLat, userLon, pointLat, pointLon);
   const BASE_RADIUS = 15;
-  // const allowedRadius = Math.max(BASE_RADIUS, gpsAccuracy);
-  const allowedRadius = BASE_RADIUS + gpsAccuracy;
-
+  const distance = calculateDistance(userLat, userLon, pointLat, pointLon);
+  const effectiveDistance = Math.max(0, distance - gpsAccuracy);
   return {
     distance,
-    allowedRadius,
-    valid: distance <= allowedRadius,
+    effectiveDistance,
+    accuracy: gpsAccuracy,
+    allowedRadius: BASE_RADIUS,
+    valid: effectiveDistance <= BASE_RADIUS,
   };
 };
 

@@ -129,27 +129,21 @@ export const createReport = async (req, res) => {
       });
     }
 
-    const distance = calculateDistance(
-      latitude,
-      longitude,
-      patrolPoint.latitude,
-      patrolPoint.longitude,
-    );
-    const isAllowedRadius = isWithinPatrolRadius({
+    const result = isWithinPatrolRadius({
       userLat: latitude,
       userLon: longitude,
       pointLat: patrolPoint.latitude,
       pointLon: patrolPoint.longitude,
       gpsAccuracy: accuracy,
     });
-    const allowedRadius = isAllowedRadius.allowedRadius || 15;
 
-    if (distance > allowedRadius) {
+    if (!result.valid) {
       return res.status(403).json({
         success: false,
         message: `Too far from patrol point.
-     Distance: ${Math.round(isAllowedRadius.distance)}m
-     GPS accuracy: ±${Math.round(accuracy)}m`,
+Distance: ${Math.round(result.distance)}m
+Effective distance: ${Math.round(result.effectiveDistance)}m
+GPS accuracy: ±${Math.round(result.accuracy)}m`,
       });
     }
 
