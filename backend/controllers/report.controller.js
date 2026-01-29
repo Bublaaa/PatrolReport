@@ -4,6 +4,7 @@ import { User } from "../models/User.js";
 import { ReportImages } from "../models/ReportImages.js";
 import { generateDownloadPDF } from "../utils/report.pdf.generator.js";
 import { isWithinPatrolRadius } from "../../frontend/src/utils/location.js";
+import { zonedTimeToUtc } from "date-fns-tz";
 
 //* GET BY DATE
 export const getReportByDate = async (req, res) => {
@@ -271,33 +272,24 @@ export const downloadPDF = async (req, res) => {
   try {
     const { date, userId, patrolPointId } = req.body;
 
-    const start = new Date(date);
-    start.setHours(0, 0, 0, 0);
+    const start = zonedTimeToUtc(`${date} 00:00:00`, "Asia/Jakarta");
+    const end = zonedTimeToUtc(`${date} 23:59:59.999`, "Asia/Jakarta");
 
-    const end = new Date(date);
-    end.setHours(23, 59, 59, 999);
-
-    const query = {
+    const reports = await Report.find({
       createdAt: { $gte: start, $lte: end },
-    };
-
-    const reports = await Report.find(query)
+    })
       .populate("userId", "firstName lastName")
       .populate("patrolPointId", "name")
       .sort({ createdAt: 1 });
-    console.log("Request Body: ", date, userId, patrolPointId);
-    console.log("Reports: ", reports);
+
     if (!reports.length) {
-      console.log("No reports found for the specified date");
       return res.status(404).json({ message: "No reports found" });
     }
 
     const reportIds = reports.map((report) => report._id);
-    console.log("Report IDs: ", reportIds);
     const reportImagesByReportId = await ReportImages.find({
       reportId: { $in: reportIds },
     });
-    console.log("Report Images: ", reportImagesByReportId);
 
     const imagesByReportId = {};
 
@@ -308,7 +300,6 @@ export const downloadPDF = async (req, res) => {
       }
       imagesByReportId[key].push(image);
     });
-    console.log("Images by Report ID: ", imagesByReportId);
 
     generateDownloadPDF(res, reports, imagesByReportId);
   } catch (error) {
