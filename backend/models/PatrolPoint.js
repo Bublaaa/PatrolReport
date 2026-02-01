@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const patrolPointSchema = new mongoose.Schema(
   {
+    workLocationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "WorkLocation",
+      // required: true,
+    },
     name: {
       type: String,
       required: true,
@@ -19,7 +24,7 @@ const patrolPointSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const PatrolPoint = mongoose.model("PatrolPoint", patrolPointSchema);

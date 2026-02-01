@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
+    workLocationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "WorkLocation",
+      // required: true,
+    },
     firstName: {
       type: String,
       required: true,
@@ -18,7 +23,7 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const User = mongoose.model("User", userSchema);
