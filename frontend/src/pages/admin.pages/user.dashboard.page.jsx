@@ -28,6 +28,7 @@ const UserPageDashboard = () => {
     fetchUsers();
   }, []);
 
+  console.log(users);
   // * DELETE ACTION HANDLER
   const handleDeleteAction = (e) => {
     const deleteButton = e.target.closest(".delete-btn");
@@ -44,7 +45,7 @@ const UserPageDashboard = () => {
           }}
 
           // redirect={navigate(-1)}
-        />
+        />,
       );
       return;
     }
@@ -69,7 +70,11 @@ const UserPageDashboard = () => {
           </Button>
         </NavLink>
       </div>
-
+      <div className="grid grid-cols-3 text-center pt-4 pb-2">
+        <h6>Full Name</h6>
+        <h6>Work Location</h6>
+        <h6>Actions</h6>
+      </div>
       {users.length === 0 && (
         <p className="text-center mt-4">No users found.</p>
       )}
@@ -82,12 +87,14 @@ const UserPageDashboard = () => {
           users.map((user) => (
             <div
               key={user._id}
-              className="flex flex-row gap-4 px-3 py-2 hover:bg-gray-100 rounded-md justify-between items-center cursor-pointer"
+              className="grid grid-cols-3 gap-4 px-3 py-2 hover:bg-gray-100 items-center ounded-md cursor-pointer"
             >
-              <p>
+              <p className="text-center">
                 {user.firstName} {user.middleName} {user.lastName}
               </p>
-              <div className="flex flex-row gap-2">
+              <p className="text-center">{user.workLocationId.name}</p>
+
+              <div className="ml-auto flex flex-row gap-2 items-end">
                 <Button
                   className="delete-btn"
                   buttonSize="small"

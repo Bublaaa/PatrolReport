@@ -5,7 +5,7 @@ const patrolPointSchema = new mongoose.Schema(
     workLocationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "WorkLocation",
-      // required: true,
+      required: true,
     },
     name: {
       type: String,

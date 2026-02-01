@@ -49,13 +49,14 @@ export const usePatrolPointStore = create((set, get) => ({
     }
   },
 
-  createPatrolPoint: async (name, latitude, longitude) => {
+  createPatrolPoint: async (name, latitude, longitude, workLocationId) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.post(`${API_URL}patrol-point/create`, {
         name,
         latitude,
         longitude,
+        workLocationId,
       });
       set({ message: response.data.message, isLoading: false });
     } catch (error) {
@@ -69,13 +70,14 @@ export const usePatrolPointStore = create((set, get) => ({
     }
   },
 
-  updatePatrolPoint: async (id, name, latitude, longitude) => {
+  updatePatrolPoint: async (id, name, latitude, longitude, workLocationId) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.put(`${API_URL}patrol-point/update/${id}`, {
         name,
         latitude,
         longitude,
+        workLocationId,
       });
       set({ message: response.data.message, isLoading: false });
     } catch (error) {
@@ -93,7 +95,7 @@ export const usePatrolPointStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.delete(
-        `${API_URL}patrol-point/delete/${id}`
+        `${API_URL}patrol-point/delete/${id}`,
       );
       set({ message: response.data.message, isLoading: false });
       toast.error("Success delete patrol point");

@@ -3,8 +3,9 @@ import { Download, Loader, MapPinCheckInside, SaveIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import { requestLocation } from "../../utils/location.js";
-import { TextInput } from "../../components/inputs.jsx";
+import { TextInput, DropdownInput } from "../../components/inputs.jsx";
 import { usePatrolPointStore } from "../../stores/patrol.point.store.js";
+import { useWorkLocationStore } from "../../stores/work.location.store.js";
 import Button from "../../components/button.jsx";
 import toast from "react-hot-toast";
 
@@ -22,8 +23,14 @@ const UpdatePatrolPointPage = () => {
     patrolPointDetail,
     generateQRCode,
     qrCode,
-    isLoading,
+    isLoading: isPatrolPointLoading,
   } = usePatrolPointStore();
+
+  const {
+    fetchWorkLocations,
+    workLocations,
+    isLoading: isWorkLocationLoading,
+  } = useWorkLocationStore();
 
   // * USE STATE
   const [PatrolPointData, setPatrolPointData] = useState({
@@ -32,6 +39,11 @@ const UpdatePatrolPointPage = () => {
     longitude: "",
   });
   const [locationGranted, setLocationGranted] = useState(null);
+  const [selectedWorkLocation, setSelectedWorkLocation] = useState();
+
+  const handleSelectWorkLocation = (e) => {
+    setSelectedWorkLocation(e.target.value);
+  };
 
   // * CHECK LOCATION PERMISSION HANDLER
   const checkLocationPermission = async () => {
@@ -60,11 +72,16 @@ const UpdatePatrolPointPage = () => {
       toast.error("Please recalibrate your coordinates");
       return;
     }
+    if (!selectedWorkLocation) {
+      toast.error("Patrol Point name is required");
+      return;
+    }
     await updatePatrolPoint(
       id,
       PatrolPointData.name,
       PatrolPointData.latitude,
-      PatrolPointData.longitude
+      PatrolPointData.longitude,
+      selectedWorkLocation,
     );
     toast.success("Success update new patrol point");
     setTimeout(() => {
@@ -90,19 +107,28 @@ const UpdatePatrolPointPage = () => {
     fetchPatrolPointDetail(id);
     generateQRCode(id);
     checkLocationPermission();
+    fetchWorkLocations();
   }, [id]);
 
   useEffect(() => {
-    if (patrolPointDetail) {
+    if (patrolPointDetail && workLocations) {
       setPatrolPointData({
         name: patrolPointDetail.name || "",
         latitude: patrolPointDetail.latitude || "",
         longitude: patrolPointDetail.longitude || "",
       });
+      setSelectedWorkLocation(patrolPointDetail.workLocationId);
     }
   }, [patrolPointDetail]);
 
-  if (isLoading) {
+  const workLocationOptions = workLocations.map((workLocation) => {
+    return {
+      label: workLocation.name,
+      value: workLocation._id,
+    };
+  });
+
+  if (isPatrolPointLoading) {
     return <Loader className="w-6 h-6 animate-spin mx-auto" />;
   }
   return (
@@ -153,6 +179,14 @@ const UpdatePatrolPointPage = () => {
           </Button>
         </div>
         <div className="flex w-full flex-col gap-5 md:col-span-3 col-span-1">
+          <DropdownInput
+            label=""
+            name="workLocation"
+            value={selectedWorkLocation}
+            options={workLocationOptions}
+            placeholder="Select Work Location"
+            onChange={handleSelectWorkLocation}
+          />
           <TextInput
             type="text"
             label={"Patrol Point Name"}

@@ -86,10 +86,14 @@ export const updateWorkLocation = async (req, res) => {
         message: "Work location not found",
       });
     }
-    const updatedWorkLocation = await WorkLocation.findByIdAndUpdate(id, {
-      name,
-      address,
-    });
+    const updatedWorkLocation = await WorkLocation.findByIdAndUpdate(
+      id,
+      {
+        name,
+        address,
+      },
+      { new: true },
+    );
     if (!updatedWorkLocation) {
       return res.status(400).json({
         success: false,

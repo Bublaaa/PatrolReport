@@ -44,13 +44,18 @@ export const getPatrolPointsDetail = async (req, res) => {
 };
 // * * CREATE
 export const createPatrolPoint = async (req, res) => {
-  let { name, latitude, longitude } = req.body;
+  let { name, latitude, longitude, workLocationId } = req.body;
 
   try {
-    if (!name || latitude === undefined || longitude === undefined) {
+    if (
+      !name ||
+      latitude === undefined ||
+      longitude === undefined ||
+      !workLocationId
+    ) {
       return res
         .status(400)
-        .json({ success: false, message: "Name and Coordinates are required" });
+        .json({ success: false, message: "All fields are required" });
     }
 
     name = name.toLowerCase();
@@ -67,6 +72,7 @@ export const createPatrolPoint = async (req, res) => {
       latitude,
       longitude,
       barcode: "",
+      workLocationId,
     });
 
     newPatrolPoint.barcode = newPatrolPoint._id.toString();
@@ -86,13 +92,18 @@ export const createPatrolPoint = async (req, res) => {
 // * * UPDATE
 export const updatePatrolPoint = async (req, res) => {
   const { id } = req.params;
-  let { name, latitude, longitude } = req.body;
+  let { name, latitude, longitude, workLocationId } = req.body;
 
   try {
-    if (!name || latitude === undefined || longitude === undefined) {
+    if (
+      !name ||
+      latitude === undefined ||
+      longitude === undefined ||
+      !workLocationId
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Name and Coordinates are required",
+        message: "All fields are required",
       });
     }
 
@@ -110,8 +121,9 @@ export const updatePatrolPoint = async (req, res) => {
         name: name.toLowerCase(),
         latitude,
         longitude,
+        workLocationId,
       },
-      { new: true }
+      { new: true },
     );
 
     res.status(200).json({

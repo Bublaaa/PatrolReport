@@ -103,10 +103,10 @@ const AddUserPage = () => {
           />
           <DropdownInput
             label=""
-            name="position"
+            name="workLocation"
             value={selectedWorkLocation}
             options={workLocationOptions}
-            placeholder="Select WorkLocation"
+            placeholder="Select Work Location"
             onChange={handleSelectWorkLocation}
           />
 
