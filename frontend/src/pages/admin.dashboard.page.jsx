@@ -7,6 +7,7 @@ import MenuLink from "../components/menu.link.jsx";
 const AdminDashboard = () => {
   const menuLinks = [
     { label: "User", icon: "Users", href: "/admin/user" },
+    { label: "Work Location", icon: "Building2", href: "/admin/work-location" },
     { label: "Patrol Point", icon: "MapPin", href: "/admin/patrol-point" },
     { label: "Report", icon: "ClipboardList", href: "/admin/report" },
     { label: "Setting", icon: "Settings", href: "/admin/setting" },

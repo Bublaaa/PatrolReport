@@ -8,38 +8,49 @@ import LoginPage from "./pages/login.page.jsx";
 
 const AdminDashboard = lazy(() => import("./pages/admin.dashboard.page.jsx"));
 
-const UserPage = lazy(() =>
-  import("./pages/admin.pages/user.dashboard.page.jsx")
+const UserPage = lazy(
+  () => import("./pages/admin.pages/user.dashboard.page.jsx"),
 );
 const AddUserPage = lazy(() => import("./pages/admin.pages/add.user.page.jsx"));
-const UserDetailPage = lazy(() =>
-  import("./pages/admin.pages/update.user.page.jsx")
+const UserDetailPage = lazy(
+  () => import("./pages/admin.pages/update.user.page.jsx"),
 );
 
-const PatrolPointPage = lazy(() =>
-  import("./pages/admin.pages/patrol.point.dashboard.page.jsx")
-);
-const AddPatrolPointPage = lazy(() =>
-  import("./pages/admin.pages/add.patrol.point.page.jsx")
-);
-const PatrolPointDetailPage = lazy(() =>
-  import("./pages/admin.pages/update.patrol.point.page.jsx")
+const WorkLocationPage = lazy(
+  () => import("./pages/admin.pages/work.location.dashboard.page.jsx"),
 );
 
-const ReportPage = lazy(() =>
-  import("./pages/admin.pages/report.dashboard.page.jsx")
+const AddWorkLocationPage = lazy(
+  () => import("./pages/admin.pages/add.work.location.page.jsx"),
 );
-const ReportDetailPage = lazy(() =>
-  import("./pages/admin.pages/report.detail.page.jsx")
+const WorkLocationDetailPage = lazy(
+  () => import("./pages/admin.pages/update.work.location.page.jsx"),
 );
-const SettingPage = lazy(() =>
-  import("./pages/admin.pages/setting.dashboard.page.jsx")
+
+const PatrolPointPage = lazy(
+  () => import("./pages/admin.pages/patrol.point.dashboard.page.jsx"),
 );
-const AddAdminAccountPage = lazy(() =>
-  import("./pages/admin.pages/add.admin.account.jsx")
+const AddPatrolPointPage = lazy(
+  () => import("./pages/admin.pages/add.patrol.point.page.jsx"),
 );
-const UpdateDriveLinkPage = lazy(() =>
-  import("./pages/admin.pages/update.drive.link.page.jsx")
+const PatrolPointDetailPage = lazy(
+  () => import("./pages/admin.pages/update.patrol.point.page.jsx"),
+);
+
+const ReportPage = lazy(
+  () => import("./pages/admin.pages/report.dashboard.page.jsx"),
+);
+const ReportDetailPage = lazy(
+  () => import("./pages/admin.pages/report.detail.page.jsx"),
+);
+const SettingPage = lazy(
+  () => import("./pages/admin.pages/setting.dashboard.page.jsx"),
+);
+const AddAdminAccountPage = lazy(
+  () => import("./pages/admin.pages/add.admin.account.jsx"),
+);
+const UpdateDriveLinkPage = lazy(
+  () => import("./pages/admin.pages/update.drive.link.page.jsx"),
 );
 
 const CreateReportPage = lazy(() => import("./pages/create.report.page.jsx"));
@@ -156,6 +167,37 @@ function App() {
             element={
               <Suspense>
                 <UserDetailPage />
+              </Suspense>
+            }
+          />
+
+          <Route
+            path="work-location"
+            element={
+              <Suspense
+                fallback={<Loader className="w-6h-6 animate-spin mx-auto" />}
+              >
+                <WorkLocationPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="work-location/add"
+            element={
+              <Suspense
+                fallback={<Loader className="w-6h-6 animate-spin mx-auto" />}
+              >
+                <AddWorkLocationPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="work-location/:id"
+            element={
+              <Suspense
+                fallback={<Loader className="w-6h-6 animate-spin mx-auto" />}
+              >
+                <WorkLocationDetailPage />
               </Suspense>
             }
           />

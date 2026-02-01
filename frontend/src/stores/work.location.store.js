@@ -34,7 +34,7 @@ export const useWorkLocationStore = create((set, get) => ({
   },
 
   // * FETCH WORK LOCATION DETAIL
-  fetchWorkLocations: async (id) => {
+  fetchWorkLocationDetail: async (id) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get(`${API_URL}work-location/${id}`);
@@ -51,7 +51,7 @@ export const useWorkLocationStore = create((set, get) => ({
   },
 
   // * CERATE WORK LOCATION
-  fetchWorkLocations: async (name, address) => {
+  createWorkLocation: async (name, address) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.post(`${API_URL}work-location/create`, {
@@ -71,7 +71,7 @@ export const useWorkLocationStore = create((set, get) => ({
   },
 
   // * UPDATE WORK LOCATION
-  fetchWorkLocations: async (id, name, address) => {
+  updateWorkLocation: async (id, name, address) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.put(`${API_URL}work-location/update/${id}`, {
