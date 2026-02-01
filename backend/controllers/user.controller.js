@@ -34,9 +34,10 @@ export const getUserDetail = async (req, res) => {
 };
 
 export const createUser = async (req, res) => {
-  const { firstName, middleName, lastName, position } = req.body;
+  const { firstName, middleName, lastName, position, workLocationId } =
+    req.body;
   try {
-    if (!firstName || !lastName || !position) {
+    if (!firstName || !lastName || !position || !workLocationId) {
       return res
         .status(400)
         .json({ success: false, message: "All fields are required" });
@@ -46,6 +47,7 @@ export const createUser = async (req, res) => {
       middleName,
       lastName,
       position,
+      workLocationId,
     });
     await newUser.save();
     res.status(201).json({
@@ -60,9 +62,10 @@ export const createUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { firstName, middleName, lastName, position } = req.body;
+  const { firstName, middleName, lastName, position, workLocationId } =
+    req.body;
   try {
-    if (!position || !firstName || !lastName) {
+    if (!position || !firstName || !lastName || !workLocationId) {
       return res
         .status(400)
         .json({ success: false, message: "All fields are required" });
@@ -78,6 +81,7 @@ export const updateUser = async (req, res) => {
       middleName,
       lastName,
       position,
+      workLocationId,
     });
     res.status(200).json({
       success: true,

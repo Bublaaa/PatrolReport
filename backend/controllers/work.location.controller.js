@@ -21,7 +21,7 @@ export const getWorkLocationDetail = async (req, res) => {
   try {
     const workLocation = await WorkLocation.findById(id);
     if (!workLocation) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         message: "Work location not found",
       });
@@ -43,14 +43,14 @@ export const createWorkLocation = async (req, res) => {
   const { name, address } = req.body;
   try {
     if (!name || !address) {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: "Name and address are required",
       });
     }
     const newWorkLocation = await WorkLocation.create({ name, address });
     if (!newWorkLocation) {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: "Failed to create work location",
       });
@@ -74,14 +74,14 @@ export const updateWorkLocation = async (req, res) => {
   const { name, address } = req.body;
   try {
     if (!name || !address) {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: "Name and address are required",
       });
     }
     const isWorkLocationExist = await WorkLocation.findById(id);
     if (!isWorkLocationExist) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         message: "Work location not found",
       });
@@ -91,7 +91,7 @@ export const updateWorkLocation = async (req, res) => {
       address,
     });
     if (!updatedWorkLocation) {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: "Failed to update work location",
       });
@@ -113,6 +113,13 @@ export const updateWorkLocation = async (req, res) => {
 export const deleteWorkLocation = async (req, res) => {
   const { id } = req.params;
   try {
+    const workLocationsCount = await WorkLocation.find();
+    if (workLocationsCount.length === 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot delete the last work location",
+      });
+    }
     const isWorkLocationExist = await WorkLocation.findById(id);
     if (!isWorkLocationExist) {
       return res.status(404).json({

@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
 import { Loader, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { TextInput } from "../../components/inputs.jsx";
-import { useState } from "react";
+import { TextInput, DropdownInput } from "../../components/inputs.jsx";
+import { useEffect, useState } from "react";
 import { useUserStore } from "../../stores/user.store.js";
+import { useWorkLocationStore } from "../../stores/work.location.store.js";
 import Button from "../../components/button.jsx";
 import toast from "react-hot-toast";
 
@@ -15,21 +16,59 @@ const AddUserPage = () => {
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [selectedWorkLocation, setSelectedWorkLocation] = useState();
 
   // * USE STORE
-  const { createUser, error, isLoading } = useUserStore();
+  const {
+    createUser,
+    error: userError,
+    isLoading: isUserLoading,
+  } = useUserStore();
+  const {
+    workLocations,
+    fetchWorkLocations,
+    isLoading: isWorkLocationLoading,
+    error: workLocationError,
+  } = useWorkLocationStore();
+
+  useEffect(() => {
+    fetchWorkLocations();
+  }, []);
+
+  const workLocationOptions = workLocations.map((workLocation) => {
+    return {
+      label: workLocation.name,
+      value: workLocation._id,
+    };
+  });
 
   // * HANDLE CREATE USER
   const handleSignUp = async (e) => {
     e.preventDefault();
     try {
-      await createUser(firstName, middleName, lastName);
-      toast.success("User created");
-      navigate(-1);
+      const newUser = await createUser(
+        firstName,
+        middleName,
+        lastName,
+        selectedWorkLocation,
+      );
+      if (newUser) {
+        toast.success("User created");
+        navigate(-1);
+      }
     } catch (error) {
       toast.error(error);
     }
   };
+
+  const handleSelectWorkLocation = (e) => {
+    setSelectedWorkLocation(e.target.value);
+  };
+
+  if (isWorkLocationLoading && isUserLoading) {
+    return <Loader className="w-6h-6 animate-spin mx-auto" />;
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -62,8 +101,18 @@ const AddUserPage = () => {
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
           />
+          <DropdownInput
+            label=""
+            name="position"
+            value={selectedWorkLocation}
+            options={workLocationOptions}
+            placeholder="Select WorkLocation"
+            onChange={handleSelectWorkLocation}
+          />
 
-          {error && <p className="text-red-500 font-semibold mt-2">{error}</p>}
+          {userError && (
+            <p className="text-red-500 font-semibold mt-2">{userError}</p>
+          )}
           {/* <PasswordStrengthMeter password={password} /> */}
 
           <Button
@@ -71,9 +120,9 @@ const AddUserPage = () => {
             buttonType="primary"
             type="submit"
             className="w-full"
-            disabled={isLoading}
+            disabled={isWorkLocationLoading && isUserLoading}
           >
-            {isLoading ? (
+            {isUserLoading ? (
               <Loader className="w-6h-6 animate-spin mx-auto" />
             ) : (
               "Add User"

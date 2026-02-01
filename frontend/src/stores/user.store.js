@@ -47,7 +47,7 @@ export const useUserStore = create((set, get) => ({
       toast.error(errorMessage);
     }
   },
-  createUser: async (firstName, middleName, lastName) => {
+  createUser: async (firstName, middleName, lastName, workLocationId) => {
     const position = "security";
     set({ isLoading: true, error: null });
     try {
@@ -56,8 +56,10 @@ export const useUserStore = create((set, get) => ({
         middleName,
         lastName,
         position,
+        workLocationId,
       });
       set({ message: response.data.message, isLoading: false });
+      return response.data;
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error creating user";
@@ -68,7 +70,14 @@ export const useUserStore = create((set, get) => ({
       toast.error(errorMessage);
     }
   },
-  updateUser: async (id, firstName, middleName, lastName, position) => {
+  updateUser: async (
+    id,
+    firstName,
+    middleName,
+    lastName,
+    position,
+    workLocationId,
+  ) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.put(`${API_URL}user/update/${id}`, {
@@ -76,6 +85,7 @@ export const useUserStore = create((set, get) => ({
         middleName,
         lastName,
         position,
+        workLocationId,
       });
       set({ message: response.data.message, isLoading: false });
       return response.data;

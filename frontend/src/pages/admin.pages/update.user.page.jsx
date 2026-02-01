@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
-import { TextInput } from "../../components/inputs.jsx";
+import { TextInput, DropdownInput } from "../../components/inputs.jsx";
 import { useUserStore } from "../../stores/user.store.js";
+import { useWorkLocationStore } from "../../stores/work.location.store.js";
 import { toast } from "react-hot-toast";
 import { User } from "lucide-react";
 import Button from "../../components/button.jsx";
@@ -21,16 +22,19 @@ const UserDetailPage = () => {
 
   // * USE STORE
   const { userDetail, fetchUserDetail, updateUser } = useUserStore();
+  const { workLocations, fetchWorkLocations } = useWorkLocationStore();
 
   // * USE STATE
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
   const [selectedPosition, setSelectedPosition] = useState();
+  const [selectedWorkLocation, setSelectedWorkLocation] = useState();
 
   // * USE EFFECT - INITIAL DATA LOAD
   useEffect(() => {
     fetchUserDetail(id);
+    fetchWorkLocations();
   }, [id, fetchUserDetail]);
 
   useEffect(() => {
@@ -39,13 +43,28 @@ const UserDetailPage = () => {
       setMiddleName(userDetail.middleName);
       setLastName(userDetail.lastName);
       setSelectedPosition(userDetail.position);
+      setSelectedWorkLocation(userDetail.workLocationId);
     }
   }, [userDetail]);
+
+  const workLocationOptions = workLocations.map((workLocation) => {
+    return {
+      label: workLocation.name,
+      value: workLocation._id,
+    };
+  });
 
   // * FORM SUBMIT HANDLER
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await updateUser(id, firstName, middleName, lastName, selectedPosition);
+    await updateUser(
+      id,
+      firstName,
+      middleName,
+      lastName,
+      selectedPosition,
+      selectedWorkLocation,
+    );
     toast.success("User updated");
     setTimeout(() => {
       navigate(-1);
@@ -54,6 +73,9 @@ const UserDetailPage = () => {
 
   const handleSelectPosition = (e) => {
     setSelectedPosition(e.target.value);
+  };
+  const handleSelectWorkLocation = (e) => {
+    setSelectedWorkLocation(e.target.value);
   };
 
   return (
@@ -87,6 +109,14 @@ const UserDetailPage = () => {
             placeholder="Last Name"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
+          />
+          <DropdownInput
+            label=""
+            name="position"
+            value={selectedWorkLocation}
+            options={workLocationOptions}
+            placeholder="Select WorkLocation"
+            onChange={handleSelectWorkLocation}
           />
           {/* <DropdownInput
             label=""
