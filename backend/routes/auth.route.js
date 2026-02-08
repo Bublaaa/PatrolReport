@@ -17,7 +17,7 @@ router.get("/get", getAllAuths);
 router.post("/login", login);
 router.post("/logout", logout);
 router.post("/create", createAuth);
-router.put("/update", updateAuth);
+router.put("/update/:id", updateAuth);
 router.delete("/delete/:id", deleteAuth);
 
 export default router;

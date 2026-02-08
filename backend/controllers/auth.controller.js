@@ -2,6 +2,7 @@ import { Auth } from "../models/Auth.js";
 import bcrypt from "bcryptjs";
 import generateTokenAndSetCookie from "../utils/generateTokenAndSetCookie.js";
 
+//* LOGIN
 export const login = async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -15,7 +16,7 @@ export const login = async (req, res) => {
       "workLocationId",
       "name address",
     );
-    console.log(auth);
+
     if (!auth) {
       return res.status(400).json({
         success: false,
@@ -43,13 +44,14 @@ export const login = async (req, res) => {
   }
 };
 
+//* LOGOUT
 export const logout = async (req, res) => {
   res.clearCookie("token");
   res.status(200).json({ success: true, message: "Logged out successfully" });
 };
 
+//* CHECK AUTH
 export const checkAuth = async (req, res) => {
-  console.log(req);
   console.log("CHECK AUTH DEBUG:", {
     id: req._id,
     cookies: req.cookies,
@@ -57,7 +59,6 @@ export const checkAuth = async (req, res) => {
   });
 
   try {
-    // const auth = await Auth.findById(req._id);
     const auth = await Auth.findById(req._id).select("-password");
     if (!auth) {
       return res.status(404).json({
@@ -78,6 +79,7 @@ export const checkAuth = async (req, res) => {
   }
 };
 
+//* CREATE ACCOUNT - GET THE USER DETAIL
 export const createAuth = async (req, res) => {
   const {
     username,
@@ -129,6 +131,7 @@ export const createAuth = async (req, res) => {
   }
 };
 
+//* UPDATE ACCOUNT
 export const updateAuth = async (req, res) => {
   const { id } = req.params;
   const {
@@ -140,44 +143,68 @@ export const updateAuth = async (req, res) => {
     workLocationId,
     position,
   } = req.body;
+
   try {
     if (!username || !firstName || !lastName || !workLocationId || !position) {
-      return res
-        .status(400)
-        .json({ success: false, message: "All fields are required" });
+      return res.status(400).json({
+        success: false,
+        message: "All required fields must be filled",
+      });
     }
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      auth.password = hashedPassword;
-    }
+
     const auth = await Auth.findById(id);
     if (!auth) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
-    const updatedUser = await Auth.findByIdAndUpdate(id, {
+    if (username && username !== auth.username) {
+      const usernameExists = await Auth.exists({
+        username,
+        _id: { $ne: id },
+      });
+
+      if (usernameExists) {
+        return res.status(400).json({
+          success: false,
+          message: "Username already exists",
+        });
+      }
+    }
+
+    const updateData = {
       username,
-      password: hashedPassword,
       firstName,
       middleName,
       lastName,
       position,
       workLocationId,
-    });
+    };
 
-    await updatedUser.save();
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    const updatedUser = await Auth.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    }).select("-password");
 
     res.status(200).json({
       success: true,
       message: "User updated successfully",
-      auth,
+      auth: updatedUser,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
+//* DELETE ACCOUNT
 export const deleteAuth = async (req, res) => {
   const { id } = req.params;
   try {
@@ -208,6 +235,7 @@ export const deleteAuth = async (req, res) => {
   }
 };
 
+//*  GET ALL THE ACCOUNT
 export const getAllAuths = async (req, res) => {
   try {
     const auths = await Auth.find()
