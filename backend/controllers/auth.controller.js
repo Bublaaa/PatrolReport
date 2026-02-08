@@ -1,4 +1,3 @@
-import { User } from "../models/User.js";
 import { Auth } from "../models/Auth.js";
 import bcrypt from "bcryptjs";
 import generateTokenAndSetCookie from "../utils/generateTokenAndSetCookie.js";
@@ -12,8 +11,11 @@ export const login = async (req, res) => {
         message: "Username and password are required",
       });
     }
-
-    const auth = await Auth.findOne({ username });
+    const auth = await Auth.findOne({ username }).populate(
+      "workLocationId",
+      "name address",
+    );
+    console.log(auth);
     if (!auth) {
       return res.status(400).json({
         success: false,
@@ -27,15 +29,14 @@ export const login = async (req, res) => {
         message: "Invalid credentials",
       });
     }
-    generateTokenAndSetCookie(res, auth.userId);
-    const user = await User.findById(auth.userId);
+    generateTokenAndSetCookie(res, auth._id);
     auth.lastLogin = new Date();
     await auth.save();
 
     res.status(200).json({
       success: true,
       message: "Logged in successfully",
-      user: user,
+      user: auth,
     });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -48,15 +49,17 @@ export const logout = async (req, res) => {
 };
 
 export const checkAuth = async (req, res) => {
-  // console.log("CHECK AUTH DEBUG:", {
-  //   userId: req.userId,
-  //   cookies: req.cookies,
-  //   authHeader: req.headers.authorization,
-  // });
+  console.log(req);
+  console.log("CHECK AUTH DEBUG:", {
+    id: req._id,
+    cookies: req.cookies,
+    authHeader: req.headers.authorization,
+  });
 
   try {
-    const user = await User.findById(req.userId);
-    if (!user) {
+    // const auth = await Auth.findById(req._id);
+    const auth = await Auth.findById(req._id).select("-password");
+    if (!auth) {
       return res.status(404).json({
         success: false,
         message: "User not found",
@@ -65,7 +68,7 @@ export const checkAuth = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      user,
+      auth,
     });
   } catch (error) {
     res.status(500).json({
@@ -76,30 +79,44 @@ export const checkAuth = async (req, res) => {
 };
 
 export const createAuth = async (req, res) => {
-  const { username, password, userId } = req.body;
+  const {
+    username,
+    password,
+    firstName,
+    middleName,
+    lastName,
+    workLocationId,
+    position,
+  } = req.body;
   try {
-    if (!username || !password || !userId) {
+    if (
+      !username ||
+      !password ||
+      !firstName ||
+      !lastName ||
+      !workLocationId ||
+      !position
+    ) {
       return res
         .status(400)
         .json({ success: false, message: "All fields are required" });
     }
-    const user = await User.findById(userId);
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    }
-    const existingAuth = await Auth.findOne({ username });
-    if (existingAuth) {
+    const isAlreadyExist = await Auth.findOne({ username });
+    if (isAlreadyExist) {
       return res
         .status(400)
         .json({ success: false, message: "Username already exists" });
     }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const newAuth = new Auth({
       username,
       password: hashedPassword,
-      userId,
+      firstName: firstName,
+      middleName: middleName,
+      lastName: lastName,
+      workLocationId: workLocationId,
+      position: position,
     });
     await newAuth.save();
     res.status(201).json({
@@ -114,36 +131,50 @@ export const createAuth = async (req, res) => {
 
 export const updateAuth = async (req, res) => {
   const { id } = req.params;
-  const { username, password, userId } = req.body;
+  const {
+    username,
+    password,
+    firstName,
+    middleName,
+    lastName,
+    workLocationId,
+    position,
+  } = req.body;
   try {
-    const auth = await Auth.findById(id);
-    if (!auth) {
+    if (!username || !firstName || !lastName || !workLocationId || !position) {
       return res
-        .status(404)
-        .json({ success: false, message: "Auth not found" });
+        .status(400)
+        .json({ success: false, message: "All fields are required" });
     }
-    if (username) auth.username = username;
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
       auth.password = hashedPassword;
     }
-    if (userId) {
-      const user = await User.findById(userId);
-      if (!user) {
-        return res
-          .status(404)
-          .json({ success: false, message: "User not found" });
-      }
-      auth.userId = userId;
+    const auth = await Auth.findById(id);
+    if (!auth) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
-    await auth.save();
+    const updatedUser = await Auth.findByIdAndUpdate(id, {
+      username,
+      password: hashedPassword,
+      firstName,
+      middleName,
+      lastName,
+      position,
+      workLocationId,
+    });
+
+    await updatedUser.save();
+
     res.status(200).json({
       success: true,
-      message: "Auth updated successfully",
+      message: "User updated successfully",
       auth,
     });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -151,14 +182,16 @@ export const deleteAuth = async (req, res) => {
   const { id } = req.params;
   try {
     const auth = await Auth.findById(id);
+    const admins = await Auth.find({ position: "admin" });
+
     if (!auth) {
       return res
         .status(404)
         .json({ success: false, message: "Auth not found" });
     }
-    const adminCount = await Auth.countDocuments();
+    const adminCount = await Auth.countDocuments({ position: "admin" });
 
-    if (adminCount <= 1) {
+    if (adminCount <= 1 && auth.position === "admin") {
       return res.status(400).json({
         success: false,
         message: "Cannot delete the last admin account",
@@ -178,7 +211,7 @@ export const deleteAuth = async (req, res) => {
 export const getAllAuths = async (req, res) => {
   try {
     const auths = await Auth.find()
-      .populate("userId", "firstName middleName lastName position")
+      .populate("workLocationId", "name address")
       .select("-password");
     res.status(200).json({
       success: true,

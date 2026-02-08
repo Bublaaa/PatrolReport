@@ -11,17 +11,32 @@ const authSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    userId: {
+    workLocationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      ref: "WorkLocation",
+      // required: true,
+    },
+    firstName: {
+      type: String,
+      // required: true,
+    },
+    middleName: {
+      type: String,
+    },
+    lastName: {
+      type: String,
+      // required: true,
+    },
+    position: {
+      type: String,
+      // required: true,
     },
     lastLogin: {
       type: Date,
       default: Date.now,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Auth = mongoose.model("Auth", authSchema);
