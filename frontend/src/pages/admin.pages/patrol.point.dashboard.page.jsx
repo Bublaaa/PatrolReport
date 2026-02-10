@@ -41,11 +41,12 @@ const PatrolPointPageDashboard = () => {
             closeModal();
             fetchPatrolPoints();
           }}
-        />
+        />,
       );
       return;
     }
   };
+  console.log(patrolPoints);
   if (isLoading) {
     return <Loader className="w-6h-6 animate-spin mx-auto" />;
   }

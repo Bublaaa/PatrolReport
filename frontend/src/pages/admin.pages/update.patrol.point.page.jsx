@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Download, Loader, MapPinCheckInside, SaveIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
@@ -6,6 +6,7 @@ import { requestLocation } from "../../utils/location.js";
 import { TextInput, DropdownInput } from "../../components/inputs.jsx";
 import { usePatrolPointStore } from "../../stores/patrol.point.store.js";
 import { useWorkLocationStore } from "../../stores/work.location.store.js";
+import { buildDropdownOptions } from "../../utils/constants.js";
 import Button from "../../components/button.jsx";
 import toast from "react-hot-toast";
 
@@ -121,12 +122,9 @@ const UpdatePatrolPointPage = () => {
     }
   }, [patrolPointDetail]);
 
-  const workLocationOptions = workLocations.map((workLocation) => {
-    return {
-      label: workLocation.name,
-      value: workLocation._id,
-    };
-  });
+  const workLocationOptions = useMemo(() =>
+    buildDropdownOptions(workLocations),
+  );
 
   if (isPatrolPointLoading) {
     return <Loader className="w-6 h-6 animate-spin mx-auto" />;

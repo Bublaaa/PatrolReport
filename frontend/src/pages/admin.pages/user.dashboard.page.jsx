@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Loader, PenBoxIcon, Trash2 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { Plus } from "lucide-react";
@@ -9,6 +9,10 @@ import { DropdownInput, TextInput } from "../../components/inputs.jsx";
 import Button from "../../components/button";
 import Modal from "../../components/modal.jsx";
 import { useWorkLocationStore } from "../../stores/work.location.store.js";
+import {
+  buildDropdownOptions,
+  buildPositionDropdownOptions,
+} from "../../utils/constants.js";
 
 const UserPageDashboard = () => {
   // * USE STATE
@@ -41,19 +45,20 @@ const UserPageDashboard = () => {
   }, []);
 
   // * DROPDOWN OPTIONS
-  const workLocationOptions = [
-    { label: "All location", value: "" },
-    ...workLocations.map((workLocation) => ({
-      label: workLocation.name,
-      value: workLocation._id,
-    })),
-  ];
-
-  const positionOptions = [
-    { label: "All position", value: "" },
-    { label: "Admin", value: "admin" },
-    { label: "Security", value: "security" },
-  ];
+  const workLocationOptions = useMemo(() =>
+    buildDropdownOptions(workLocations, {
+      includeAll: true,
+      allLabel: "All Locations",
+      allValue: "",
+    }),
+  );
+  const positionOptions = useMemo(() =>
+    buildPositionDropdownOptions({
+      includeAll: true,
+      allLabel: "All Positions",
+      allValue: "",
+    }),
+  );
 
   // * FILTER FUNCTIONS
   const handleFilterPosition = (e) => {

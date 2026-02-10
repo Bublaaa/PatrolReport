@@ -5,7 +5,9 @@ import QRCode from "qrcode";
 // * * GET ALL
 export const getAllPatrolPoints = async (req, res) => {
   try {
-    const patrolPoints = await PatrolPoint.find().sort({ name: 1 });
+    const patrolPoints = await PatrolPoint.find()
+      .populate("workLocationId", "name address")
+      .sort({ name: 1 });
     if (patrolPoints.length === 0) {
       return res.status(404).json({
         success: false,

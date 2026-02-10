@@ -2,11 +2,15 @@ import { motion } from "framer-motion";
 import { Loader, Lock, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { TextInput, DropdownInput } from "../../components/inputs.jsx";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useWorkLocationStore } from "../../stores/work.location.store.js";
 import Button from "../../components/button.jsx";
 import toast from "react-hot-toast";
 import { useAuthStore } from "../../stores/auth.store.js";
+import {
+  buildDropdownOptions,
+  buildPositionDropdownOptions,
+} from "../../utils/constants.js";
 
 const AddUserPage = () => {
   // * USE NAVIGATE
@@ -38,17 +42,10 @@ const AddUserPage = () => {
     fetchWorkLocations();
   }, []);
 
-  const workLocationOptions = workLocations.map((workLocation) => {
-    return {
-      label: workLocation.name,
-      value: workLocation._id,
-    };
-  });
-
-  const positionOptions = [
-    { label: "Admin", value: "admin" },
-    { label: "Security", value: "security" },
-  ];
+  const workLocationOptions = useMemo(() =>
+    buildDropdownOptions(workLocations),
+  );
+  const positionOptions = useMemo(() => buildPositionDropdownOptions());
 
   // * HANDLE CREATE USER
   const handleSignUp = async (e) => {

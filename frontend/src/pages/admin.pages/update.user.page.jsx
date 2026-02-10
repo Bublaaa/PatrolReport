@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import { TextInput, DropdownInput } from "../../components/inputs.jsx";
@@ -6,6 +6,10 @@ import { useAuthStore } from "../../stores/auth.store.js";
 import { useWorkLocationStore } from "../../stores/work.location.store.js";
 import { toast } from "react-hot-toast";
 import { User } from "lucide-react";
+import {
+  buildDropdownOptions,
+  buildPositionDropdownOptions,
+} from "../../utils/constants.js";
 import Button from "../../components/button.jsx";
 
 const UserDetailPage = () => {
@@ -44,16 +48,10 @@ const UserDetailPage = () => {
     }
   }, [userDetail]);
 
-  const workLocationOptions = workLocations.map((workLocation) => {
-    return {
-      label: workLocation.name,
-      value: workLocation._id,
-    };
-  });
-  const positionOptions = [
-    { label: "Admin", value: "admin" },
-    { label: "Security", value: "security" },
-  ];
+  const workLocationOptions = useMemo(() =>
+    buildDropdownOptions(workLocations),
+  );
+  const positionOptions = useMemo(() => buildPositionDropdownOptions());
 
   // * FORM SUBMIT HANDLER
   const handleSubmit = async (e) => {
