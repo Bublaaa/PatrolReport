@@ -9,11 +9,6 @@ import { User } from "lucide-react";
 import Button from "../../components/button.jsx";
 
 const UserDetailPage = () => {
-  const positionOptions = [
-    { label: "Admin", value: "admin" },
-    { label: "Security", value: "security" },
-  ];
-
   // * USE PARAMS
   const { id } = useParams();
 
@@ -55,6 +50,10 @@ const UserDetailPage = () => {
       value: workLocation._id,
     };
   });
+  const positionOptions = [
+    { label: "Admin", value: "admin" },
+    { label: "Security", value: "security" },
+  ];
 
   // * FORM SUBMIT HANDLER
   const handleSubmit = async (e) => {
