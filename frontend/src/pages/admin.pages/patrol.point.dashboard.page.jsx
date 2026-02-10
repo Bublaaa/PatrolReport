@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Plus, Loader, Trash2, PenBoxIcon } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { usePatrolPointStore } from "../../stores/patrol.point.store.js";
 import { DeleteConfirmationForm } from "../../components/delete.confirmation";
 import { toTitleCase } from "../../utils/toTitleCase.js";
+import { DropdownInput, TextInput } from "../../components/inputs.jsx";
+import { buildDropdownOptions } from "../../utils/constants.js";
+import { useWorkLocationStore } from "../../stores/work.location.store.js";
 import Modal from "../../components/modal";
 import Button from "../../components/button";
 
@@ -14,6 +17,8 @@ const PatrolPointPageDashboard = () => {
     title: "",
     body: "",
   });
+  const [filterName, setFilterName] = useState("");
+  const [selectedWorkLocation, setSelectedWorkLocation] = useState("");
   // * MODAL FUNCTION
   const openModal = (title, body) =>
     setModalState({ isOpen: true, title, body });
@@ -23,8 +28,17 @@ const PatrolPointPageDashboard = () => {
   // * USE STORE
   const { isLoading, patrolPoints, deletePatrolPoint, fetchPatrolPoints } =
     usePatrolPointStore();
+
+  const {
+    workLocations,
+    fetchWorkLocations,
+    isLoading: isWorkLocationLoading,
+    error: workLocationError,
+  } = useWorkLocationStore();
+
   useEffect(() => {
     fetchPatrolPoints();
+    fetchWorkLocations();
   }, []);
 
   // * DELETE ACTION HANDLER
@@ -46,8 +60,36 @@ const PatrolPointPageDashboard = () => {
       return;
     }
   };
-  console.log(patrolPoints);
-  if (isLoading) {
+
+  const handleFilterName = (e) => {
+    setFilterName(e.target.value);
+  };
+
+  const handleFilterWorkLocation = (e) => {
+    setSelectedWorkLocation(e.target.value);
+  };
+
+  const workLocationOptions = useMemo(() =>
+    buildDropdownOptions(workLocations, {
+      includeAll: true,
+      allLabel: "All locations",
+      allValue: "",
+    }),
+  );
+
+  // * FILTERED LIST
+  const filteredPatrolPoints = patrolPoints.filter((point) => {
+    const matchWorkLocation =
+      !selectedWorkLocation ||
+      point.workLocationId._id === selectedWorkLocation;
+
+    const matchName =
+      !filterName || point.name.includes(filterName.toLowerCase());
+
+    return matchWorkLocation && matchName;
+  });
+
+  if (isLoading || isWorkLocationLoading) {
     return <Loader className="w-6h-6 animate-spin mx-auto" />;
   }
   return (
@@ -67,7 +109,24 @@ const PatrolPointPageDashboard = () => {
         </NavLink>
       </div>
 
-      {patrolPoints.length === 0 && (
+      <div className="grid grid-cols-3 gap-5 items-center pt-4 pb-2">
+        <DropdownInput
+          className="span-2"
+          name="workLocation"
+          value={selectedWorkLocation}
+          options={workLocationOptions}
+          placeholder="Filter Work Location"
+          onChange={handleFilterWorkLocation}
+        />
+        <TextInput
+          type="text"
+          placeholder="Search name"
+          value={filterName}
+          onChange={handleFilterName}
+        />
+      </div>
+
+      {filteredPatrolPoints.length === 0 && (
         <p className="text-center mt-4">No patrol points found.</p>
       )}
 
@@ -75,14 +134,15 @@ const PatrolPointPageDashboard = () => {
         className="flex flex-col gap-2 w-full justify-between pt-2"
         onClick={(e) => handleDeleteAction(e)}
       >
-        {patrolPoints.length > 0 &&
-          patrolPoints.map((point) => (
+        {filteredPatrolPoints.length > 0 &&
+          filteredPatrolPoints.map((point) => (
             <div
               key={point._id}
-              className="flex flex-row gap-4 px-3 py-2 hover:bg-gray-100 rounded-md justify-between items-center cursor-pointer"
+              className="grid grid-cols-3 gap-4 px-3 py-2 hover:bg-gray-100 rounded-md justify-between items-center cursor-pointer"
             >
+              <p>{toTitleCase(point.workLocationId.name)}</p>
               <p>{toTitleCase(point.name)}</p>
-              <div className="flex flex-row gap-2">
+              <div className="flex flex-row gap-2 justify-end">
                 <Button
                   className="delete-btn"
                   buttonSize="small"

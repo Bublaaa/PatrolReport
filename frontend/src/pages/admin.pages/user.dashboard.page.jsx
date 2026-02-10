@@ -131,7 +131,7 @@ const UserPageDashboard = () => {
       </div>
       <div className="grid grid-cols-4 gap-5 items-center pt-4 pb-2">
         <DropdownInput
-          name="workLocation"
+          name="position"
           value={selectedPosition}
           options={positionOptions}
           placeholder="Filter Position"
