@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import { TextInput, DropdownInput } from "../../components/inputs.jsx";
 import { useUserStore } from "../../stores/user.store.js";
+import { useAuthStore } from "../../stores/auth.store.js";
 import { useWorkLocationStore } from "../../stores/work.location.store.js";
 import { toast } from "react-hot-toast";
 import { User } from "lucide-react";
@@ -21,7 +22,8 @@ const UserDetailPage = () => {
   const navigate = useNavigate();
 
   // * USE STORE
-  const { userDetail, fetchUserDetail, updateUser } = useUserStore();
+  const { userDetail, getAuthDetail, updateAuth } = useAuthStore();
+  // const { userDetail, fetchUserDetail, updateUser } = useUserStore();
   const { workLocations, fetchWorkLocations } = useWorkLocationStore();
 
   // * USE STATE
@@ -33,9 +35,9 @@ const UserDetailPage = () => {
 
   // * USE EFFECT - INITIAL DATA LOAD
   useEffect(() => {
-    fetchUserDetail(id);
+    getAuthDetail(id);
     fetchWorkLocations();
-  }, [id, fetchUserDetail]);
+  }, [id, getAuthDetail]);
 
   useEffect(() => {
     if (userDetail) {
@@ -57,7 +59,7 @@ const UserDetailPage = () => {
   // * FORM SUBMIT HANDLER
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await updateUser(
+    await updateAuth(
       id,
       firstName,
       middleName,

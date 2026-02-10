@@ -11,7 +11,7 @@ export const TextInput = ({
 }) => (
   <div className="relative">
     {label && (
-      <label className="block text-sm font-medium text-gray-600 mb-1">
+      <label className="block text-sm font-medium text-gray-600 mb-2">
         {label}
       </label>
     )}
@@ -154,7 +154,7 @@ export const DropdownInput = ({
       </button>
 
       {isOpen && (
-        <ul className="absolute left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+        <ul className="absolute left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-100 max-h-60 overflow-y-auto">
           {options.map((option) => (
             <li
               key={option.value}

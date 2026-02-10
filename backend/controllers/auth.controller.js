@@ -79,7 +79,7 @@ export const checkAuth = async (req, res) => {
   }
 };
 
-//* CREATE ACCOUNT - GET THE USER DETAIL
+//* CREATE ACCOUNT
 export const createAuth = async (req, res) => {
   const {
     username,
@@ -90,6 +90,15 @@ export const createAuth = async (req, res) => {
     workLocationId,
     position,
   } = req.body;
+  console.log(
+    username,
+    password,
+    firstName,
+    middleName,
+    lastName,
+    workLocationId,
+    position,
+  );
   try {
     if (
       !username ||
@@ -247,5 +256,26 @@ export const getAllAuths = async (req, res) => {
     });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+// * GET ACCOUNT DETAIL
+export const getAuthDetail = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const authDetail = await Auth.findById(id).select("-password");
+    if (!authDetail) {
+      res.status(404).json({
+        success: false,
+        message: "Account not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Account detail fetched successfully",
+      authDetail: authDetail,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };

@@ -28,7 +28,6 @@ const UserPageDashboard = () => {
     fetchUsers();
   }, []);
 
-  console.log(users);
   // * DELETE ACTION HANDLER
   const handleDeleteAction = (e) => {
     const deleteButton = e.target.closest(".delete-btn");

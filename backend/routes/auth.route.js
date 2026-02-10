@@ -7,6 +7,7 @@ import {
   updateAuth,
   deleteAuth,
   getAllAuths,
+  getAuthDetail,
 } from "../controllers/auth.controller.js";
 import { verifyToken } from "../middlewares/verifyToken.js";
 
@@ -14,6 +15,7 @@ const router = express.Router();
 
 router.get("/check-auth", verifyToken, checkAuth);
 router.get("/get", getAllAuths);
+router.get("/get/:id", getAuthDetail);
 router.post("/login", login);
 router.post("/logout", logout);
 router.post("/create", createAuth);
