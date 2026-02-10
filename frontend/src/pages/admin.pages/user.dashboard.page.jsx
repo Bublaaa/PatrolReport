@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useUserStore } from "../../stores/user.store.js";
 import { Loader, PenBoxIcon, Trash2 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { DeleteConfirmationForm } from "../../components/delete.confirmation.jsx";
+import { useAuthStore } from "../../stores/auth.store.js";
+import { toTitleCase } from "../../utils/toTitleCase.js";
 import Button from "../../components/button";
 import Modal from "../../components/modal.jsx";
 
@@ -21,11 +22,11 @@ const UserPageDashboard = () => {
     setModalState({ isOpen: false, title: "", body: null });
 
   // * USE STORE
-  const { isLoading, users, fetchUsers, deleteUser } = useUserStore();
+  const { isLoading, users, getAllAuth, deleteAuth } = useAuthStore();
 
   // * USE EFFECT - INITIAL DATA LOAD
   useEffect(() => {
-    fetchUsers();
+    getAllAuth();
   }, []);
 
   // * DELETE ACTION HANDLER
@@ -36,11 +37,11 @@ const UserPageDashboard = () => {
         "Delete Account",
         <DeleteConfirmationForm
           itemName={deleteButton.dataset.name}
-          onDelete={deleteUser}
+          onDelete={deleteAuth}
           itemId={deleteButton.dataset.id}
           onClose={() => {
             closeModal();
-            fetchUsers();
+            getAllAuth();
           }}
 
           // redirect={navigate(-1)}
@@ -69,7 +70,8 @@ const UserPageDashboard = () => {
           </Button>
         </NavLink>
       </div>
-      <div className="grid grid-cols-3 text-center pt-4 pb-2">
+      <div className="grid grid-cols-4 text-center pt-4 pb-2">
+        <h6>Position</h6>
         <h6>Full Name</h6>
         <h6>Work Location</h6>
         <h6>Actions</h6>
@@ -86,8 +88,11 @@ const UserPageDashboard = () => {
           users.map((user) => (
             <div
               key={user._id}
-              className="grid grid-cols-3 gap-4 px-3 py-2 hover:bg-gray-100 items-center ounded-md cursor-pointer"
+              className="grid grid-cols-4 gap-4 px-3 py-2 hover:bg-gray-100 items-center rounded-md cursor-pointer"
             >
+              <div className="bg-white-shadow bg-opacity-50 rounded-full items-center text-center">
+                <h6 className="text-accent">{toTitleCase(user.position)}</h6>
+              </div>
               <p className="text-center">
                 {user.firstName} {user.middleName} {user.lastName}
               </p>
@@ -100,7 +105,7 @@ const UserPageDashboard = () => {
                   buttonType="danger"
                   icon={Trash2}
                   data-id={user._id}
-                  data-name={user.firstName}
+                  data-name={user.firstName + user.lastName}
                 ></Button>
                 <NavLink to={`/admin/user/${user._id}`}>
                   <Button

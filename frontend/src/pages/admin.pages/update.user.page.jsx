@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import { TextInput, DropdownInput } from "../../components/inputs.jsx";
-import { useUserStore } from "../../stores/user.store.js";
 import { useAuthStore } from "../../stores/auth.store.js";
 import { useWorkLocationStore } from "../../stores/work.location.store.js";
 import { toast } from "react-hot-toast";
@@ -23,10 +22,10 @@ const UserDetailPage = () => {
 
   // * USE STORE
   const { userDetail, getAuthDetail, updateAuth } = useAuthStore();
-  // const { userDetail, fetchUserDetail, updateUser } = useUserStore();
   const { workLocations, fetchWorkLocations } = useWorkLocationStore();
 
   // * USE STATE
+  const [username, setUsername] = useState("");
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -41,6 +40,7 @@ const UserDetailPage = () => {
 
   useEffect(() => {
     if (userDetail) {
+      setUsername(userDetail.username);
       setFirstName(userDetail.firstName);
       setMiddleName(userDetail.middleName);
       setLastName(userDetail.lastName);
@@ -59,15 +59,25 @@ const UserDetailPage = () => {
   // * FORM SUBMIT HANDLER
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (
+      !username ||
+      !firstName ||
+      !lastName ||
+      !selectedWorkLocation ||
+      !selectedPosition
+    ) {
+      toast.error("Please fill all required fields");
+      return;
+    }
     await updateAuth(
       id,
+      username,
       firstName,
       middleName,
       lastName,
       selectedPosition,
       selectedWorkLocation,
     );
-    toast.success("User updated");
     setTimeout(() => {
       navigate(-1);
     }, 1000);
@@ -91,43 +101,54 @@ const UserDetailPage = () => {
         <h4 className="mb-6 text-center bg-clip-text">Update Account</h4>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
-          <TextInput
-            icon={User}
-            type="text"
-            placeholder="Fist Name"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
-          <TextInput
-            icon={User}
-            type="text"
-            placeholder="Middle Name"
-            value={middleName}
-            onChange={(e) => setMiddleName(e.target.value)}
-          />
-          <TextInput
-            icon={User}
-            type="text"
-            placeholder="Last Name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
-          <DropdownInput
-            label=""
-            name="workLocation"
-            value={selectedWorkLocation}
-            options={workLocationOptions}
-            placeholder="Select Work Location"
-            onChange={handleSelectWorkLocation}
-          />
-          {/* <DropdownInput
-            label=""
-            name="position"
-            value={selectedPosition}
-            options={positionOptions}
-            placeholder="Select Position"
-            onChange={handleSelectPosition}
-          /> */}
+          <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
+            <div className="space-y-5">
+              <TextInput
+                icon={User}
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              <DropdownInput
+                name="workLocation"
+                value={selectedWorkLocation}
+                options={workLocationOptions}
+                placeholder="Select Work Location"
+                onChange={handleSelectWorkLocation}
+              />
+              <DropdownInput
+                name="position"
+                value={selectedPosition}
+                options={positionOptions}
+                placeholder="Select User Position"
+                onChange={handleSelectPosition}
+              />
+            </div>
+            <div className="space-y-5">
+              <TextInput
+                icon={User}
+                type="text"
+                placeholder="Fist Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+              <TextInput
+                icon={User}
+                type="text"
+                placeholder="Middle Name"
+                value={middleName}
+                onChange={(e) => setMiddleName(e.target.value)}
+              />
+              <TextInput
+                icon={User}
+                type="text"
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </div>
+          </div>
 
           <Button
             buttonSize="full"

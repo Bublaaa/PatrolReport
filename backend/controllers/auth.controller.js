@@ -90,15 +90,6 @@ export const createAuth = async (req, res) => {
     workLocationId,
     position,
   } = req.body;
-  console.log(
-    username,
-    password,
-    firstName,
-    middleName,
-    lastName,
-    workLocationId,
-    position,
-  );
   try {
     if (
       !username ||
@@ -182,6 +173,18 @@ export const updateAuth = async (req, res) => {
       }
     }
 
+    const adminCount = await Auth.countDocuments({ position: "admin" });
+
+    const isLastAdmin =
+      adminCount === 1 && auth.position === "admin" && position !== "admin";
+
+    if (isLastAdmin) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot change the last admin account",
+      });
+    }
+
     const updateData = {
       username,
       firstName,
@@ -218,8 +221,6 @@ export const deleteAuth = async (req, res) => {
   const { id } = req.params;
   try {
     const auth = await Auth.findById(id);
-    const admins = await Auth.find({ position: "admin" });
-
     if (!auth) {
       return res
         .status(404)

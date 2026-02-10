@@ -143,13 +143,24 @@ export const useAuthStore = create((set, get) => ({
   },
 
   // * UPDATE ACCOUNT
-  updateAuth: async (id, username, password) => {
+  updateAuth: async (
+    id,
+    username,
+    firstName,
+    middleName,
+    lastName,
+    position,
+    workLocationId,
+  ) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.put(`${API_URL}auth/update/${id}`, {
         username,
-        password,
-        userId,
+        firstName,
+        middleName,
+        lastName,
+        workLocationId,
+        position,
       });
       set({ isLoading: false });
       toast.success("Auth updated successfully");

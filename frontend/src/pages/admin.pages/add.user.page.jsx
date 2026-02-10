@@ -53,13 +53,6 @@ const AddUserPage = () => {
   // * HANDLE CREATE USER
   const handleSignUp = async (e) => {
     e.preventDefault();
-    console.log("Username:", username);
-    console.log("Password:", password);
-    console.log("FirstName:", firstName);
-    console.log("MiddleName:", middleName);
-    console.log("Last Name:", lastName);
-    console.log("Selected Position:", selectedPosition);
-    console.log("Selected Work Position:", selectedWorkLocation);
     if (
       !username ||
       !password ||
@@ -104,7 +97,7 @@ const AddUserPage = () => {
     if (workLocationOptions.length > 0) {
       setSelectedWorkLocation(workLocationOptions[0].value);
     }
-  }, [positionOptions, workLocationOptions]);
+  }, []);
 
   if (isWorkLocationLoading || isAuthLoading) {
     return <Loader className="w-6 h-6 animate-spin mx-auto" />;
