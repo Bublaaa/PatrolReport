@@ -57,16 +57,16 @@ const CreateReportPage = lazy(() => import("./pages/create.report.page.jsx"));
 const ScanPage = lazy(() => import("./pages/scan.page.jsx"));
 
 const ProtectedRoute = ({ children, requiredPosition }) => {
-  const { isAuthenticated, userDetail } = useAuthStore();
+  const { isAuthenticated, loggedInUserDetail } = useAuthStore();
   const location = useLocation();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredPosition && userDetail.position !== requiredPosition) {
+  if (requiredPosition && loggedInUserDetail.position !== requiredPosition) {
     if (
-      userDetail.position === "admin" &&
+      loggedInUserDetail.position === "admin" &&
       location.pathname !== "/admin" &&
       !location.pathname.startsWith("/admin/")
     ) {

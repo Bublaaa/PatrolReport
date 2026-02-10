@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { Loader } from "lucide-react";
 import { usePatrolPointStore } from "../stores/patrol.point.store.js";
 import { useReportStore } from "../stores/report.store.js";
-import { useUserStore } from "../stores/user.store.js";
 import {
   DropdownInput,
   TextareaInput,
@@ -14,6 +13,7 @@ import { toTitleCase } from "../utils/toTitleCase.js";
 import { compressImages } from "../utils/compressImage.js";
 import toast from "react-hot-toast";
 import Button from "../components/button.jsx";
+import { useAuthStore } from "../stores/auth.store.js";
 
 const CreateReportPage = () => {
   // * USE PARAMS
@@ -21,7 +21,7 @@ const CreateReportPage = () => {
   // * USE STORE
   const { fetchPatrolPointDetail, isLoading, patrolPointDetail } =
     usePatrolPointStore();
-  const { users, fetchUsers } = useUserStore();
+  const { users, getAllAuth } = useAuthStore();
   const { createReport } = useReportStore();
 
   // * USE STATE
@@ -108,10 +108,10 @@ const CreateReportPage = () => {
   useEffect(() => {
     if (id) {
       fetchPatrolPointDetail(id);
-      fetchUsers();
+      getAllAuth();
       checkLocationPermission();
     }
-  }, [id, fetchPatrolPointDetail, fetchUsers]);
+  }, [id, fetchPatrolPointDetail, getAllAuth]);
 
   useEffect(() => {
     setReportData((prev) => ({

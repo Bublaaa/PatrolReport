@@ -12,7 +12,7 @@ const AdminDashboard = () => {
     { label: "Report", icon: "ClipboardList", href: "/admin/report" },
     { label: "Setting", icon: "Settings", href: "/admin/setting" },
   ];
-  const { userDetail, logout } = useAuthStore();
+  const { loggedInUserDetail, logout } = useAuthStore();
   const handleLogout = async (e) => {
     e.preventDefault();
     try {
@@ -27,7 +27,7 @@ const AdminDashboard = () => {
         <div className="flex flex-col gap-5">
           <div className="flex flex-row justify-between bg-white rounded-lg bg-white shadow-md px-6 py-4">
             <h5>
-              {userDetail.firstName} {userDetail.lastName}
+              {loggedInUserDetail.firstName} {loggedInUserDetail.lastName}
             </h5>
             <Button
               buttonSize="small"

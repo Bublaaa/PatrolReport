@@ -12,6 +12,7 @@ axios.defaults.withCredentials = true;
 export const useAuthStore = create((set, get) => ({
   users: [],
   userDetail: null,
+  loggedInUserDetail: null,
   isAuthenticated: false,
   error: null,
   isLoading: false,
@@ -61,7 +62,7 @@ export const useAuthStore = create((set, get) => ({
     try {
       const response = await axios.get(`${API_URL}auth/check-auth`);
       set({
-        userDetail: response.data.auth,
+        loggedInUserDetail: response.data.auth,
         isAuthenticated: true,
         isCheckingAuth: false,
       });

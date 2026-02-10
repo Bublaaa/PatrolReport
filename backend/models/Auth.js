@@ -14,22 +14,22 @@ const authSchema = new mongoose.Schema(
     workLocationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "WorkLocation",
-      // required: true,
+      required: true,
     },
     firstName: {
       type: String,
-      // required: true,
+      required: true,
     },
     middleName: {
       type: String,
     },
     lastName: {
       type: String,
-      // required: true,
+      required: true,
     },
     position: {
       type: String,
-      // required: true,
+      required: true,
     },
     lastLogin: {
       type: Date,
