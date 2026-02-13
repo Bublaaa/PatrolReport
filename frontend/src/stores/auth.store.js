@@ -28,7 +28,7 @@ export const useAuthStore = create((set, get) => ({
       });
       set({
         isAuthenticated: true,
-        userDetail: response.data.user,
+        loggedInUserDetail: response.data.user,
         error: null,
         isLoading: false,
       });
@@ -46,6 +46,7 @@ export const useAuthStore = create((set, get) => ({
     try {
       await axios.post(`${API_URL}auth/logout`);
       set({
+        loggedInUserDetail: null,
         userDetail: null,
         isAuthenticated: false,
         error: null,

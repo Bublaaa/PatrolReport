@@ -178,7 +178,7 @@ export const generatePatrolPointBarcode = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Patrol Point ID is required" });
     }
-    const patrolPointUrl = `${URL}report/create/${id}`;
+    const patrolPointUrl = `${URL}security/report/create/${id}`;
     const qrCodeDataUrl = await QRCode.toDataURL(patrolPointUrl);
 
     if (!qrCodeDataUrl) {

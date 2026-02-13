@@ -129,7 +129,7 @@ export const useReportStore = create((set, get) => ({
         },
         {
           responseType: "blob",
-        }
+        },
       );
       set({ isLoading: false });
       return response;

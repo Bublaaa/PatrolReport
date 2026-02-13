@@ -7,6 +7,9 @@ import { Loader } from "lucide-react";
 import LoginPage from "./pages/login.page.jsx";
 
 const AdminDashboard = lazy(() => import("./pages/admin.dashboard.page.jsx"));
+const SecurityDashboard = lazy(
+  () => import("./pages/security.dashboard.page.jsx"),
+);
 
 const UserPage = lazy(
   () => import("./pages/admin.pages/user.dashboard.page.jsx"),
@@ -46,9 +49,6 @@ const ReportDetailPage = lazy(
 const SettingPage = lazy(
   () => import("./pages/admin.pages/setting.dashboard.page.jsx"),
 );
-const AddAdminAccountPage = lazy(
-  () => import("./pages/admin.pages/add.admin.account.jsx"),
-);
 const UpdateDriveLinkPage = lazy(
   () => import("./pages/admin.pages/update.drive.link.page.jsx"),
 );
@@ -56,30 +56,57 @@ const UpdateDriveLinkPage = lazy(
 const CreateReportPage = lazy(() => import("./pages/create.report.page.jsx"));
 const ScanPage = lazy(() => import("./pages/scan.page.jsx"));
 
+// const ProtectedRoute = ({ children, requiredPosition }) => {
+//   const { isAuthenticated, loggedInUserDetail } = useAuthStore();
+//   const location = useLocation();
+//   if (!isAuthenticated) {
+//     return <Navigate to="/login" replace />;
+//   }
+
+//   if (requiredPosition && loggedInUserDetail.position !== requiredPosition) {
+//     if (
+//       loggedInUserDetail.position === "admin" &&
+//       location.pathname !== "/admin" &&
+//       !location.pathname.startsWith("/admin/")
+//     ) {
+//       return <Navigate to="/admin" replace />;
+//     } else if (
+//       (loggedInUserDetail.position === "security") &
+//       (location.pathname !== "/security")
+//     ) {
+//       return <Navigate to="/security" replace />;
+//     }
+//   }
+//   return children;
+// };
+
 const ProtectedRoute = ({ children, requiredPosition }) => {
-  const { isAuthenticated, loggedInUserDetail } = useAuthStore();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const loggedInUserDetail = useAuthStore((s) => s.loggedInUserDetail);
   const location = useLocation();
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   if (requiredPosition && loggedInUserDetail.position !== requiredPosition) {
-    if (
-      loggedInUserDetail.position === "admin" &&
-      location.pathname !== "/admin" &&
-      !location.pathname.startsWith("/admin/")
-    ) {
-      return <Navigate to="/admin" replace />;
-    }
+    return <Navigate to="/login" replace />;
   }
+
   return children;
 };
 
 const RedirectAuthenticatedUser = ({ children }) => {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, loggedInUserDetail, isCheckingAuth } =
+    useAuthStore();
+  if (isCheckingAuth) return null;
   if (isAuthenticated) {
-    return <Navigate to="/admin" replace />;
+    switch (loggedInUserDetail.position) {
+      case "admin":
+        return <Navigate to="/admin" replace />;
+      case "security":
+        return <Navigate to="/security" replace />;
+    }
   }
   return children;
 };
@@ -110,25 +137,40 @@ function App() {
           }
         />
         <Route
-          path="/scan"
+          path="/security/*"
           element={
-            <Suspense
-              fallback={<Loader className="w-6h-6 animate-spin mx-auto" />}
-            >
-              <ScanPage />
-            </Suspense>
+            <ProtectedRoute requiredPosition="security">
+              <Suspense
+                fallback={<Loader className="w-6 h-6 animate-spin mx-auto" />}
+              >
+                <SecurityDashboard />
+              </Suspense>
+            </ProtectedRoute>
           }
-        />
-        <Route
-          path="report/create/:id"
-          element={
-            <Suspense
-              fallback={<Loader className="w-6h-6 animate-spin mx-auto" />}
-            >
-              <CreateReportPage />
-            </Suspense>
-          }
-        />
+        >
+          <Route index element={<Navigate to="scan" replace />} />
+
+          <Route
+            path="scan"
+            element={
+              <Suspense
+                fallback={<Loader className="w-6 h-6 animate-spin mx-auto" />}
+              >
+                <ScanPage />
+              </Suspense>
+            }
+          />
+
+          <Route
+            path="report/create/:id"
+            element={
+              <Suspense>
+                <CreateReportPage />
+              </Suspense>
+            }
+          />
+        </Route>
+
         <Route
           path="/admin/*"
           element={
@@ -263,14 +305,6 @@ function App() {
             element={
               <Suspense>
                 <UpdateDriveLinkPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="setting/account/create/:id"
-            element={
-              <Suspense>
-                <AddAdminAccountPage />
               </Suspense>
             }
           />

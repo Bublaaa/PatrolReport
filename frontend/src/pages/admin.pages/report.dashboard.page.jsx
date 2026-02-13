@@ -81,11 +81,11 @@ const ReportPageDashboard = () => {
     if (!reports?.length) return [];
     const map = new Map();
     reports.forEach((report) => {
-      const user = report.userId;
-      if (!map.has(user._id)) {
-        map.set(user._id, {
-          label: `${user.firstName} ${user.lastName}`,
-          value: user._id,
+      const userId = report.userId;
+      if (!map.has(userId)) {
+        map.set(userId, {
+          label: `${userId.firstName} ${userId.lastName}`,
+          value: userId,
         });
       }
     });

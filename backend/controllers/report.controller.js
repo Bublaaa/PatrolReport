@@ -1,6 +1,6 @@
+import { Auth } from "../models/Auth.js";
 import { Report } from "../models/Report.js";
 import { PatrolPoint } from "../models/PatrolPoint.js";
-import { User } from "../models/User.js";
 import { ReportImages } from "../models/ReportImages.js";
 import { generateDownloadPDF } from "../utils/report.pdf.generator.js";
 import { isWithinPatrolRadius } from "../../frontend/src/utils/location.js";
@@ -113,7 +113,7 @@ export const createReport = async (req, res) => {
       });
     }
 
-    const user = await User.findById(userId);
+    const user = await Auth.findById(userId);
     if (!user) {
       return res.status(404).json({
         success: false,

@@ -21,12 +21,12 @@ const CreateReportPage = () => {
   // * USE STORE
   const { fetchPatrolPointDetail, isLoading, patrolPointDetail } =
     usePatrolPointStore();
-  const { users, getAllAuth } = useAuthStore();
+  const { loggedInUserDetail } = useAuthStore();
   const { createReport } = useReportStore();
 
   // * USE STATE
   const initialReportData = {
-    userId: "",
+    userId: loggedInUserDetail._id,
     patrolPointId: "",
     report: "",
     images: [],
@@ -108,10 +108,9 @@ const CreateReportPage = () => {
   useEffect(() => {
     if (id) {
       fetchPatrolPointDetail(id);
-      getAllAuth();
       checkLocationPermission();
     }
-  }, [id, fetchPatrolPointDetail, getAllAuth]);
+  }, [id, fetchPatrolPointDetail]);
 
   useEffect(() => {
     setReportData((prev) => ({
@@ -127,12 +126,6 @@ const CreateReportPage = () => {
     reportData.patrolPointId &&
     reportData.latitude &&
     reportData.longitude;
-
-  // * POPULATE USER OPTION
-  const userOptions = users.map((user) => ({
-    label: `${user.firstName} ${user.lastName}`,
-    value: user._id,
-  }));
 
   if (isLoading || !patrolPointDetail) {
     return <Loader className="w-6 h-6 animate-spin mx-auto" />;
@@ -192,18 +185,6 @@ const CreateReportPage = () => {
           </div>
 
           <div className="flex flex-col gap-5 px-6 py-4 bg-white shadow-md rounded-lg">
-            <DropdownInput
-              label="Select User"
-              name="userId"
-              value={reportData.userId}
-              options={userOptions}
-              onChange={(e) =>
-                setReportData((prev) => ({
-                  ...prev,
-                  userId: e.target.value,
-                }))
-              }
-            />
             <TextareaInput
               label="Report Description"
               name="report"

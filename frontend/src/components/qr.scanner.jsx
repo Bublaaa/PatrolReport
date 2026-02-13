@@ -37,10 +37,10 @@ const QrScanner = ({ onScanSuccess }) => {
             setIsDebounced(true);
             await stopScanner();
             onScanSuccess?.(decodedText);
-            navigate("/", { replace: true });
-            setTimeout(() => {
-              window.location.reload();
-            }, 5000);
+            // navigate("/", { replace: true });
+            // setTimeout(() => {
+            //   window.location.reload();
+            // }, 5000);
           },
           async (errorMessage) => {
             console.warn("QR Scan Error:", errorMessage);
@@ -57,7 +57,7 @@ const QrScanner = ({ onScanSuccess }) => {
     startScanner();
 
     return () => stopScanner();
-  }, [onScanSuccess, isDebounced, navigate]);
+  }, [onScanSuccess, isDebounced]);
 
   const stopScanner = async () => {
     if (scannerRef.current && isScanning.current) {

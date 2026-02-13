@@ -4,7 +4,7 @@ const reportSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Auth",
       required: true,
     },
     patrolPointId: {
@@ -23,7 +23,7 @@ const reportSchema = new mongoose.Schema(
       type: String,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Report = mongoose.model("Report", reportSchema);
