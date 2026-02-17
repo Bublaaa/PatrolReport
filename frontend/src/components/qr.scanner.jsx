@@ -31,7 +31,7 @@ const QrScanner = ({ onScanSuccess }) => {
         await scannerRef.current.start(
           camera.id,
 
-          { fps: 10, qrbox: { width: 250, height: 250 } },
+          { fps: 10, qrbox: { width: 300, height: 300 } },
           async (decodedText) => {
             if (isDebounced) return;
             setIsDebounced(true);

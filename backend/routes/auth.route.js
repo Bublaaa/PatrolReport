@@ -5,6 +5,7 @@ import {
   checkAuth,
   createAuth,
   updateAuth,
+  updateProfile,
   deleteAuth,
   getAllAuths,
   getAuthDetail,
@@ -20,6 +21,7 @@ router.post("/login", login);
 router.post("/logout", logout);
 router.post("/create", createAuth);
 router.put("/update/:id", updateAuth);
+router.put("/profile/update/:id", updateProfile);
 router.delete("/delete/:id", deleteAuth);
 
 export default router;

@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Loader } from "lucide-react";
-import { usePatrolPointStore } from "../stores/patrol.point.store.js";
-import { useReportStore } from "../stores/report.store.js";
+import { usePatrolPointStore } from "../../stores/patrol.point.store.js";
+import { useReportStore } from "../../stores/report.store.js";
 import {
   DropdownInput,
   TextareaInput,
   CameraInput,
-} from "../components/inputs.jsx";
-import { requestLocation } from "../utils/location";
-import { toTitleCase } from "../utils/toTitleCase.js";
-import { compressImages } from "../utils/compressImage.js";
+} from "../../components/inputs.jsx";
+import { requestLocation } from "../../utils/location.js";
+import { toTitleCase } from "../../utils/toTitleCase.js";
+import { compressImages } from "../../utils/compressImage.js";
 import toast from "react-hot-toast";
-import Button from "../components/button.jsx";
-import { useAuthStore } from "../stores/auth.store.js";
+import Button from "../../components/button.jsx";
+import { useAuthStore } from "../../stores/auth.store.js";
 
 const CreateReportPage = () => {
   // * USE PARAMS

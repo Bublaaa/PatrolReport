@@ -3,7 +3,6 @@ import { useAuthStore } from "../src/stores/auth.store.js";
 import { useEffect, lazy, Suspense } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Loader } from "lucide-react";
-
 import LoginPage from "./pages/login.page.jsx";
 
 const AdminDashboard = lazy(() => import("./pages/admin.dashboard.page.jsx"));
@@ -53,8 +52,13 @@ const UpdateDriveLinkPage = lazy(
   () => import("./pages/admin.pages/update.drive.link.page.jsx"),
 );
 
-const CreateReportPage = lazy(() => import("./pages/create.report.page.jsx"));
-const ScanPage = lazy(() => import("./pages/scan.page.jsx"));
+const CreateReportPage = lazy(
+  () => import("./pages/security.pages/create.report.page.jsx"),
+);
+const ScanPage = lazy(() => import("./pages/security.pages/scan.page.jsx"));
+const ProfilePage = lazy(
+  () => import("./pages/security.pages/security.update.profile.page.jsx"),
+);
 
 // const ProtectedRoute = ({ children, requiredPosition }) => {
 //   const { isAuthenticated, loggedInUserDetail } = useAuthStore();
@@ -148,7 +152,7 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="scan" replace />} />
+          <Route index element={<Navigate to="setting" replace />} />
 
           <Route
             path="scan"
@@ -157,6 +161,16 @@ function App() {
                 fallback={<Loader className="w-6 h-6 animate-spin mx-auto" />}
               >
                 <ScanPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="setting"
+            element={
+              <Suspense
+                fallback={<Loader className="w-6 h-6 animate-spin mx-auto" />}
+              >
+                <ProfilePage />
               </Suspense>
             }
           />

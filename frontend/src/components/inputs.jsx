@@ -9,22 +9,24 @@ export const TextInput = ({
   error,
   ...props
 }) => (
-  <div className="relative">
+  <div>
     {label && (
       <label className="block text-sm font-medium text-gray-600 mb-2">
         {label}
       </label>
     )}
-    {Icon && (
-      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-        <Icon className="size-5 text-accent" />
-      </div>
-    )}
-    <input
-      {...props}
-      value={value}
-      onChange={onChange}
-      className={`w-full border rounded-lg md:p-3 p-2 bg-white text-dark placeholder:text-sm 
+    <div className="relative">
+      {Icon && (
+        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+          <Icon className="size-5 text-accent" />
+        </div>
+      )}
+
+      <input
+        {...props}
+        value={value}
+        onChange={onChange}
+        className={`w-full border rounded-lg md:p-3 p-2 bg-white text-dark placeholder:text-sm 
         md:placeholder:text-base placeholder-gray-400 focus:ring-4 focus:outline-none transition no-spinner
         ${Icon ? "md:pl-10 pl-10" : "md:p-3 p-2"} 
         ${
@@ -32,7 +34,9 @@ export const TextInput = ({
             ? "border-red-500 focus:ring-red-300"
             : "border-gray-300 focus:border-accent focus:ring-accent/40"
         }`}
-    />
+      />
+    </div>
+    {/* {error && <p className="text-red-500 text-sm mt-1">{error}</p>} */}
   </div>
 );
 

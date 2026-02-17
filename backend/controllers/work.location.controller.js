@@ -1,3 +1,4 @@
+import { PatrolPoint } from "../models/PatrolPoint.js";
 import { WorkLocation } from "../models/WorkLocation.js";
 //* GET ALL WORK LOCATIONS
 export const getAllWorkLocations = async (req, res) => {
@@ -117,11 +118,14 @@ export const updateWorkLocation = async (req, res) => {
 export const deleteWorkLocation = async (req, res) => {
   const { id } = req.params;
   try {
-    const workLocationsCount = await WorkLocation.find();
-    if (workLocationsCount.length === 1) {
+    const accountCount = await Auth.countDocuments({ workLocationId: id });
+    const patrolPointCount = await PatrolPoint.countDocuments({
+      workLocationId: id,
+    });
+    if (accountCount > 0 && patrolPointCount > 0) {
       return res.status(400).json({
         success: false,
-        message: "Cannot delete the last work location",
+        message: `Work location has ${accountCount} accounts and ${patrolPointCount} patrol points`,
       });
     }
     const isWorkLocationExist = await WorkLocation.findById(id);

@@ -131,7 +131,78 @@ export const createAuth = async (req, res) => {
   }
 };
 
-//* UPDATE ACCOUNT
+//* UPDATE ACCOUNT - FOR USER
+export const updateProfile = async (req, res) => {
+  const { id } = req.params;
+  const {
+    username,
+    oldPassword,
+    newPassword,
+    firstName,
+    middleName,
+    lastName,
+  } = req.body;
+  try {
+    if (!username || !firstName || !lastName) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    const auth = await Auth.findById(id);
+    if (!auth) {
+      return res.status(404).json({
+        success: false,
+        message: "Account not found",
+      });
+    }
+
+    const updateData = {
+      username,
+      firstName,
+      middleName,
+      lastName,
+    };
+
+    if (newPassword) {
+      if (!oldPassword) {
+        return res.status(400).json({
+          success: false,
+          message: "Old password is required",
+        });
+      }
+
+      const isPasswordValid = await bcrypt.compare(oldPassword, auth.password);
+
+      if (!isPasswordValid) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid old password",
+        });
+      }
+
+      updateData.password = await bcrypt.hash(newPassword, 10);
+    }
+
+    const updatedAccount = await Auth.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      auth: updatedAccount,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+//* UPDATE ACCOUNT - FOR ADMIN
 export const updateAuth = async (req, res) => {
   const { id } = req.params;
   const {

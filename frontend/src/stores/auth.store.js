@@ -144,7 +144,7 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  // * UPDATE ACCOUNT
+  // * UPDATE ACCOUNT - ADMIN
   updateAuth: async (
     id,
     username,
@@ -166,6 +166,40 @@ export const useAuthStore = create((set, get) => ({
       });
       set({ isLoading: false });
       toast.success("Auth updated successfully");
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Error updating auth";
+      set({
+        error: errorMessage,
+        isLoading: false,
+      });
+      toast.error(errorMessage);
+    }
+  },
+
+  // * UPDATE ACCOUNT - USER
+  updateProfile: async (
+    id,
+    username,
+    firstName,
+    middleName,
+    lastName,
+    oldPassword,
+    newPassword,
+  ) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.put(`${API_URL}auth/profile/update/${id}`, {
+        username,
+        oldPassword,
+        newPassword,
+        firstName,
+        middleName,
+        lastName,
+      });
+      set({ isLoading: false, loggedInUserDetail: response.data.auth });
+      return response.data.auth;
+      toast.success("Profile Updated");
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error updating auth";
