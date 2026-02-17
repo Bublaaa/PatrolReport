@@ -269,22 +269,22 @@ export const deleteReport = async (req, res) => {
 // * GENERATE PDF
 export const downloadPDF = async (req, res) => {
   try {
-    const { date, userId, patrolPointId } = req.body;
+    const { reports } = req.body;
 
-    const start = new Date(date);
-    start.setHours(0, 0, 0, 0);
+    // const start = new Date(date);
+    // start.setHours(0, 0, 0, 0);
 
-    const end = new Date(date);
-    end.setHours(23, 59, 59, 999);
+    // const end = new Date(date);
+    // end.setHours(23, 59, 59, 999);
 
-    const query = {
-      createdAt: { $gte: start, $lte: end },
-    };
+    // const query = {
+    //   createdAt: { $gte: start, $lte: end },
+    // };
 
-    const reports = await Report.find(query)
-      .populate("userId", "firstName lastName")
-      .populate("patrolPointId", "name")
-      .sort({ createdAt: 1 });
+    // const reports = await Report.find(query)
+    //   .populate("userId", "firstName lastName")
+    //   .populate("patrolPointId", "name")
+    //   .sort({ createdAt: 1 });
 
     if (!reports.length) {
       return res.status(404).json({ message: "No reports found" });

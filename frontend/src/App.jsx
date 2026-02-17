@@ -152,7 +152,7 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="setting" replace />} />
+          <Route index element={<Navigate to="scan" replace />} />
 
           <Route
             path="scan"

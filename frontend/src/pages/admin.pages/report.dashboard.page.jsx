@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import { DateInput, DropdownInput } from "../../components/inputs.jsx";
 import { useReportStore } from "../../stores/report.store.js";
 import { toTitleCase } from "../../utils/toTitleCase.js";
+import { buildDropdownOptions } from "../../utils/constants.js";
 import {
   formatDateToString,
   formatTime,
@@ -54,43 +55,57 @@ const ReportPageDashboard = () => {
 
   const handleGeneratePDF = async () => {
     try {
-      const res = await downloadPDF(selectedDate);
+      if (filteredReports.length !== 0) {
+        const res = await downloadPDF(filteredReports);
 
-      const disposition = res.headers["content-disposition"];
-      const filenameMatch = disposition?.match(/filename="?(.+)"?/);
-      const filename = filenameMatch?.[1] || "patrol-report.pdf";
+        const disposition = res.headers["content-disposition"];
+        const filenameMatch = disposition?.match(/filename="?(.+)"?/);
+        const filename = filenameMatch?.[1] || "patrol-report.pdf";
 
-      const blob = new Blob([res.data], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
+        const blob = new Blob([res.data], { type: "application/pdf" });
+        const url = window.URL.createObjectURL(blob);
 
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
 
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }
     } catch (error) {
       console.error(error);
     }
   };
 
   // * POPULATE USER OPTIONS
-  const userOptions = useMemo(() => {
+  const userArray = useMemo(() => {
     if (!reports?.length) return [];
+
     const map = new Map();
+
     reports.forEach((report) => {
-      const userId = report.userId;
-      if (!map.has(userId)) {
-        map.set(userId, {
-          label: `${userId.firstName} ${userId.lastName}`,
-          value: userId,
+      const user = report.userId;
+
+      if (!user?._id) return;
+
+      if (!map.has(user._id)) {
+        map.set(user._id, {
+          name: `${user.firstName} ${user.lastName}`,
+          _id: user._id, // better to use id only
         });
       }
     });
+
     return Array.from(map.values());
   }, [reports]);
+
+  const userOptions = buildDropdownOptions(userArray, {
+    includeAll: true,
+    allLabel: "All User",
+    allValue: "",
+  });
 
   // * POPULATE PATROL POINTS OPTION
   const patrolPointOptions = useMemo(() => {
@@ -134,7 +149,8 @@ const ReportPageDashboard = () => {
   if (isLoading) {
     return <Loader className="w-6 h-6 animate-spin mx-auto" />;
   }
-
+  console.log(userArray);
+  console.log(userOptions);
   return (
     <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md gap-5">
       <div className="flex flex-row justify-between items-center">

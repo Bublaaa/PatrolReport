@@ -7,7 +7,7 @@ import MenuLink from "../components/menu.link.jsx";
 
 const SecurityDashboard = () => {
   const menuLinks = [
-    // { label: "Scan", icon: "MapPin", href: "/security/scan" },
+    { label: "Scan", icon: "MapPin", href: "/security/scan" },
     { label: "Setting", icon: "Settings", href: "/security/setting" },
   ];
   const { loggedInUserDetail, logout } = useAuthStore();

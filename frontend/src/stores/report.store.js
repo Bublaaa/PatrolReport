@@ -119,13 +119,13 @@ export const useReportStore = create((set, get) => ({
     }
   },
 
-  downloadPDF: async (selectedDate) => {
+  downloadPDF: async (reports) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.post(
         `${API_URL}report/export/pdf`,
         {
-          date: selectedDate,
+          reports: reports,
         },
         {
           responseType: "blob",
