@@ -166,7 +166,7 @@ const AddPatrolPointPage = () => {
       {locationGranted === false && (
         <div className="p-2 items-center text-center bg-red-100 rounded-lg">
           <p className="text-red-500">
-            ❌ Location permission is required for adding new outpost.
+            ❌ Location permission is required for adding new patrol point.
           </p>
         </div>
       )}

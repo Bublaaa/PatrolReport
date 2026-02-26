@@ -11,6 +11,7 @@ axios.defaults.withCredentials = true;
 
 export const useReportStore = create((set, get) => ({
   reports: [],
+  monthlyReports: [],
   reportDetail: null,
   error: null,
   isLoading: false,
@@ -33,6 +34,23 @@ export const useReportStore = create((set, get) => ({
       } else {
         toast.success("Successfully fetch reports");
       }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Error fetching reports";
+      set({ reports: [], error: errorMessage, isLoading: false });
+      toast.error(errorMessage);
+    }
+  },
+
+  fetchReportDetailByMonth: async (month) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.get(`${API_URL}report/month/${month}`);
+      set({
+        monthlyReports: response.data.reports || [],
+        isLoading: false,
+      });
+      toast.success("Successfully fetch reports");
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error fetching reports";

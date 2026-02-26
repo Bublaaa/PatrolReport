@@ -47,6 +47,56 @@ export const getReportByDate = async (req, res) => {
   }
 };
 
+//* GET REPORT BY MONTH
+export const getReportByMonth = async (req, res) => {
+  try {
+    const { month } = req.params;
+
+    if (!month) {
+      return res.status(400).json({
+        success: false,
+        message: "Selected month is required",
+      });
+    }
+
+    // month format: YYYY-MM
+    const [yearStr, monthStr] = month.split("-");
+    const year = Number(yearStr);
+    const monthIndex = Number(monthStr);
+
+    // Start of month
+    const startOfMonth = new Date(year, monthIndex - 1, 2, 0, 0, 0, 0);
+    const endOfMonth = new Date(year, monthIndex, 0, 23, 59, 59, 999);
+
+    const reports = await Report.find({
+      createdAt: {
+        $gte: startOfMonth,
+        $lte: endOfMonth,
+      },
+    })
+      .populate({
+        path: "userId",
+        select: "firstName lastName",
+      })
+      .populate({
+        path: "patrolPointId",
+        select: "name",
+      })
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      message: "Successfully retrieved report",
+      reports,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 //* GET ALL
 export const getAllReports = async (req, res) => {
   try {

@@ -52,11 +52,11 @@ export const logout = async (req, res) => {
 
 //* CHECK AUTH
 export const checkAuth = async (req, res) => {
-  console.log("CHECK AUTH DEBUG:", {
-    id: req._id,
-    cookies: req.cookies,
-    authHeader: req.headers.authorization,
-  });
+  // console.log("CHECK AUTH DEBUG:", {
+  //   id: req._id,
+  //   cookies: req.cookies,
+  //   authHeader: req.headers.authorization,
+  // });
 
   try {
     const auth = await Auth.findById(req._id).select("-password");

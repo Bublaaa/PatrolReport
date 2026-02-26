@@ -26,6 +26,39 @@ export const startDailyReport = () => {
       console.log("Cron running:", new Date().toISOString());
       try {
         const report = await getTodayReports();
+        console.log(report.length);
+        const pdfReport = await createReportPDF(report);
+        if (!pdfReport) {
+          console.log("No PDF generated");
+          return;
+        }
+        const fileData = await uploadToDrive(pdfReport);
+        await updateTodayReports(fileData.viewLink, fileData.fileId);
+        console.log("[SUCCESS] Daily report processed successfully");
+      } catch (err) {
+        console.error("[ERROR] Cron task :", err);
+      } finally {
+        isGeneratingRunning = false;
+      }
+    },
+    {
+      timezone: "Asia/Jakarta",
+    },
+  );
+};
+// * START GENERATE DAILY REPORT
+export const startMonthlyReport = () => {
+  cron.schedule(
+    "0 0 1 * *",
+    async () => {
+      if (isGeneratingRunning) {
+        console.log("Cron is already running");
+        return;
+      }
+      isGeneratingRunning = true;
+      console.log("Cron running:", new Date().toISOString());
+      try {
+        const report = await getTodayReports();
         const pdfReport = await createReportPDF(report);
         if (!pdfReport) {
           console.log("No PDF generated");
@@ -179,6 +212,97 @@ async function getTodayReports() {
     .populate("patrolPointId", "name")
     .sort({ createdAt: 1 });
 }
+
+// async function getTodayReports() {
+//   const start = new Date();
+//   start.setHours(0, 0, 0, 0);
+
+//   const end = new Date();
+//   end.setHours(23, 59, 59, 999);
+
+//   return Report.aggregate([
+//     // 1️⃣ Match today reports
+//     {
+//       $match: {
+//         createdAt: { $gte: start, $lte: end },
+//       },
+//     },
+
+//     // 2️⃣ Sort ascending FIRST
+//     {
+//       $sort: { createdAt: 1 },
+//     },
+
+//     // 3️⃣ Lookup patrol point
+//     {
+//       $lookup: {
+//         from: "patrolpoints",
+//         localField: "patrolPointId",
+//         foreignField: "_id",
+//         as: "patrolPoint",
+//       },
+//     },
+//     { $unwind: "$patrolPoint" },
+
+//     // 4️⃣ Lookup work location from patrol point
+//     {
+//       $lookup: {
+//         from: "worklocations",
+//         localField: "patrolPoint.workLocationId",
+//         foreignField: "_id",
+//         as: "workLocation",
+//       },
+//     },
+//     { $unwind: "$workLocation" },
+
+//     // 5️⃣ Lookup user
+//     {
+//       $lookup: {
+//         from: "users",
+//         localField: "userId",
+//         foreignField: "_id",
+//         as: "user",
+//       },
+//     },
+//     { $unwind: "$user" },
+
+//     // 6️⃣ Group by workLocation + patrolPoint
+//     {
+//       $group: {
+//         _id: {
+//           workLocationId: "$workLocation._id",
+//           patrolPointId: "$patrolPoint._id",
+//         },
+//         workLocation: { $first: "$workLocation" },
+//         patrolPoint: { $first: "$patrolPoint" },
+//         reports: { $push: "$$ROOT" },
+//       },
+//     },
+
+//     // 7️⃣ Regroup by workLocation
+//     {
+//       $group: {
+//         _id: "$_id.workLocationId",
+//         workLocation: { $first: "$workLocation" },
+//         patrolPoints: {
+//           $push: {
+//             patrolPoint: "$patrolPoint",
+//             reports: "$reports",
+//           },
+//         },
+//       },
+//     },
+
+//     // 8️⃣ Final clean structure
+//     {
+//       $project: {
+//         _id: 0,
+//         workLocation: 1,
+//         patrolPoints: 1,
+//       },
+//     },
+//   ]);
+// }
 
 // * GENERATING DAILY REPORT PDF
 const createReportPDF = async (reports) => {

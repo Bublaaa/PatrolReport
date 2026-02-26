@@ -388,7 +388,14 @@ export const CameraInput = ({ label, onFilesChange, maxFiles = 5 }) => {
 //   );
 // };
 
-export const DateInput = ({ value, onChange, label, error, ...props }) => (
+export const DateInput = ({
+  value,
+  onChange,
+  label,
+  type = "date",
+  error,
+  ...props
+}) => (
   <div className="relative">
     {label && (
       <label className="block text-sm font-medium text-gray-600 mb-1">
@@ -399,7 +406,7 @@ export const DateInput = ({ value, onChange, label, error, ...props }) => (
       {...props}
       value={value}
       onChange={onChange}
-      type="date"
+      type={type}
       className={`w-full border rounded-lg md:p-3 p-2 bg-white text-dark placeholder:text-sm 
         md:placeholder:text-base placeholder-gray-400 focus:ring-4 focus:outline-none transition no-spinner
         ${
