@@ -304,7 +304,7 @@ export const generateDownloadPDF = async (res, reports, imagesByReportId) => {
   doc.pipe(res);
 
   doc.font("Helvetica-Bold").fontSize(14).text("Report Patrol");
-  doc.font("Helvetica").fontSize(10).text(`Date : ${dateString}`);
+  // doc.font("Helvetica").fontSize(10).text(`Date : ${dateString}`);
 
   doc.moveDown(1);
   drawDivider(doc);
@@ -314,8 +314,11 @@ export const generateDownloadPDF = async (res, reports, imagesByReportId) => {
       doc,
       {
         id: report._id,
-        time: new Date(report.createdAt).toLocaleTimeString("id-ID", {
+        time: new Date(report.createdAt).toLocaleString("id-ID", {
           timeZone: "Asia/Jakarta",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
           hour: "2-digit",
           minute: "2-digit",
         }),

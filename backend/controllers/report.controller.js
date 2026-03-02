@@ -68,22 +68,101 @@ export const getReportByMonth = async (req, res) => {
     const startOfMonth = new Date(year, monthIndex - 1, 2, 0, 0, 0, 0);
     const endOfMonth = new Date(year, monthIndex, 0, 23, 59, 59, 999);
 
-    const reports = await Report.find({
-      createdAt: {
-        $gte: startOfMonth,
-        $lte: endOfMonth,
+    const reports = await Report.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: startOfMonth,
+            $lte: endOfMonth,
+          },
+        },
       },
-    })
-      .populate({
-        path: "userId",
-        select: "firstName lastName",
-      })
-      .populate({
-        path: "patrolPointId",
-        select: "name",
-      })
-      .sort({ createdAt: -1 });
 
+      { $sort: { createdAt: 1 } },
+
+      {
+        $lookup: {
+          from: "patrolpoints",
+          let: { patrolPointId: "$patrolPointId" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$patrolPointId"] } } },
+            { $project: { _id: 1, name: 1, workLocationId: 1 } },
+          ],
+          as: "patrolPoint",
+        },
+      },
+      { $unwind: "$patrolPoint" },
+
+      {
+        $lookup: {
+          from: "worklocations",
+          let: { workLocationId: "$patrolPoint.workLocationId" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$workLocationId"] } } },
+            { $project: { _id: 1, name: 1 } },
+          ],
+          as: "workLocation",
+        },
+      },
+      { $unwind: "$workLocation" },
+
+      {
+        $lookup: {
+          from: "auths",
+          let: { userId: "$userId" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$userId"] } } },
+            { $project: { _id: 1, firstName: 1, lastName: 1 } },
+          ],
+          as: "user",
+        },
+      },
+      { $unwind: "$user" },
+
+      {
+        $group: {
+          _id: "$workLocation._id",
+          workLocation: { $first: "$workLocation" },
+
+          totalReports: { $sum: 1 },
+
+          reports: {
+            $push: {
+              _id: "$_id",
+              report: "$report",
+              createdAt: "$createdAt",
+              userId: {
+                _id: "$user._id",
+                firstName: "$user.firstName",
+                lastName: "$user.lastName",
+              },
+              patrolPointId: {
+                _id: "$patrolPoint._id",
+                name: "$patrolPoint.name",
+              },
+            },
+          },
+        },
+      },
+
+      {
+        $project: {
+          _id: 0,
+          workLocation: 1,
+          totalReports: 1,
+          reports: 1,
+        },
+      },
+
+      { $sort: { totalReports: -1 } },
+    ]);
+    if (reports.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No reports found for the selected month",
+        reports: [],
+      });
+    }
     return res.status(200).json({
       success: true,
       message: "Successfully retrieved report",

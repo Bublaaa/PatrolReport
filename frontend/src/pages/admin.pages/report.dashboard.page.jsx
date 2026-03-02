@@ -1,5 +1,12 @@
-import { useEffect, useState, useMemo, use } from "react";
-import { ChevronLeft, ChevronRight, DownloadIcon, Loader } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  DownloadIcon,
+  Loader,
+  Search,
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { DateInput, DropdownInput } from "../../components/inputs.jsx";
 import { useReportStore } from "../../stores/report.store.js";
@@ -29,6 +36,7 @@ const ReportPageDashboard = () => {
   // * USE STORE
   const {
     isLoading,
+    error,
     reports,
     monthlyReports,
     fetchReportDetailByDate,
@@ -79,6 +87,12 @@ const ReportPageDashboard = () => {
     const newMonth = String(date.getMonth() + 1).padStart(2, "0");
 
     return `${newYear}-${newMonth}`;
+  };
+
+  //* HANDLE SEARCH MONTHLY REPORT
+  const handleSearchMonthlyReport = () => {
+    if (!selectedMonth) return;
+    fetchReportDetailByMonth(selectedMonth);
   };
 
   // * GENERATE PDF TO DOWNLOAD
@@ -164,24 +178,10 @@ const ReportPageDashboard = () => {
     });
   }, [reports, selectedDate, selectedUser, selectedPatrolPoint]);
 
-  const filteredMonthlyReports = useMemo(() => {
-    if (!monthlyReports?.length) return [];
-    // const selectedKey = toIndonesiaDateKey(selectedMonth);
-    return monthlyReports.filter((report) => {
-      // const reportKey = toIndonesiaDateKey(report.createdAt);
-      return (
-        (!selectedUser || report.userId._id === selectedUser) &&
-        (!selectedPatrolPoint ||
-          report.patrolPointId._id === selectedPatrolPoint)
-      );
-    });
-  }, [monthlyReports, selectedMonth, selectedUser, selectedPatrolPoint]);
-
   // * USE EFFECT - INITIAL DATA LOAD
   useEffect(() => {
     fetchReportDetailByDate(selectedDate);
-    fetchReportDetailByMonth(selectedMonth);
-  }, [selectedDate, selectedMonth]);
+  }, [selectedDate]);
 
   if (isLoading) {
     return <Loader className="w-6 h-6 animate-spin mx-auto" />;
@@ -189,49 +189,57 @@ const ReportPageDashboard = () => {
   return (
     <div className="flex flex-col w-full gap-5">
       <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md gap-5">
-        <div className="flex flex-row justify-between items-center">
+        <div className="flex flex-col w-full justify-between gap-5">
           <h5>Monthly Report</h5>
-          <div className="flex flex-row gap-3">
-            <Button
-              buttonSize="small"
-              buttonType="secondary"
-              icon={ChevronLeft}
-              onClick={() => setSelectedMonth(addMonths(selectedMonth, -1))}
-            />
+          <div className="flex flex-row w-full justify-between">
+            <div className="flex flex-row gap-3">
+              <Button
+                buttonSize="small"
+                buttonType="secondary"
+                icon={ChevronLeft}
+                onClick={() => setSelectedMonth(addMonths(selectedMonth, -1))}
+              />
 
-            <DateInput
-              value={selectedMonth}
-              type="month"
-              onChange={(e) => setSelectedMonth(e.target.value)}
-            />
+              <DateInput
+                value={selectedMonth}
+                type="month"
+                onChange={(e) => setSelectedMonth(e.target.value)}
+              />
 
+              <Button
+                buttonSize="small"
+                buttonType="secondary"
+                icon={ChevronRight}
+                onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}
+              />
+            </div>
             <Button
-              buttonSize="small"
-              buttonType="secondary"
-              icon={ChevronRight}
-              onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}
-            />
+              type="icon"
+              icon={Search}
+              onClick={handleSearchMonthlyReport}
+            ></Button>
           </div>
+          {error && <p className="text-red-500 font-semibold mb-2"> {error}</p>}
+          {monthlyReports.length > 0 &&
+            monthlyReports.map((report) => (
+              <div
+                key={report.workLocation._id}
+                className="grid grid-cols-3 gap-3 text-center justify-center items-center"
+              >
+                <p>{report.workLocation.name}</p>
+                <p>{report.totalReports} Total reports</p>
+                <p>
+                  <Button
+                    className="ml-auto"
+                    icon={Download}
+                    onClick={() => handleGeneratePDF(report.reports)}
+                  >
+                    Download
+                  </Button>
+                </p>
+              </div>
+            ))}
         </div>
-        <div className="grid grid-cols-2 justify-between gap-5 items-center">
-          <DropdownInput
-            label="Sort by User"
-            name="user"
-            value={selectedUser}
-            options={userOptions}
-            placeholder="Select User"
-            onChange={handleFilterUser}
-          />
-          <DropdownInput
-            label="Sort by Patrol Point"
-            name="patrolPoint"
-            value={selectedPatrolPoint}
-            options={patrolPointOptions}
-            placeholder="Select Point"
-            onChange={handleFilterPatrolPoint}
-          />
-        </div>
-        {filteredMonthlyReports.length}
       </div>
 
       <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md gap-5">
@@ -315,12 +323,11 @@ const ReportPageDashboard = () => {
             </a>
           </div>
         )}
-        {filteredReports.length > 0 && !filteredReports.at(-1).documentUrl && (
+        {filteredReports.length > 0 && (
           <div className="flex flex-row gap-5 items-center pt-3">
-            <p>PDF file not generated yet</p>
             <Button
               buttonType="primary"
-              onClick={handleGeneratePDF}
+              onClick={() => handleGeneratePDF(filteredReports)}
               icon={DownloadIcon}
             >
               Download PDF

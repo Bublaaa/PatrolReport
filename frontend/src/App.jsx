@@ -39,6 +39,10 @@ const PatrolPointDetailPage = lazy(
   () => import("./pages/admin.pages/update.patrol.point.page.jsx"),
 );
 
+const MonthlyReportPage = lazy(
+  () => import("./pages/admin.pages/report.monthly.page.jsx"),
+);
+
 const ReportPage = lazy(
   () => import("./pages/admin.pages/report.dashboard.page.jsx"),
 );
@@ -300,6 +304,14 @@ function App() {
             element={
               <Suspense>
                 <ReportDetailPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="report/monthly/:month"
+            element={
+              <Suspense>
+                <MonthlyReportPage />
               </Suspense>
             }
           />

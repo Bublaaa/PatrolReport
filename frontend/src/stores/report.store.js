@@ -54,7 +54,7 @@ export const useReportStore = create((set, get) => ({
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error fetching reports";
-      set({ reports: [], error: errorMessage, isLoading: false });
+      set({ monthlyReports: [], error: errorMessage, isLoading: false });
       toast.error(errorMessage);
     }
   },
