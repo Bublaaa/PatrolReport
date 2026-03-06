@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import fs from "fs";
 import path from "path";
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
@@ -19,7 +20,6 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5003;
 const __dirname = path.resolve();
-const ROOT_DIR = process.cwd();
 
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
@@ -38,7 +38,8 @@ app.use("/api/drive", driveUploadRoutes);
 app.use("/api/system-setting", systemSettingRoutes);
 
 // app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use("/uploads", express.static(path.join(ROOT_DIR, "uploads")));
+// app.use("/uploads", express.static(path.join(ROOT_DIR, "uploads")));
+app.use("/uploads", express.static(UPLOAD_ROOT));
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "/frontend/dist")));
@@ -53,4 +54,7 @@ startReportCron();
 app.listen(port, () => {
   connection();
   console.log("Server is running on port:", port);
+  console.log("UPLOAD_ROOT:", UPLOAD_ROOT);
+  console.log("IMAGEs:", fs.readdirSync(REPORT_IMAGES_DIR));
+  console.log("PDFs:", fs.readdirSync(REPORT_PDF_DIR));
 });

@@ -3,12 +3,11 @@ import fs from "fs";
 import path from "path";
 import sharp from "sharp";
 import { toTitleCase } from "../../frontend/src/utils/toTitleCase.js";
+import { REPORT_PDF_DIR, UPLOAD_ROOT } from "../utils/storage.path.js";
 
 // * CONSTANT
-const PDF_DIR = path.join(process.cwd(), "uploads", "report-pdf");
-
-if (!fs.existsSync(PDF_DIR)) {
-  fs.mkdirSync(PDF_DIR, { recursive: true });
+if (!fs.existsSync(REPORT_PDF_DIR)) {
+  fs.mkdirSync(REPORT_PDF_DIR, { recursive: true });
 }
 
 const PAGE_MARGIN = 40;
@@ -80,7 +79,8 @@ const drawImageCell = async (doc, x, y, w, h, filePath, options = {}) => {
     backgroundColor = null,
   } = options;
 
-  const imagePath = path.join(process.cwd(), filePath);
+  // const imagePath = path.join(process.cwd(), filePath);
+  const imagePath = path.join(UPLOAD_ROOT, filePath.replace("/uploads/", ""));
 
   doc.save();
 
@@ -295,11 +295,21 @@ export const generateDownloadPDF = async (res, reports, imagesByReportId) => {
     })
     .replace(/\//g, "-");
 
+  const filename = `${dateString}-report.pdf`;
+  const encodedFilename = encodeURIComponent(filename);
+
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
     "Content-Disposition",
-    `attachment; filename=${dateString}-report.pdf`,
+    `attachment; filename="${filename}"; filename*=UTF-8''${encodedFilename}`,
   );
+
+  doc.on("error", (err) => {
+    console.error("PDF generation error:", err);
+    if (!res.headersSent) {
+      res.status(500).json({ message: "Failed to generate PDF" });
+    }
+  });
 
   doc.pipe(res);
 
@@ -351,7 +361,7 @@ export const generateUploadPDF = async (reports, imagesByReportId) => {
     })
     .replace(/\//g, "-");
   const fileName = `${dateString}-report.pdf`;
-  const filePath = path.join(PDF_DIR, fileName);
+  const filePath = path.join(REPORT_PDF_DIR, fileName);
 
   const doc = new PDFDocument({ size: "A4", margin: PAGE_MARGIN });
   const writeStream = fs.createWriteStream(filePath);
