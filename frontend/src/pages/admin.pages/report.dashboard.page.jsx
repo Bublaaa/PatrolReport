@@ -1,9 +1,17 @@
 import { useEffect, useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, DownloadIcon, Loader } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  DownloadIcon,
+  Loader,
+  Search,
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { DateInput, DropdownInput } from "../../components/inputs.jsx";
 import { useReportStore } from "../../stores/report.store.js";
 import { toTitleCase } from "../../utils/toTitleCase.js";
+import { buildDropdownOptions } from "../../utils/constants.js";
 import {
   formatDateToString,
   formatTime,
@@ -19,18 +27,31 @@ const ReportPageDashboard = () => {
     const wib = new Date(now.getTime() + 7 * 60 * 60 * 1000);
     return wib.toISOString().split("T")[0];
   });
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    const wib = new Date(now.getTime() + 1);
+    return wib.toISOString().split("T")[0].slice(0, 7);
+  });
 
   // * USE STORE
-  const { isLoading, reports, fetchReportDetailByDate, downloadPDF } =
-    useReportStore();
+  const {
+    isLoading,
+    error,
+    reports,
+    monthlyReports,
+    fetchReportDetailByDate,
+    fetchReportDetailByMonth,
+    downloadPDF,
+  } = useReportStore();
   const handleFilterUser = (e) => {
     setSelectedUser(e.target.value);
   };
 
-  // * FUNCTIONS
+  // * HANDLE FILTER BY PATROL POINT
   const handleFilterPatrolPoint = (e) => {
     setSelectedPatrolPoint(e.target.value);
   };
+  // * FORMAT TO INDONESIA DATE KEY ZONE
   const toIndonesiaDateKey = (date) => {
     return new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Jakarta",
@@ -40,10 +61,12 @@ const ReportPageDashboard = () => {
     }).format(new Date(date));
   };
 
+  // * DATE FORMATTING
   const parseDate = (dateStr) => {
     const [y, m, d] = dateStr.split("-");
     return new Date(y, m - 1, d);
   };
+  // * HANDLE CHANGE DATE
   const addDays = (dateStr, days) => {
     const date = parseDate(dateStr);
     date.setDate(date.getDate() + days);
@@ -52,45 +75,77 @@ const ReportPageDashboard = () => {
     return wib.toISOString().split("T")[0];
   };
 
-  const handleGeneratePDF = async () => {
+  // * HANDLE CHANGE MONTH
+  const addMonths = (dateStr, months) => {
+    const [yearStr, monthStr] = dateStr.split("-");
+    const year = Number(yearStr);
+    const monthIndex = Number(monthStr) - 1;
+    const date = new Date(year, monthIndex);
+    date.setMonth(date.getMonth() + months);
+
+    const newYear = date.getFullYear();
+    const newMonth = String(date.getMonth() + 1).padStart(2, "0");
+
+    return `${newYear}-${newMonth}`;
+  };
+
+  //* HANDLE SEARCH MONTHLY REPORT
+  const handleSearchMonthlyReport = () => {
+    if (!selectedMonth) return;
+    fetchReportDetailByMonth(selectedMonth);
+  };
+
+  // * GENERATE PDF TO DOWNLOAD
+  const handleGeneratePDF = async (reports) => {
     try {
-      const res = await downloadPDF(selectedDate);
+      if (reports.length !== 0) {
+        const res = await downloadPDF(reports);
 
-      const disposition = res.headers["content-disposition"];
-      const filenameMatch = disposition?.match(/filename="?(.+)"?/);
-      const filename = filenameMatch?.[1] || "patrol-report.pdf";
+        const disposition = res.headers["content-disposition"];
+        const filenameMatch = disposition?.match(/filename="?(.+)"?/);
+        const filename = filenameMatch?.[1] || "patrol-report.pdf";
 
-      const blob = new Blob([res.data], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
+        const blob = new Blob([res.data], { type: "application/pdf" });
+        const url = window.URL.createObjectURL(blob);
 
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
 
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }
     } catch (error) {
       console.error(error);
     }
   };
 
   // * POPULATE USER OPTIONS
-  const userOptions = useMemo(() => {
+  const userArray = useMemo(() => {
     if (!reports?.length) return [];
     const map = new Map();
     reports.forEach((report) => {
       const user = report.userId;
+      if (!user?._id) return;
       if (!map.has(user._id)) {
         map.set(user._id, {
-          label: `${user.firstName} ${user.lastName}`,
-          value: user._id,
+          name: `${user.firstName} ${user.lastName}`,
+          _id: user._id,
         });
       }
     });
+
     return Array.from(map.values());
   }, [reports]);
+
+  // * GENERATE USER OPTIONS
+  const userOptions = buildDropdownOptions(userArray, {
+    includeAll: true,
+    allLabel: "All User",
+    allValue: "",
+  });
 
   // * POPULATE PATROL POINTS OPTION
   const patrolPointOptions = useMemo(() => {
@@ -111,12 +166,9 @@ const ReportPageDashboard = () => {
   // * FILTERED REPORT DATA
   const filteredReports = useMemo(() => {
     if (!reports?.length) return [];
-
     const selectedKey = toIndonesiaDateKey(selectedDate);
-
     return reports.filter((report) => {
       const reportKey = toIndonesiaDateKey(report.createdAt);
-
       return (
         reportKey === selectedKey &&
         (!selectedUser || report.userId._id === selectedUser) &&
@@ -134,101 +186,155 @@ const ReportPageDashboard = () => {
   if (isLoading) {
     return <Loader className="w-6 h-6 animate-spin mx-auto" />;
   }
-
   return (
-    <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md gap-5">
-      <div className="flex flex-row justify-between items-center">
-        <h5>Report Dashboard</h5>
-        <div className="flex flex-row gap-3">
-          <Button
-            buttonSize="small"
-            buttonType="secondary"
-            icon={ChevronLeft}
-            onClick={() => setSelectedDate(addDays(selectedDate, -1))}
-          />
+    <div className="flex flex-col w-full gap-5">
+      <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md gap-5">
+        <div className="flex flex-col w-full justify-between gap-5">
+          <h5>Monthly Report</h5>
+          <div className="flex flex-row w-full justify-between">
+            <div className="flex flex-row gap-3">
+              <Button
+                buttonSize="small"
+                buttonType="secondary"
+                icon={ChevronLeft}
+                onClick={() => setSelectedMonth(addMonths(selectedMonth, -1))}
+              />
 
-          <DateInput
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
+              <DateInput
+                value={selectedMonth}
+                type="month"
+                onChange={(e) => setSelectedMonth(e.target.value)}
+              />
 
-          <Button
-            buttonSize="small"
-            buttonType="secondary"
-            icon={ChevronRight}
-            onClick={() => setSelectedDate(addDays(selectedDate, 1))}
-          />
-        </div>
-      </div>
-      <div className="grid grid-cols-2 justify-between gap-5 items-center">
-        <DropdownInput
-          label="Sort by User"
-          name="user"
-          value={selectedUser}
-          options={userOptions}
-          placeholder="Select User"
-          onChange={handleFilterUser}
-        />
-        <DropdownInput
-          label="Sort by Patrol Point"
-          name="patrolPoint"
-          value={selectedPatrolPoint}
-          options={patrolPointOptions}
-          placeholder="Select Point"
-          onChange={handleFilterPatrolPoint}
-        />
-      </div>
-      {filteredReports.length === 0 ? (
-        <p className="text-center mt-4">No patrol points found.</p>
-      ) : (
-        <div className="flex flex-col gap-2 w-full justify-between pt-2">
-          <h4 className="text-center">{formatDateToString(selectedDate)}</h4>
-          <div className="grid grid-cols-3 items-center text-center">
-            <h6>Time</h6>
-            <h6>User</h6>
-            <h6>Patrol Point</h6>
+              <Button
+                buttonSize="small"
+                buttonType="secondary"
+                icon={ChevronRight}
+                onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}
+              />
+            </div>
+            <Button
+              type="icon"
+              icon={Search}
+              onClick={handleSearchMonthlyReport}
+            ></Button>
           </div>
-          {filteredReports.length > 0 &&
-            filteredReports.map((report) => (
-              <NavLink
-                to={`/admin/report/${report._id}`}
-                key={report._id}
-                className="grid grid-cols-3 text-center gap-4 px-3 py-2 hover:bg-gray-100 rounded-md justify-between items-center cursor-pointer"
+          {error && <p className="text-red-500 font-semibold mb-2"> {error}</p>}
+          {monthlyReports.length > 0 &&
+            monthlyReports.map((report) => (
+              <div
+                key={report.workLocation._id}
+                className="grid grid-cols-3 gap-3 text-center justify-center items-center"
               >
-                <p>{formatTime(report.createdAt)}</p>
+                <p>{report.workLocation.name}</p>
+                <p>{report.totalReports} Total reports</p>
                 <p>
-                  {report.userId.firstName} {report.userId.lastName}
+                  <Button
+                    className="ml-auto"
+                    icon={Download}
+                    onClick={() => handleGeneratePDF(report.reports)}
+                  >
+                    Download
+                  </Button>
                 </p>
-                <p>{toTitleCase(report.patrolPointId.name)}</p>
-              </NavLink>
+              </div>
             ))}
         </div>
-      )}
-      {filteredReports.length > 0 && filteredReports.at(-1).documentUrl && (
-        <div className="flex flex-row gap-5 items-center pt-3">
-          <p>PDF file generated</p>
-          <a
-            href={filteredReports.at(-1).documentUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            buttonType="secondary"
-          >
-            View Report Document (PDF)
-          </a>
+      </div>
+
+      <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md gap-5">
+        <div className="flex flex-row justify-between items-center">
+          <h5>Report Dashboard</h5>
+          <div className="flex flex-row gap-3">
+            <Button
+              buttonSize="small"
+              buttonType="secondary"
+              icon={ChevronLeft}
+              onClick={() => setSelectedDate(addDays(selectedDate, -1))}
+            />
+
+            <DateInput
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+            />
+
+            <Button
+              buttonSize="small"
+              buttonType="secondary"
+              icon={ChevronRight}
+              onClick={() => setSelectedDate(addDays(selectedDate, 1))}
+            />
+          </div>
         </div>
-      )}
-      {filteredReports.length > 0 && !filteredReports.at(-1).documentUrl && (
-        <div className="flex flex-row gap-5 items-center pt-3">
-          <p>PDF file not generated yet</p>
-          <Button
-            buttonType="primary"
-            onClick={handleGeneratePDF}
-            icon={DownloadIcon}
-          >
-            Download PDF
-          </Button>
+        <div className="grid grid-cols-2 justify-between gap-5 items-center">
+          <DropdownInput
+            label="Sort by User"
+            name="user"
+            value={selectedUser}
+            options={userOptions}
+            placeholder="Select User"
+            onChange={handleFilterUser}
+          />
+          <DropdownInput
+            label="Sort by Patrol Point"
+            name="patrolPoint"
+            value={selectedPatrolPoint}
+            options={patrolPointOptions}
+            placeholder="Select Point"
+            onChange={handleFilterPatrolPoint}
+          />
         </div>
-      )}
+        {filteredReports.length === 0 ? (
+          <p className="text-center mt-4">No reports found.</p>
+        ) : (
+          <div className="flex flex-col gap-2 w-full justify-between pt-2">
+            <h4 className="text-center">{formatDateToString(selectedDate)}</h4>
+            <div className="grid grid-cols-3 items-center text-center">
+              <h6>Time</h6>
+              <h6>User</h6>
+              <h6>Patrol Point</h6>
+            </div>
+            {filteredReports.length > 0 &&
+              filteredReports.map((report) => (
+                <NavLink
+                  to={`/admin/report/${report._id}`}
+                  key={report._id}
+                  className="grid grid-cols-3 text-center gap-4 px-3 py-2 hover:bg-gray-100 rounded-md justify-between items-center cursor-pointer"
+                >
+                  <p>{formatTime(report.createdAt)}</p>
+                  <p>
+                    {report.userId.firstName} {report.userId.lastName}
+                  </p>
+                  <p>{toTitleCase(report.patrolPointId.name)}</p>
+                </NavLink>
+              ))}
+          </div>
+        )}
+        {filteredReports.length > 0 && filteredReports.at(-1).documentUrl && (
+          <div className="flex flex-row gap-5 items-center pt-3">
+            <p>PDF file generated</p>
+            <a
+              href={filteredReports.at(-1).documentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              buttonType="secondary"
+            >
+              View Report Document (PDF)
+            </a>
+          </div>
+        )}
+        {filteredReports.length > 0 && (
+          <div className="flex flex-row gap-5 items-center pt-3">
+            <Button
+              buttonType="primary"
+              onClick={() => handleGeneratePDF(filteredReports)}
+              icon={DownloadIcon}
+            >
+              Download PDF
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

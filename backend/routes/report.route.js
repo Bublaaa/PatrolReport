@@ -3,6 +3,7 @@ import {
   getAllReports,
   getReportDetail,
   getReportByDate,
+  getReportByMonth,
   createReport,
   updateReport,
   deleteReport,
@@ -17,6 +18,7 @@ router.get("/get", getAllReports);
 
 // GET ALL REPORTS
 router.get("/:date", getReportByDate);
+router.get("/month/:month", getReportByMonth);
 
 // GET REPORT DETAIL
 router.get("/get/:id", getReportDetail);

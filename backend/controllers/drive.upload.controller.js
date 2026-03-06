@@ -12,9 +12,20 @@ const REDIRECT_URL = process.env.REDIRECT_URL;
 const oAuth2Client = new google.auth.OAuth2(
   CLIENT_ID,
   CLIENT_SECRET,
-  REDIRECT_URL
+  REDIRECT_URL,
 );
-oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+
+oAuth2Client.setCredentials({
+  refresh_token: REFRESH_TOKEN,
+});
+
+oAuth2Client.on("tokens", (tokens) => {
+  if (tokens.refresh_token) {
+    console.log("New refresh token received");
+  }
+  console.log("Access token refreshed automatically");
+});
+
 const drive = google.drive({ version: "v3", auth: oAuth2Client });
 const DEFAULT_FOLDER_ID = "1e98vZugtTswuNjf-z1-q_sLTQxi7htVc";
 
@@ -46,41 +57,6 @@ export const uploadToDrive = async (file) => {
   }
 };
 
-export const uploadToDriveWithMulter = async (req, res) => {
-  try {
-    const file = req.file;
-    if (!file) {
-      res.status(404).json({ success: false, message: "File not found" });
-    }
-    const response = await drive.files.create({
-      requestBody: {
-        name: file.originalName,
-        parents: ["1e98vZugtTswuNjf-z1-q_sLTQxi7htVc"],
-      },
-      media: {
-        mimeType: file.mimeType,
-        body: fs.createReadStream(file.path),
-      },
-      fields: "id, name, webContentLink, webViewLink",
-    });
-    res.status(200).json({
-      success: true,
-      fileId: response.data.id,
-      fileName: response.data.name,
-      downloadLink: response.data.webContentLink,
-      viewLink: response.data.webViewLink,
-      message: "Success upload file",
-    });
-    return {
-      fileId: response.data.id,
-      fileName: response.data.name,
-      viewLink: response.data.webViewLink,
-    };
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
 // **  DELETE
 export const deleteFromDrive = async (req, res) => {
   const fileId = req.body;
@@ -107,6 +83,15 @@ export const getDriveFolderId = async () => {
   } catch (error) {
     throw new Error(`Get drive folder ID failed: ${error.message}`);
   }
+};
+
+// * REFRESH TOKEN
+export const getAccessToken = async () => {
+  const authUrl = oAuth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope: ["https://www.googleapis.com/auth/drive"],
+    prompt: "consent", // VERY IMPORTANT
+  });
 };
 
 // * SERVICE ACCOUNT
@@ -152,6 +137,41 @@ export const getDriveFolderId = async () => {
 //       fileName: response.data.name,
 //       // driveUrl: response.data.webViewLink,
 //     });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+// export const uploadToDriveWithMulter = async (req, res) => {
+//   try {
+//     const file = req.file;
+//     if (!file) {
+//       res.status(404).json({ success: false, message: "File not found" });
+//     }
+//     const response = await drive.files.create({
+//       requestBody: {
+//         name: file.originalName,
+//         parents: ["1e98vZugtTswuNjf-z1-q_sLTQxi7htVc"],
+//       },
+//       media: {
+//         mimeType: file.mimeType,
+//         body: fs.createReadStream(file.path),
+//       },
+//       fields: "id, name, webContentLink, webViewLink",
+//     });
+//     res.status(200).json({
+//       success: true,
+//       fileId: response.data.id,
+//       fileName: response.data.name,
+//       downloadLink: response.data.webContentLink,
+//       viewLink: response.data.webViewLink,
+//       message: "Success upload file",
+//     });
+//     return {
+//       fileId: response.data.id,
+//       fileName: response.data.name,
+//       viewLink: response.data.webViewLink,
+//     };
 //   } catch (error) {
 //     res.status(500).json({ success: false, message: error.message });
 //   }

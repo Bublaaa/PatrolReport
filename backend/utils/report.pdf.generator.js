@@ -304,22 +304,29 @@ export const generateDownloadPDF = async (res, reports, imagesByReportId) => {
   doc.pipe(res);
 
   doc.font("Helvetica-Bold").fontSize(14).text("Report Patrol");
-  doc.font("Helvetica").fontSize(10).text(`Date : ${dateString}`);
+  // doc.font("Helvetica").fontSize(10).text(`Date : ${dateString}`);
 
   doc.moveDown(1);
   drawDivider(doc);
 
   for (const report of reports) {
+    const firstName = report.userId?.firstName ?? "Unknown";
+    const lastName = report.userId?.lastName ?? "";
+
+    const user = `${firstName} ${lastName}`.trim();
     await renderReportBlock(
       doc,
       {
         id: report._id,
-        time: new Date(report.createdAt).toLocaleTimeString("id-ID", {
+        time: new Date(report.createdAt).toLocaleString("id-ID", {
           timeZone: "Asia/Jakarta",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
           hour: "2-digit",
           minute: "2-digit",
         }),
-        user: `${report.userId.firstName} ${report.userId.lastName}`,
+        user: user,
         point: report.patrolPointId.name,
         text: report.report,
       },
@@ -358,6 +365,10 @@ export const generateUploadPDF = async (reports, imagesByReportId) => {
   drawDivider(doc);
 
   for (const report of reports) {
+    const firstName = report.userId?.firstName ?? "Unknown";
+    const lastName = report.userId?.lastName ?? "";
+
+    const user = `${firstName} ${lastName}`.trim();
     await renderReportBlock(
       doc,
       {
@@ -367,7 +378,7 @@ export const generateUploadPDF = async (reports, imagesByReportId) => {
           hour: "2-digit",
           minute: "2-digit",
         }),
-        user: `${report.userId.firstName} ${report.userId.lastName}`,
+        user: user,
         point: report.patrolPointId.name,
         text: report.report,
       },

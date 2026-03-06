@@ -12,6 +12,7 @@ axios.defaults.withCredentials = true;
 export const useAuthStore = create((set, get) => ({
   users: [],
   userDetail: null,
+  loggedInUserDetail: null,
   isAuthenticated: false,
   error: null,
   isLoading: false,
@@ -27,7 +28,7 @@ export const useAuthStore = create((set, get) => ({
       });
       set({
         isAuthenticated: true,
-        userDetail: response.data.user,
+        loggedInUserDetail: response.data.user,
         error: null,
         isLoading: false,
       });
@@ -45,6 +46,7 @@ export const useAuthStore = create((set, get) => ({
     try {
       await axios.post(`${API_URL}auth/logout`);
       set({
+        loggedInUserDetail: null,
         userDetail: null,
         isAuthenticated: false,
         error: null,
@@ -61,7 +63,7 @@ export const useAuthStore = create((set, get) => ({
     try {
       const response = await axios.get(`${API_URL}auth/check-auth`);
       set({
-        userDetail: response.data.user,
+        loggedInUserDetail: response.data.auth,
         isAuthenticated: true,
         isCheckingAuth: false,
       });
@@ -70,13 +72,13 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  //* FETCH ADMIN
+  //* FETCH ALL ACCOUNT
   getAllAuth: async () => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get(`${API_URL}auth/get`);
       set({ users: response.data.auths, isLoading: false });
-      toast.success("Admin fetched successfully");
+      toast.success("All accounts fetched successfully");
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error fetching auth";
@@ -88,13 +90,44 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  createAuth: async (username, password, userId) => {
+  //* FETCH ACCOUNT DETAIL
+  getAuthDetail: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.get(`${API_URL}auth/get/${id}`);
+      set({ userDetail: response.data.authDetail, isLoading: false });
+      toast.success("Account fetched successfully");
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Error fetching auth";
+      set({
+        error: errorMessage,
+        isLoading: false,
+      });
+      toast.error(errorMessage);
+    }
+  },
+
+  // * CREATE ACCOUNT
+  createAuth: async (
+    username,
+    password,
+    firstName,
+    middleName,
+    lastName,
+    workLocationId,
+    position,
+  ) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.post(`${API_URL}auth/create`, {
         username,
         password,
-        userId,
+        firstName,
+        middleName,
+        lastName,
+        workLocationId,
+        position,
       });
       set({ isLoading: false });
       toast.success("Auth created successfully");
@@ -111,13 +144,25 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  updateAuth: async (id, username, password, userId) => {
+  // * UPDATE ACCOUNT - ADMIN
+  updateAuth: async (
+    id,
+    username,
+    firstName,
+    middleName,
+    lastName,
+    position,
+    workLocationId,
+  ) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.put(`${API_URL}auth/update/${id}`, {
         username,
-        password,
-        userId,
+        firstName,
+        middleName,
+        lastName,
+        workLocationId,
+        position,
       });
       set({ isLoading: false });
       toast.success("Auth updated successfully");
@@ -132,6 +177,41 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
+  // * UPDATE ACCOUNT - USER
+  updateProfile: async (
+    id,
+    username,
+    firstName,
+    middleName,
+    lastName,
+    oldPassword,
+    newPassword,
+  ) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.put(`${API_URL}auth/profile/update/${id}`, {
+        username,
+        oldPassword,
+        newPassword,
+        firstName,
+        middleName,
+        lastName,
+      });
+      set({ isLoading: false, loggedInUserDetail: response.data.auth });
+      return response.data.auth;
+      toast.success("Profile Updated");
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Error updating auth";
+      set({
+        error: errorMessage,
+        isLoading: false,
+      });
+      toast.error(errorMessage);
+    }
+  },
+
+  // * DELETE ACCOUNT
   deleteAuth: async (id) => {
     set({ isLoading: true, error: null });
     try {

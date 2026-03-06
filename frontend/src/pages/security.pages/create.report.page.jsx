@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Loader } from "lucide-react";
-import { usePatrolPointStore } from "../stores/patrol.point.store.js";
-import { useReportStore } from "../stores/report.store.js";
-import { useUserStore } from "../stores/user.store.js";
+import { usePatrolPointStore } from "../../stores/patrol.point.store.js";
+import { useReportStore } from "../../stores/report.store.js";
 import {
   DropdownInput,
   TextareaInput,
   CameraInput,
-} from "../components/inputs.jsx";
-import { requestLocation } from "../utils/location";
-import { toTitleCase } from "../utils/toTitleCase.js";
-import { compressImages } from "../utils/compressImage.js";
+} from "../../components/inputs.jsx";
+import { requestLocation } from "../../utils/location.js";
+import { toTitleCase } from "../../utils/toTitleCase.js";
+import { compressImages } from "../../utils/compressImage.js";
 import toast from "react-hot-toast";
-import Button from "../components/button.jsx";
+import Button from "../../components/button.jsx";
+import { useAuthStore } from "../../stores/auth.store.js";
 
 const CreateReportPage = () => {
   // * USE PARAMS
@@ -21,12 +21,12 @@ const CreateReportPage = () => {
   // * USE STORE
   const { fetchPatrolPointDetail, isLoading, patrolPointDetail } =
     usePatrolPointStore();
-  const { users, fetchUsers } = useUserStore();
+  const { loggedInUserDetail } = useAuthStore();
   const { createReport } = useReportStore();
 
   // * USE STATE
   const initialReportData = {
-    userId: "",
+    userId: loggedInUserDetail._id,
     patrolPointId: "",
     report: "",
     images: [],
@@ -108,10 +108,9 @@ const CreateReportPage = () => {
   useEffect(() => {
     if (id) {
       fetchPatrolPointDetail(id);
-      fetchUsers();
       checkLocationPermission();
     }
-  }, [id, fetchPatrolPointDetail, fetchUsers]);
+  }, [id, fetchPatrolPointDetail]);
 
   useEffect(() => {
     setReportData((prev) => ({
@@ -127,12 +126,6 @@ const CreateReportPage = () => {
     reportData.patrolPointId &&
     reportData.latitude &&
     reportData.longitude;
-
-  // * POPULATE USER OPTION
-  const userOptions = users.map((user) => ({
-    label: `${user.firstName} ${user.lastName}`,
-    value: user._id,
-  }));
 
   if (isLoading || !patrolPointDetail) {
     return <Loader className="w-6 h-6 animate-spin mx-auto" />;
@@ -185,25 +178,13 @@ const CreateReportPage = () => {
             {locationGranted === false && (
               <div className="p-2 items-center text-center bg-red-100 rounded-lg">
                 <p className="text-red-500">
-                  ❌ Location permission is required for adding new outpost.
+                  ❌ Location permission is required for create new report.
                 </p>
               </div>
             )}
           </div>
 
           <div className="flex flex-col gap-5 px-6 py-4 bg-white shadow-md rounded-lg">
-            <DropdownInput
-              label="Select User"
-              name="userId"
-              value={reportData.userId}
-              options={userOptions}
-              onChange={(e) =>
-                setReportData((prev) => ({
-                  ...prev,
-                  userId: e.target.value,
-                }))
-              }
-            />
             <TextareaInput
               label="Report Description"
               name="report"

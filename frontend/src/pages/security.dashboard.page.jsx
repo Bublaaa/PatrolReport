@@ -5,13 +5,10 @@ import toast from "react-hot-toast";
 import Button from "../components/button.jsx";
 import MenuLink from "../components/menu.link.jsx";
 
-const AdminDashboard = () => {
+const SecurityDashboard = () => {
   const menuLinks = [
-    { label: "User", icon: "Users", href: "/admin/user" },
-    { label: "Work Location", icon: "Building2", href: "/admin/work-location" },
-    { label: "Patrol Point", icon: "MapPin", href: "/admin/patrol-point" },
-    { label: "Report", icon: "ClipboardList", href: "/admin/report" },
-    { label: "Setting", icon: "Settings", href: "/admin/setting" },
+    { label: "Scan", icon: "MapPin", href: "/security/scan" },
+    { label: "Setting", icon: "Settings", href: "/security/setting" },
   ];
   const { loggedInUserDetail, logout } = useAuthStore();
   const handleLogout = async (e) => {
@@ -24,7 +21,7 @@ const AdminDashboard = () => {
   };
   return (
     <div className="w-full h-screen items-end bg-white-shadow overflow-y-auto scrollbar-hidden">
-      <div className="max-w-3xl w-full mx-auto h-fit p-3">
+      <div className="max-w-3xl w-full mx-auto h-fit">
         <div className="flex flex-col gap-5">
           <div className="flex flex-row justify-between bg-white rounded-lg bg-white shadow-md px-6 py-4">
             <h5>
@@ -40,7 +37,7 @@ const AdminDashboard = () => {
           {/* NAVIGATION */}
           <MenuLink links={menuLinks} />
           {/* CONTENT */}
-          <div className="flex justify-center items-start w-full h-full overflow-y-auto scrollbar-hidden p-2 pb-10">
+          <div className="flex justify-center items-start w-full h-full overflow-y-auto scrollbar-hidden pb-10">
             <Outlet />
           </div>
         </div>
@@ -48,4 +45,4 @@ const AdminDashboard = () => {
     </div>
   );
 };
-export default AdminDashboard;
+export default SecurityDashboard;

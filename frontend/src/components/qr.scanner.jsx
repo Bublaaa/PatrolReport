@@ -31,16 +31,16 @@ const QrScanner = ({ onScanSuccess }) => {
         await scannerRef.current.start(
           camera.id,
 
-          { fps: 10, qrbox: { width: 250, height: 250 } },
+          { fps: 10, qrbox: { width: 300, height: 300 } },
           async (decodedText) => {
             if (isDebounced) return;
             setIsDebounced(true);
             await stopScanner();
             onScanSuccess?.(decodedText);
-            navigate("/", { replace: true });
-            setTimeout(() => {
-              window.location.reload();
-            }, 5000);
+            // navigate("/", { replace: true });
+            // setTimeout(() => {
+            //   window.location.reload();
+            // }, 5000);
           },
           async (errorMessage) => {
             console.warn("QR Scan Error:", errorMessage);
@@ -57,7 +57,7 @@ const QrScanner = ({ onScanSuccess }) => {
     startScanner();
 
     return () => stopScanner();
-  }, [onScanSuccess, isDebounced, navigate]);
+  }, [onScanSuccess, isDebounced]);
 
   const stopScanner = async () => {
     if (scannerRef.current && isScanning.current) {

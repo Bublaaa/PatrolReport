@@ -9,8 +9,9 @@ import patrolPointRoutes from "./routes/patrol.point.route.js";
 import reportRoutes from "./routes/report.route.js";
 import reportImagesRoutes from "./routes/report.images.route.js";
 import systemSettingRoutes from "./routes/system.setting.route.js";
+import workLocationRoutes from "./routes/work.location.route.js";
 import { connection } from "./database/connection.js";
-import { startDailyReport, cleanReportFiles } from "./services/scheduler.js";
+import { startReportCron } from "./services/scheduler.js";
 import driveUploadRoutes from "./routes/drive.upload.route.js";
 
 dotenv.config();
@@ -31,6 +32,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/patrol-point", patrolPointRoutes);
 app.use("/api/report", reportRoutes);
 app.use("/api/report-images", reportImagesRoutes);
+app.use("/api/work-location", workLocationRoutes);
 
 app.use("/api/drive", driveUploadRoutes);
 app.use("/api/system-setting", systemSettingRoutes);
@@ -46,8 +48,7 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-startDailyReport();
-cleanReportFiles();
+startReportCron();
 
 app.listen(port, () => {
   connection();
