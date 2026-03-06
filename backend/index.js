@@ -11,7 +11,7 @@ import reportImagesRoutes from "./routes/report.images.route.js";
 import systemSettingRoutes from "./routes/system.setting.route.js";
 import workLocationRoutes from "./routes/work.location.route.js";
 import { connection } from "./database/connection.js";
-import { startDailyReport, cleanReportFiles } from "./services/scheduler.js";
+import { startReportCron } from "./services/scheduler.js";
 import driveUploadRoutes from "./routes/drive.upload.route.js";
 
 dotenv.config();
@@ -48,8 +48,7 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-startDailyReport();
-cleanReportFiles();
+startReportCron();
 
 app.listen(port, () => {
   connection();

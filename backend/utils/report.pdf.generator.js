@@ -310,6 +310,10 @@ export const generateDownloadPDF = async (res, reports, imagesByReportId) => {
   drawDivider(doc);
 
   for (const report of reports) {
+    const firstName = report.userId?.firstName ?? "Unknown";
+    const lastName = report.userId?.lastName ?? "";
+
+    const user = `${firstName} ${lastName}`.trim();
     await renderReportBlock(
       doc,
       {
@@ -322,7 +326,7 @@ export const generateDownloadPDF = async (res, reports, imagesByReportId) => {
           hour: "2-digit",
           minute: "2-digit",
         }),
-        user: `${report.userId.firstName} ${report.userId.lastName}`,
+        user: user,
         point: report.patrolPointId.name,
         text: report.report,
       },
@@ -361,6 +365,10 @@ export const generateUploadPDF = async (reports, imagesByReportId) => {
   drawDivider(doc);
 
   for (const report of reports) {
+    const firstName = report.userId?.firstName ?? "Unknown";
+    const lastName = report.userId?.lastName ?? "";
+
+    const user = `${firstName} ${lastName}`.trim();
     await renderReportBlock(
       doc,
       {
@@ -370,7 +378,7 @@ export const generateUploadPDF = async (reports, imagesByReportId) => {
           hour: "2-digit",
           minute: "2-digit",
         }),
-        user: `${report.userId.firstName} ${report.userId.lastName}`,
+        user: user,
         point: report.patrolPointId.name,
         text: report.report,
       },
