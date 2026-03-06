@@ -14,6 +14,11 @@ import workLocationRoutes from "./routes/work.location.route.js";
 import { connection } from "./database/connection.js";
 import { startReportCron } from "./services/scheduler.js";
 import driveUploadRoutes from "./routes/drive.upload.route.js";
+import {
+  UPLOAD_ROOT,
+  REPORT_IMAGES_DIR,
+  REPORT_PDF_DIR,
+} from "./utils/storage.path.js";
 
 dotenv.config();
 
