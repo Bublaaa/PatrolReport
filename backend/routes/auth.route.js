@@ -5,8 +5,10 @@ import {
   checkAuth,
   createAuth,
   updateAuth,
+  updateProfile,
   deleteAuth,
   getAllAuths,
+  getAuthDetail,
 } from "../controllers/auth.controller.js";
 import { verifyToken } from "../middlewares/verifyToken.js";
 
@@ -14,10 +16,12 @@ const router = express.Router();
 
 router.get("/check-auth", verifyToken, checkAuth);
 router.get("/get", getAllAuths);
+router.get("/get/:id", getAuthDetail);
 router.post("/login", login);
 router.post("/logout", logout);
 router.post("/create", createAuth);
-router.put("/update", updateAuth);
+router.put("/update/:id", updateAuth);
+router.put("/profile/update/:id", updateProfile);
 router.delete("/delete/:id", deleteAuth);
 
 export default router;

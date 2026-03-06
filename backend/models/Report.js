@@ -23,7 +23,7 @@ const reportSchema = new mongoose.Schema(
       type: String,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Report = mongoose.model("Report", reportSchema);

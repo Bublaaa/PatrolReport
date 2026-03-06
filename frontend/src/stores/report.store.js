@@ -11,6 +11,7 @@ axios.defaults.withCredentials = true;
 
 export const useReportStore = create((set, get) => ({
   reports: [],
+  monthlyReports: [],
   reportDetail: null,
   error: null,
   isLoading: false,
@@ -37,6 +38,23 @@ export const useReportStore = create((set, get) => ({
       const errorMessage =
         error.response?.data?.message || "Error fetching reports";
       set({ reports: [], error: errorMessage, isLoading: false });
+      toast.error(errorMessage);
+    }
+  },
+
+  fetchReportDetailByMonth: async (month) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.get(`${API_URL}report/month/${month}`);
+      set({
+        monthlyReports: response.data.reports || [],
+        isLoading: false,
+      });
+      toast.success("Successfully fetch reports");
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Error fetching reports";
+      set({ monthlyReports: [], error: errorMessage, isLoading: false });
       toast.error(errorMessage);
     }
   },
@@ -119,17 +137,17 @@ export const useReportStore = create((set, get) => ({
     }
   },
 
-  downloadPDF: async (selectedDate) => {
+  downloadPDF: async (reports) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.post(
         `${API_URL}report/export/pdf`,
         {
-          date: selectedDate,
+          reports: reports,
         },
         {
           responseType: "blob",
-        }
+        },
       );
       set({ isLoading: false });
       return response;
