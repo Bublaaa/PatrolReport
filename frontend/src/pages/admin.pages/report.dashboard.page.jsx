@@ -96,10 +96,10 @@ const ReportPageDashboard = () => {
   };
 
   // * GENERATE PDF TO DOWNLOAD
-  const handleGeneratePDF = async (reports) => {
+  const handleGeneratePDF = async (reports, kind, workLocation = null) => {
     try {
       if (reports.length !== 0) {
-        const res = await downloadPDF(reports);
+        const res = await downloadPDF(reports, kind, workLocation);
 
         const disposition = res.headers["content-disposition"];
         const filenameMatch = disposition?.match(/filename="?(.+)"?/);
@@ -232,7 +232,13 @@ const ReportPageDashboard = () => {
                   <Button
                     className="ml-auto"
                     icon={Download}
-                    onClick={() => handleGeneratePDF(report.reports)}
+                    onClick={() =>
+                      handleGeneratePDF(
+                        report.reports,
+                        "monthly",
+                        report.workLocation.name,
+                      )
+                    }
                   >
                     Download
                   </Button>
@@ -327,7 +333,7 @@ const ReportPageDashboard = () => {
           <div className="flex flex-row gap-5 items-center pt-3">
             <Button
               buttonType="primary"
-              onClick={() => handleGeneratePDF(filteredReports)}
+              onClick={() => handleGeneratePDF(filteredReports, "daily")}
               icon={DownloadIcon}
             >
               Download PDF

@@ -7,17 +7,19 @@ import {
   createReport,
   updateReport,
   deleteReport,
+  downloadPDF,
 } from "../controllers/report.controller.js";
 import { uploadReportImages } from "../middlewares/multer.js";
-import { downloadPDF } from "../controllers/report.controller.js";
 
 const router = express.Router();
 
 // GET ALL REPORTS
 router.get("/get", getAllReports);
 
+router.post("/export/pdf", downloadPDF);
+
 // GET ALL REPORTS
-router.get("/:date", getReportByDate);
+router.get("/date/:date", getReportByDate);
 router.get("/month/:month", getReportByMonth);
 
 // GET REPORT DETAIL
@@ -26,8 +28,6 @@ router.get("/get/:id", getReportDetail);
 // CREATE NEW REPORT
 // router.post("/create", createReport);
 router.post("/create", uploadReportImages.array("images", 5), createReport);
-
-router.post("/export/pdf", downloadPDF);
 
 // UPDATE REPORT
 router.put("/update/:id", updateReport);

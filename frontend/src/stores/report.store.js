@@ -23,7 +23,9 @@ export const useReportStore = create((set, get) => ({
       const formattedDate =
         typeof date === "string" ? date : date.toISOString().split("T")[0];
 
-      const response = await axios.get(`${API_URL}report/${formattedDate}`);
+      const response = await axios.get(
+        `${API_URL}report/date/${formattedDate}`,
+      );
 
       set({
         reports: response.data.reports || [],
@@ -137,15 +139,27 @@ export const useReportStore = create((set, get) => ({
     }
   },
 
-  downloadPDF: async (reports) => {
+  downloadPDF: async (reports, kind, workLocation = null) => {
+    console.log(reports, kind, workLocation);
+    const cleanedReports = reports.map((report) => ({
+      _id: report._id,
+      createdAt: report.createdAt,
+      report: report.report,
+      userId: report.userId,
+      patrolPointId: report.patrolPointId,
+      documentUrl: report.documentUrl,
+      workLocation: workLocation,
+    }));
     set({ isLoading: true, error: null });
     try {
       const response = await axios.post(
         `${API_URL}report/export/pdf`,
         {
-          reports: reports,
+          reports: cleanedReports,
+          workLocation,
         },
         {
+          params: { kind },
           responseType: "blob",
         },
       );

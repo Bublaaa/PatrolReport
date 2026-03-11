@@ -2,7 +2,10 @@ import { Auth } from "../models/Auth.js";
 import { Report } from "../models/Report.js";
 import { PatrolPoint } from "../models/PatrolPoint.js";
 import { ReportImages } from "../models/ReportImages.js";
-import { generateDownloadPDF } from "../utils/report.pdf.generator.js";
+import {
+  generateDownloadPDF,
+  generateRangedReportPDF,
+} from "../utils/report.pdf.generator.js";
 import { isWithinPatrolRadius } from "../../frontend/src/utils/location.js";
 import { fromZonedTime } from "date-fns-tz";
 
@@ -132,6 +135,7 @@ export const getReportByMonth = async (req, res) => {
               _id: "$_id",
               report: "$report",
               createdAt: "$createdAt",
+              documentUrl: "$documentUrl",
               userId: {
                 _id: "$user._id",
                 firstName: "$user.firstName",
@@ -375,43 +379,41 @@ export const deleteReport = async (req, res) => {
 // * GENERATE PDF
 export const downloadPDF = async (req, res) => {
   try {
+    console.log("QUERY:", req.query);
+    console.log("BODY:", req.body);
+
     const { reports } = req.body;
+    const { kind } = req.query;
+    console.log("KIND:", kind);
 
-    // const start = new Date(date);
-    // start.setHours(0, 0, 0, 0);
-
-    // const end = new Date(date);
-    // end.setHours(23, 59, 59, 999);
-
-    // const query = {
-    //   createdAt: { $gte: start, $lte: end },
-    // };
-
-    // const reports = await Report.find(query)
-    //   .populate("userId", "firstName lastName")
-    //   .populate("patrolPointId", "name")
-    //   .sort({ createdAt: 1 });
-
-    if (!reports.length) {
+    if (!reports || reports.length === 0) {
       return res.status(404).json({ message: "No reports found" });
     }
 
-    const reportIds = reports.map((report) => report._id);
-    const reportImagesByReportId = await ReportImages.find({
-      reportId: { $in: reportIds },
-    });
+    if (kind === "daily") {
+      const reportIds = reports.map((report) => report._id);
+      const reportImagesByReportId = await ReportImages.find({
+        reportId: { $in: reportIds },
+      });
 
-    const imagesByReportId = {};
+      const imagesByReportId = {};
 
-    reportImagesByReportId.forEach((image) => {
-      const key = image.reportId.toString();
-      if (!imagesByReportId[key]) {
-        imagesByReportId[key] = [];
-      }
-      imagesByReportId[key].push(image);
-    });
+      reportImagesByReportId.forEach((image) => {
+        const key = image.reportId.toString();
+        if (!imagesByReportId[key]) {
+          imagesByReportId[key] = [];
+        }
+        imagesByReportId[key].push(image);
+      });
 
-    generateDownloadPDF(res, reports, imagesByReportId);
+      return generateDownloadPDF(res, reports, imagesByReportId);
+    }
+
+    if (kind === "weekly" || kind === "monthly") {
+      return generateRangedReportPDF(res, reports, kind);
+    }
+
+    // generateDownloadPDF(res, reports, imagesByReportId);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
