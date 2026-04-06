@@ -189,10 +189,10 @@ const ReportPageDashboard = () => {
   return (
     <div className="flex flex-col w-full gap-5">
       <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md gap-5">
-        <div className="flex flex-col w-full justify-between gap-5">
+        <div className="flex flex-col w-full justify-between gap-1">
           <h5>Monthly Report</h5>
-          <div className="flex flex-row w-full justify-between">
-            <div className="flex flex-row gap-3">
+          <div className="grid md:grid-cols-2 grid-cols-1 gap-2 w-full justify-between">
+            <div className="flex flex-row gap-2 w-fill">
               <Button
                 buttonSize="small"
                 buttonType="secondary"
@@ -214,7 +214,7 @@ const ReportPageDashboard = () => {
               />
             </div>
             <Button
-              type="icon"
+              buttonSize="medium"
               icon={Search}
               onClick={handleSearchMonthlyReport}
             ></Button>
@@ -249,7 +249,7 @@ const ReportPageDashboard = () => {
       </div>
 
       <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md gap-5">
-        <div className="flex flex-row justify-between items-center">
+        <div className="flex md:flex-row flex-col justify-between gap-1">
           <h5>Report Dashboard</h5>
           <div className="flex flex-row gap-3">
             <Button

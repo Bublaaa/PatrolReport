@@ -140,7 +140,6 @@ export const useReportStore = create((set, get) => ({
   },
 
   downloadPDF: async (reports, kind, workLocation = null) => {
-    console.log(reports, kind, workLocation);
     const cleanedReports = reports.map((report) => ({
       _id: report._id,
       createdAt: report.createdAt,

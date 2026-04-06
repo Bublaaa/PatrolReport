@@ -129,7 +129,7 @@ const UserPageDashboard = () => {
           </Button>
         </NavLink>
       </div>
-      <div className="grid grid-cols-4 gap-5 items-center pt-4 pb-2">
+      <div className="grid md:grid-cols-4 grid-cols-2 gap-5 items-center pt-4 pb-2">
         <DropdownInput
           name="position"
           value={selectedPosition}
@@ -181,15 +181,7 @@ const UserPageDashboard = () => {
               </p>
               <p className="text-center">{user.workLocationId.name}</p>
 
-              <div className="ml-auto flex flex-row gap-2 items-end">
-                <Button
-                  className="delete-btn"
-                  buttonSize="small"
-                  buttonType="danger"
-                  icon={Trash2}
-                  data-id={user._id}
-                  data-name={user.firstName + user.lastName}
-                ></Button>
+              <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
                 <NavLink to={`/admin/user/${user._id}`}>
                   <Button
                     buttonType="secondary"
@@ -197,6 +189,14 @@ const UserPageDashboard = () => {
                     icon={PenBoxIcon}
                   />
                 </NavLink>
+                <Button
+                  className="delete-btn"
+                  buttonSize="icon"
+                  buttonType="danger"
+                  icon={Trash2}
+                  data-id={user._id}
+                  data-name={user.firstName + user.lastName}
+                ></Button>
               </div>
             </div>
           ))}

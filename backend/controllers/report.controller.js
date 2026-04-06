@@ -379,12 +379,8 @@ export const deleteReport = async (req, res) => {
 // * GENERATE PDF
 export const downloadPDF = async (req, res) => {
   try {
-    console.log("QUERY:", req.query);
-    console.log("BODY:", req.body);
-
     const { reports } = req.body;
     const { kind } = req.query;
-    console.log("KIND:", kind);
 
     if (!reports || reports.length === 0) {
       return res.status(404).json({ message: "No reports found" });
