@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import axios from "../utils/axios";
 import toast from "react-hot-toast";
 
 const API_URL =

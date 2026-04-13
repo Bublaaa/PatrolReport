@@ -9,7 +9,7 @@ export const login = async (req, res) => {
     if (!username || !password) {
       return res.status(400).json({
         success: false,
-        message: "Username and password are required",
+        message: req.t("common.required_fields"),
       });
     }
     const auth = await Auth.findOne({ username }).populate(
@@ -20,14 +20,14 @@ export const login = async (req, res) => {
     if (!auth) {
       return res.status(400).json({
         success: false,
-        message: "Invalid credentials",
+        message: req.t("auth.invalid_credentials"),
       });
     }
     const isPasswordValid = await bcrypt.compare(password, auth.password);
     if (!isPasswordValid) {
       return res.status(400).json({
         success: false,
-        message: "Invalid credentials",
+        message: req.t("auth.invalid_credentials"),
       });
     }
     generateTokenAndSetCookie(res, auth._id);
@@ -36,18 +36,22 @@ export const login = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Logged in successfully",
+      message: req.t("auth.login_success"),
       user: auth,
     });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res
+      .status(400)
+      .json({ success: false, message: req.t("common.server_error") });
   }
 };
 
 //* LOGOUT
 export const logout = async (req, res) => {
   res.clearCookie("token");
-  res.status(200).json({ success: true, message: "Logged out successfully" });
+  res
+    .status(200)
+    .json({ success: true, message: req.t("auth.logout_success") });
 };
 
 //* CHECK AUTH
@@ -63,7 +67,7 @@ export const checkAuth = async (req, res) => {
     if (!auth) {
       return res.status(404).json({
         success: false,
-        message: "User not found",
+        message: req.t("auth.user_not_found"),
       });
     }
 
@@ -74,7 +78,7 @@ export const checkAuth = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: req.t("common.server_error"),
     });
   }
 };
@@ -101,13 +105,13 @@ export const createAuth = async (req, res) => {
     ) {
       return res
         .status(400)
-        .json({ success: false, message: "All fields are required" });
+        .json({ success: false, message: req.t("common.required_fields") });
     }
     const isAlreadyExist = await Auth.findOne({ username });
     if (isAlreadyExist) {
       return res
         .status(400)
-        .json({ success: false, message: "Username already exists" });
+        .json({ success: false, message: req.t("auth.user_already_exists") });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -123,11 +127,13 @@ export const createAuth = async (req, res) => {
     await newAuth.save();
     res.status(201).json({
       success: true,
-      message: "Auth created successfully",
+      message: req.t("auth.create_success"),
       auth: newAuth,
     });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res
+      .status(400)
+      .json({ success: false, message: req.t("common.server_error") });
   }
 };
 
@@ -146,7 +152,7 @@ export const updateProfile = async (req, res) => {
     if (!username || !firstName || !lastName) {
       return res.status(400).json({
         success: false,
-        message: "All fields are required",
+        message: req.t("common.required_fields"),
       });
     }
 
@@ -154,7 +160,7 @@ export const updateProfile = async (req, res) => {
     if (!auth) {
       return res.status(404).json({
         success: false,
-        message: "Account not found",
+        message: req.t("auth.user_not_found"),
       });
     }
 
@@ -169,7 +175,7 @@ export const updateProfile = async (req, res) => {
       if (!oldPassword) {
         return res.status(400).json({
           success: false,
-          message: "Old password is required",
+          message: req.t("auth.old_password_required"),
         });
       }
 
@@ -178,7 +184,7 @@ export const updateProfile = async (req, res) => {
       if (!isPasswordValid) {
         return res.status(400).json({
           success: false,
-          message: "Invalid old password",
+          message: req.t("auth.invalid_old_password"),
         });
       }
 
@@ -191,13 +197,13 @@ export const updateProfile = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Profile updated successfully",
+      message: req.t("auth.update_success"),
       auth: updatedAccount,
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: req.t("common.server_error"),
     });
   }
 };
@@ -219,7 +225,7 @@ export const updateAuth = async (req, res) => {
     if (!username || !firstName || !lastName || !workLocationId || !position) {
       return res.status(400).json({
         success: false,
-        message: "All required fields must be filled",
+        message: req.t("common.required_fields"),
       });
     }
 
@@ -227,7 +233,7 @@ export const updateAuth = async (req, res) => {
     if (!auth) {
       return res.status(404).json({
         success: false,
-        message: "User not found",
+        message: req.t("auth.user_not_found"),
       });
     }
     if (username && username !== auth.username) {
@@ -239,7 +245,7 @@ export const updateAuth = async (req, res) => {
       if (usernameExists) {
         return res.status(400).json({
           success: false,
-          message: "Username already exists",
+          message: req.t("auth.user_already_exists"),
         });
       }
     }
@@ -252,7 +258,7 @@ export const updateAuth = async (req, res) => {
     if (isLastAdmin) {
       return res.status(400).json({
         success: false,
-        message: "Cannot change the last admin account",
+        message: req.t("auth.last_admin_error"),
       });
     }
 
@@ -276,13 +282,13 @@ export const updateAuth = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "User updated successfully",
+      message: req.t("auth.update_success"),
       auth: updatedUser,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: req.t("common.server_error"),
     });
   }
 };
@@ -295,24 +301,26 @@ export const deleteAuth = async (req, res) => {
     if (!auth) {
       return res
         .status(404)
-        .json({ success: false, message: "Auth not found" });
+        .json({ success: false, message: req.t("auth.user_not_found") });
     }
     const adminCount = await Auth.countDocuments({ position: "admin" });
 
     if (adminCount <= 1 && auth.position === "admin") {
       return res.status(400).json({
         success: false,
-        message: "Cannot delete the last admin account",
+        message: req.t("auth.last_admin_error"),
       });
     }
 
     await Auth.findByIdAndDelete(id);
     res.status(200).json({
       success: true,
-      message: "Auth deleted successfully",
+      message: req.t("auth.delete_success"),
     });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res
+      .status(400)
+      .json({ success: false, message: req.t("common.server_error") });
   }
 };
 
@@ -327,7 +335,9 @@ export const getAllAuths = async (req, res) => {
       auths,
     });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res
+      .status(400)
+      .json({ success: false, message: req.t("common.server_error") });
   }
 };
 
@@ -339,15 +349,17 @@ export const getAuthDetail = async (req, res) => {
     if (!authDetail) {
       res.status(404).json({
         success: false,
-        message: "Account not found",
+        message: req.t("auth.user_not_found"),
       });
     }
     res.status(200).json({
       success: true,
-      message: "Account detail fetched successfully",
+      message: req.t("auth.get_detail_success"),
       authDetail: authDetail,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: req.t("common.server_error") });
   }
 };
