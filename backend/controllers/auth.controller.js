@@ -332,6 +332,7 @@ export const getAllAuths = async (req, res) => {
       .select("-password");
     res.status(200).json({
       success: true,
+      message: req.t("auth.get_all_auth_success"),
       auths,
     });
   } catch (error) {

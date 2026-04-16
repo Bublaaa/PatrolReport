@@ -30,6 +30,7 @@ export const getWorkLocationDetail = async (req, res) => {
     }
     res.status(200).json({
       success: true,
+      message: req.t("work_location.get_detail_success"),
       workLocation,
     });
   } catch (error) {

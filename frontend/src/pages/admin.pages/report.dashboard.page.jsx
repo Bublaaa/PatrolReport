@@ -17,11 +17,13 @@ import {
   formatTime,
 } from "../../utils/dateTimeFormatter.js";
 import Button from "../../components/button.jsx";
+import { set } from "mongoose";
 
 const ReportPageDashboard = () => {
   // * USE STATE
   const [selectedPatrolPoint, setSelectedPatrolPoint] = useState();
   const [selectedUser, setSelectedUser] = useState();
+  const [monthlySearchError, setMonthlySearchError] = useState();
   const [selectedDate, setSelectedDate] = useState(() => {
     const now = new Date();
     const wib = new Date(now.getTime() + 7 * 60 * 60 * 1000);
@@ -93,6 +95,9 @@ const ReportPageDashboard = () => {
   const handleSearchMonthlyReport = () => {
     if (!selectedMonth) return;
     fetchReportDetailByMonth(selectedMonth);
+    if (error) {
+      setMonthlySearchError(error);
+    }
   };
 
   // * GENERATE PDF TO DOWNLOAD
@@ -219,7 +224,12 @@ const ReportPageDashboard = () => {
               onClick={handleSearchMonthlyReport}
             ></Button>
           </div>
-          {error && <p className="text-red-500 font-semibold mb-2"> {error}</p>}
+          {error && (
+            <p className="text-red-500 font-semibold mb-2">
+              {" "}
+              {monthlySearchError}
+            </p>
+          )}
           {monthlyReports.length > 0 &&
             monthlyReports.map((report) => (
               <div

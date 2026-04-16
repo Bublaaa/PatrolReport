@@ -66,18 +66,24 @@ const UserDetailPage = () => {
       toast.error("Please fill all required fields");
       return;
     }
-    await updateAuth(
-      id,
-      username,
-      firstName,
-      middleName,
-      lastName,
-      selectedPosition,
-      selectedWorkLocation,
-    );
-    setTimeout(() => {
-      navigate(-1);
-    }, 1000);
+    try {
+      const updatedAuth = await updateAuth(
+        id,
+        username,
+        firstName,
+        middleName,
+        lastName,
+        selectedPosition,
+        selectedWorkLocation,
+      );
+      if (updatedAuth) {
+        setTimeout(() => {
+          navigate(-1);
+        }, 1000);
+      }
+    } catch (error) {
+      toast.error(error);
+    }
   };
 
   const handleSelectPosition = (e) => {

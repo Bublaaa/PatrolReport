@@ -21,7 +21,12 @@ export const usePatrolPointStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get(`${API_URL}patrol-point/get`);
-      set({ patrolPoints: response.data.patrolPoints, isLoading: false });
+      set({
+        patrolPoints: response.data.patrolPoints,
+        message: response.data.message,
+        isLoading: false,
+      });
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error fetching patrol points";
@@ -37,7 +42,12 @@ export const usePatrolPointStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get(`${API_URL}patrol-point/${id}`);
-      set({ patrolPointDetail: response.data.patrolPoint, isLoading: false });
+      set({
+        patrolPointDetail: response.data.patrolPoint,
+        message: response.data.message,
+        isLoading: false,
+      });
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error fetching patrol point detail";
@@ -59,6 +69,7 @@ export const usePatrolPointStore = create((set, get) => ({
         workLocationId,
       });
       set({ message: response.data.message, isLoading: false });
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error creating patrol point";
@@ -80,6 +91,7 @@ export const usePatrolPointStore = create((set, get) => ({
         workLocationId,
       });
       set({ message: response.data.message, isLoading: false });
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error updating patrol point";
@@ -98,7 +110,7 @@ export const usePatrolPointStore = create((set, get) => ({
         `${API_URL}patrol-point/delete/${id}`,
       );
       set({ message: response.data.message, isLoading: false });
-      toast.error("Success delete patrol point");
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error deleting patrol point";
@@ -121,6 +133,7 @@ export const usePatrolPointStore = create((set, get) => ({
         message: response.data.message,
         isLoading: false,
       });
+      // toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error generating QR code";

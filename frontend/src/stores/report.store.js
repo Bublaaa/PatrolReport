@@ -27,12 +27,13 @@ export const useReportStore = create((set, get) => ({
 
       set({
         reports: response.data.reports || [],
+        message: response.data.message,
         isLoading: false,
       });
       if (response.data.reports.length === 0) {
-        toast.error("Report not found");
+        toast.error(response.data.message);
       } else {
-        toast.success("Successfully fetch reports");
+        toast.success(response.data.message);
       }
     } catch (error) {
       const errorMessage =
@@ -48,9 +49,10 @@ export const useReportStore = create((set, get) => ({
       const response = await axios.get(`${API_URL}report/month/${month}`);
       set({
         monthlyReports: response.data.reports || [],
+        message: response.data.message,
         isLoading: false,
       });
-      toast.success("Successfully fetch reports");
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error fetching reports";
@@ -63,7 +65,12 @@ export const useReportStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get(`${API_URL}report/get`);
-      set({ reports: response.data.reports, isLoading: false });
+      set({
+        reports: response.data.reports,
+        message: response.data.message,
+        isLoading: false,
+      });
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error fetching reports";
@@ -79,7 +86,12 @@ export const useReportStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get(`${API_URL}report/get/${id}`);
-      set({ reportDetail: response.data.report, isLoading: false });
+      set({
+        reportDetail: response.data.report,
+        message: response.data.message,
+        isLoading: false,
+      });
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error fetching report detail";
@@ -105,6 +117,7 @@ export const useReportStore = create((set, get) => ({
         isLoading: false,
       });
       const reportDetail = response.data.report;
+      toast.success(response.data.message);
       return reportDetail;
     } catch (error) {
       const errorMessage =
@@ -126,6 +139,7 @@ export const useReportStore = create((set, get) => ({
         patrolPointId,
       });
       set({ message: response.data.message, isLoading: false });
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error updating report";

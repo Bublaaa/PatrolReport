@@ -34,6 +34,13 @@ export const getReportByDate = async (req, res) => {
       })
       .sort({ createdAt: -1 });
 
+    if (reports.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: req.t("report.report_not_found"),
+        reports: [],
+      });
+    }
     res.status(200).json({
       success: true,
       message: req.t("report.get_detail_success"),
