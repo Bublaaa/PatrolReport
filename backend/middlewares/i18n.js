@@ -25,16 +25,3 @@ export const i18nMiddleware = (req, res, next) => {
 
   next();
 };
-
-const getLanguage = (req) => {
-  const header = req.headers["accept-language"];
-
-  if (!header) return "id";
-
-  const langs = header.split(",").map((l) => l.split(";")[0]);
-
-  if (langs.some((l) => l.startsWith("en"))) return "en";
-  if (langs.some((l) => l.startsWith("id"))) return "id";
-
-  return "id"; // default
-};

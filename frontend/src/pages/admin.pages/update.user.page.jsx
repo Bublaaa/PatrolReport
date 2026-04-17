@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { TextInput, DropdownInput } from "../../components/inputs.jsx";
 import { useAuthStore } from "../../stores/auth.store.js";
 import { useWorkLocationStore } from "../../stores/work.location.store.js";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-hot-toast";
 import { User } from "lucide-react";
 import {
@@ -13,6 +14,7 @@ import {
 import Button from "../../components/button.jsx";
 
 const UserDetailPage = () => {
+  const { t } = useTranslation();
   // * USE PARAMS
   const { id } = useParams();
 
@@ -63,7 +65,7 @@ const UserDetailPage = () => {
       !selectedWorkLocation ||
       !selectedPosition
     ) {
-      toast.error("Please fill all required fields");
+      toast.error(t("error.all_fields_required"));
       return;
     }
     try {
@@ -101,7 +103,9 @@ const UserDetailPage = () => {
       className=" w-full bg-white bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden mx-2"
     >
       <div className="p-8">
-        <h4 className="mb-6 text-center bg-clip-text">Update Account</h4>
+        <h4 className="mb-6 text-center bg-clip-text">
+          {t("update_user_page.title")}
+        </h4>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
@@ -109,7 +113,7 @@ const UserDetailPage = () => {
               <TextInput
                 icon={User}
                 type="text"
-                placeholder="Username"
+                placeholder={t("update_user_page.username_placeholder")}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
@@ -117,14 +121,14 @@ const UserDetailPage = () => {
                 name="workLocation"
                 value={selectedWorkLocation}
                 options={workLocationOptions}
-                placeholder="Select Work Location"
+                placeholder={t("update_user_page.work_location_placeholder")}
                 onChange={handleSelectWorkLocation}
               />
               <DropdownInput
                 name="position"
                 value={selectedPosition}
                 options={positionOptions}
-                placeholder="Select User Position"
+                placeholder={t("update_user_page.position_placeholder")}
                 onChange={handleSelectPosition}
               />
             </div>
@@ -132,21 +136,21 @@ const UserDetailPage = () => {
               <TextInput
                 icon={User}
                 type="text"
-                placeholder="Fist Name"
+                placeholder={t("update_user_page.first_name_placeholder")}
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
               />
               <TextInput
                 icon={User}
                 type="text"
-                placeholder="Middle Name"
+                placeholder={t("update_user_page.middle_name_placeholder")}
                 value={middleName}
                 onChange={(e) => setMiddleName(e.target.value)}
               />
               <TextInput
                 icon={User}
                 type="text"
-                placeholder="Last Name"
+                placeholder={t("update_user_page.last_name_placeholder")}
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
               />
@@ -159,7 +163,7 @@ const UserDetailPage = () => {
             type="submit"
             className="w-full"
           >
-            Save
+            {t("update_user_page.update_user_button_label")}
           </Button>
         </form>
       </div>
