@@ -39,6 +39,22 @@ const id = {
     last_name_placeholder: "Nama Belakang",
     update_user_button_label: "Simpan",
   },
+  work_location_dashboard_page: {
+    title: "Dasbor Lokasi Kerja",
+    add_work_location_button_label: "Tambah Lokasi Kerja",
+    delete_modal_title: "Hapus Lokasi Kerja",
+    work_locations_not_found: "Tidak ada lokasi kerja ditemukan.",
+  },
+  add_work_location_page: {
+    title: "Tambah Lokasi Kerja",
+    work_location_name_placeholder: "Nama Lokasi Kerja",
+    work_location_address_placeholder: "Alamat",
+  },
+  update_work_location_page: {
+    title: "Update Lokasi Kerja",
+    work_location_name_placeholder: "Nama Lokasi Kerja",
+    work_location_address_placeholder: "Alamat",
+  },
   delete_modal: {
     confirmation_body_1: "Ketik",
     confirmation_body_2: "untuk mengkonfirmasi penghapusan",

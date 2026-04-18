@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { Building, MapPinHouse } from "lucide-react";
 import { motion } from "framer-motion";
 import { TextInput } from "../../components/inputs.jsx";
-import Button from "../../components/button";
-import { toast } from "react-hot-toast";
 import { Loader } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+import Button from "../../components/button";
 
 const WorkLocationDetailPage = () => {
+  const { t } = useTranslation();
   //* USE PARAMS
   const { id } = useParams();
 
@@ -56,20 +58,26 @@ const WorkLocationDetailPage = () => {
       className=" w-full bg-white bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden mx-2"
     >
       <div className="p-8">
-        <h4 className="mb-6 text-center bg-clip-text">Update Work Location</h4>
+        <h4 className="mb-6 text-center bg-clip-text">
+          {t("update_work_location_page.title")}
+        </h4>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           <TextInput
             icon={Building}
             type="text"
-            placeholder="Work Location Name"
+            placeholder={t(
+              "update_work_location_page.work_location_name_placeholder",
+            )}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
           <TextInput
             icon={MapPinHouse}
             type="text"
-            placeholder="Address"
+            placeholder={t(
+              "update_work_location_page.work_location_address_placeholder",
+            )}
             value={address}
             onChange={(e) => setAddress(e.target.value)}
           />

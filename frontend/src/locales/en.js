@@ -39,6 +39,22 @@ const en = {
     last_name_placeholder: "Last Name",
     update_user_button_label: "Save",
   },
+  work_location_dashboard_page: {
+    title: "Work Location Dashboard",
+    add_work_location_button_label: "Add Work Location",
+    delete_modal_title: "Delete Work Location",
+    work_locations_not_found: "No work locations found.",
+  },
+  add_work_location_page: {
+    title: "Add Work Location",
+    work_location_name_placeholder: "Work Location Name",
+    work_location_address_placeholder: "Address",
+  },
+  update_work_location_page: {
+    title: "Update Work Location",
+    work_location_name_placeholder: "Work Location Name",
+    work_location_address_placeholder: "Address",
+  },
   delete_modal: {
     confirmation_body_1: "Please type",
     confirmation_body_2: "to confirm deletion",

@@ -1,13 +1,15 @@
 import { NavLink } from "react-router-dom";
 import { Plus } from "lucide-react";
-import Modal from "../../components/modal.jsx";
-import Button from "../../components/button.jsx";
 import { DeleteConfirmationForm } from "../../components/delete.confirmation.jsx";
 import { useEffect, useState } from "react";
 import { useWorkLocationStore } from "../../stores/work.location.store.js";
 import { Loader, PenBoxIcon, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import Modal from "../../components/modal.jsx";
+import Button from "../../components/button.jsx";
 
 const WorkLocationDashboardPage = () => {
+  const { t } = useTranslation();
   // * USE STATE
   const [modalState, setModalState] = useState({
     isOpen: false,
@@ -34,7 +36,7 @@ const WorkLocationDashboardPage = () => {
     const deleteButton = e.target.closest(".delete-btn");
     if (deleteButton) {
       openModal(
-        "Delete Account",
+        t("work_location_dashboard_page.delete_modal_title"),
         <DeleteConfirmationForm
           itemName={deleteButton.dataset.name}
           onDelete={deleteWorkLocation}
@@ -62,20 +64,22 @@ const WorkLocationDashboardPage = () => {
         body={modalState.body}
       />
       <div className="flex flex-row justify-between">
-        <h5>Work Location Dashboard</h5>
+        <h5>{t("work_location_dashboard_page.title")}</h5>
         <NavLink to={"/admin/work-location/add"}>
           <Button buttonType="primary" buttonSize="medium" icon={Plus}>
-            Add Work Location
+            {t("work_location_dashboard_page.add_work_location_button_label")}
           </Button>
         </NavLink>
       </div>
 
       {workLocations.length === 0 && (
-        <p className="text-center mt-4">No work locations found.</p>
+        <p className="text-center mt-4">
+          {t("work_location_dashboard_page.work_locations_not_found")}
+        </p>
       )}
 
       <div
-        className="flex flex-col gap-2 w-full justify-between pt-2"
+        className="grid md:grid-cols-2 grid-cols-1 gap-2 w-full justify-between pt-2"
         onClick={(e) => handleDeleteAction(e)}
       >
         {workLocations.length > 0 &&
@@ -86,7 +90,7 @@ const WorkLocationDashboardPage = () => {
             >
               <div className="flex flex-col items-start">
                 <h6>{workLocation.name}</h6>
-                <p>{workLocation.address}</p>
+                <p className="line-clamp-2">{workLocation.address}</p>
               </div>
 
               <div className="flex flex-row gap-2">

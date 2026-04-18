@@ -4,10 +4,12 @@ import { useWorkLocationStore } from "../../stores/work.location.store.js";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { TextInput } from "../../components/inputs.jsx";
+import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import Button from "../../components/button";
 
 const AddWorkLocationPage = () => {
+  const { t } = useTranslation();
   //* USE NAVIGATE
   const navigate = useNavigate();
 
@@ -22,9 +24,10 @@ const AddWorkLocationPage = () => {
   const handleCreateWorkLocation = async (e) => {
     e.preventDefault();
     try {
-      await createWorkLocation(name, address);
-      toast.success("Work location created");
-      navigate(-1);
+      const newWorkLocation = await createWorkLocation(name, address);
+      if (newWorkLocation) {
+        navigate(-1);
+      }
     } catch (error) {
       toast.error(error);
     }
@@ -42,20 +45,26 @@ const AddWorkLocationPage = () => {
       className="w-full bg-white bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl overflow-auto scrollbar-hidden mx-2"
     >
       <div className="p-8">
-        <h2 className="mb-6 text-center bg-clip-text">Add Work Location</h2>
+        <h2 className="mb-6 text-center bg-clip-text">
+          {t("add_work_location_page.title")}
+        </h2>
 
         <form className="space-y-5" onSubmit={handleCreateWorkLocation}>
           <TextInput
             icon={Building}
             type="text"
-            placeholder="Work Location Name"
+            placeholder={t(
+              "add_work_location_page.work_location_name_placeholder",
+            )}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
           <TextInput
             icon={MapPinHouse}
             type="text"
-            placeholder="Work Location Address"
+            placeholder={t(
+              "add_work_location_page.work_location_address_placeholder",
+            )}
             value={address}
             onChange={(e) => setAddress(e.target.value)}
           />
