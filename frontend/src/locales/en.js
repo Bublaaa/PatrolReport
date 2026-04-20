@@ -118,6 +118,13 @@ const en = {
     delete_modal_title: "Delete Report",
     no_patrol_images_found: "No patrol images found.",
   },
+  setting_page: {
+    storage_setting: "Storage Setting (Google Drive)",
+    language_setting: "Language Setting",
+    change_language_label: "Language :",
+    drive_link_label: "Google Drive link :",
+    open_drive_folder_button_label: "Open Drive Folder",
+  },
   delete_modal: {
     confirmation_body_1: "Please type",
     confirmation_body_2: "to confirm deletion",

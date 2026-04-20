@@ -118,6 +118,13 @@ const id = {
     delete_modal_title: "Hapus Laporan",
     no_patrol_images_found: "Tidak ada gambar patroli ditemukan.",
   },
+  setting_page: {
+    storage_setting: "Pengaturan Penyimpanan (Google Drive)",
+    language_setting: "Pengaturan Bahasa",
+    change_language_label: "Bahasa :",
+    drive_link_label: "Google drive tautan :",
+    open_drive_folder_button_label: "Buka Folder Google Drive",
+  },
   delete_modal: {
     confirmation_body_1: "Ketik",
     confirmation_body_2: "untuk mengkonfirmasi penghapusan",

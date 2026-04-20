@@ -9,9 +9,15 @@ const LanguageToggleButton = () => {
   };
 
   return (
-    <button onClick={handleToggle}>
-      {language === "en" ? <EnglishFlagIcon /> : <IndonesiaFlagIcon />}
-    </button>
+    <div
+      className="flex flex-row gap-2 items-center cursor-pointer hover:bg-white-shadow px-3 py-2 rounded-md transition-colors"
+      onClick={handleToggle}
+    >
+      <button>
+        {language === "en" ? <EnglishFlagIcon /> : <IndonesiaFlagIcon />}
+      </button>
+      <h6>{language === "en" ? "English" : "Indonesia"}</h6>
+    </div>
   );
 };
 

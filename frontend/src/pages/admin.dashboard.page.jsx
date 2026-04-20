@@ -4,7 +4,6 @@ import { LucideLogOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import Button from "../components/button.jsx";
-import LanguageToggleButton from "../components/language.toggle.button.jsx";
 import MenuLink from "../components/menu.link.jsx";
 
 const AdminDashboard = () => {
@@ -46,7 +45,6 @@ const AdminDashboard = () => {
               {loggedInUserDetail.firstName} {loggedInUserDetail.lastName}
             </h5>
             <div className="flex flex-row gap-5 items-center">
-              <LanguageToggleButton />
               <Button
                 buttonSize="small"
                 buttonType="secondary"
