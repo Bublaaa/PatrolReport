@@ -1,20 +1,13 @@
 import multer from "multer";
-import fs from "fs";
-import path from "path";
 import crypto from "crypto";
+import { REPORT_PDF_DIR, REPORT_IMAGES_DIR } from "../utils/storage.path.js";
 
-// * DIRECTORY
-const ROOT_DIR = process.cwd();
-
-const uploadDir = path.join(ROOT_DIR, "uploads/report-images");
-const uploadPDFDir = path.join(ROOT_DIR, "uploads/report-pdf");
-
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-if (!fs.existsSync(uploadPDFDir)) {
-  fs.mkdirSync(uploadPDFDir, { recursive: true });
-}
+// if (!fs.existsSync(REPORT_PDF_DIR)) {
+//   fs.mkdirSync(REPORT_PDF_DIR, { recursive: true });
+// }
+// if (!fs.existsSync(REPORT_IMAGES_DIR)) {
+//   fs.mkdirSync(REPORT_IMAGES_DIR, { recursive: true });
+// }
 
 // * IMAGE
 const sanitize = (value, fallback) =>
@@ -22,7 +15,7 @@ const sanitize = (value, fallback) =>
 
 const imageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir);
+    cb(null, REPORT_IMAGES_DIR);
   },
 
   filename: (req, file, cb) => {
@@ -45,10 +38,11 @@ const imageFilter = (req, file, cb) => {
 // * PDF
 const pdfStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadPDFDir);
+    cb(null, REPORT_PDF_DIR);
   },
 
   filename: (req, file, cb) => {
+    const reportDate = req.body?.reportDate ?? new Date();
     const dateString = new Date(reportDate)
       .toLocaleDateString("id-ID", {
         timeZone: "Asia/Jakarta",
@@ -57,7 +51,6 @@ const pdfStorage = multer.diskStorage({
         day: "2-digit",
       })
       .replace(/\//g, "-");
-    // const unique = crypto.randomBytes(4).toString("hex");
 
     cb(null, `${dateString}-report.pdf`);
   },

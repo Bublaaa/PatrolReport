@@ -4,6 +4,7 @@ import { PatrolPoint } from "../models/PatrolPoint.js";
 import { ReportImages } from "../models/ReportImages.js";
 import { generateDownloadPDF } from "../utils/report.pdf.generator.js";
 import { isWithinPatrolRadius } from "../../frontend/src/utils/location.js";
+import { fromZonedTime } from "date-fns-tz";
 
 //* GET BY DATE
 export const getReportByDate = async (req, res) => {
@@ -240,7 +241,6 @@ export const getReportDetail = async (req, res) => {
 export const createReport = async (req, res) => {
   const { userId, patrolPointId, report, latitude, longitude, accuracy } =
     req.body;
-  const images = req.files?.map((f) => f.path) || [];
   try {
     if (
       !userId ||
@@ -271,22 +271,15 @@ export const createReport = async (req, res) => {
       });
     }
 
-    const distance = calculateDistance(
-      latitude,
-      longitude,
-      patrolPoint.latitude,
-      patrolPoint.longitude,
-    );
-    const isAllowedRadius = isWithinPatrolRadius({
+    const result = isWithinPatrolRadius({
       userLat: latitude,
       userLon: longitude,
       pointLat: patrolPoint.latitude,
       pointLon: patrolPoint.longitude,
       gpsAccuracy: accuracy,
     });
-    const allowedRadius = isAllowedRadius.allowedRadius || 15;
 
-    if (distance > allowedRadius) {
+    if (!result.valid) {
       return res.status(403).json({
         success: false,
         message: req.t("report.too_far_from_patrol_point_error"),
@@ -310,15 +303,6 @@ export const createReport = async (req, res) => {
 
       await ReportImages.insertMany(imageDocs);
     }
-
-    // if (req.files?.length > 0) {
-    //   const imageDocs = req.files.map((file) => ({
-    //     reportId: newReport._id,
-    //     filePath: file.path,
-    //   }));
-    //   await ReportImages.insertMany(imageDocs);
-    // }
-
     await newReport.save();
 
     res.status(201).json({
