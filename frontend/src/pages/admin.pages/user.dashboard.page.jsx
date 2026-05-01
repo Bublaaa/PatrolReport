@@ -113,7 +113,7 @@ const UserPageDashboard = () => {
   });
 
   if (isLoading || isWorkLocationLoading) {
-    return <Loader className="w-6h-6 animate-spin mx-auto" />;
+    return <Loader className="w-6 h-6 animate-spin mx-auto" />;
   }
   return (
     <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md">
