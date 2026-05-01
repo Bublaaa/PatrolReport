@@ -15,6 +15,11 @@ import { connection } from "./database/connection.js";
 import { startReportCron } from "./services/scheduler.js";
 import driveUploadRoutes from "./routes/drive.upload.route.js";
 import { i18nMiddleware } from "./middlewares/i18n.js";
+import {
+  UPLOAD_ROOT,
+  REPORT_IMAGES_DIR,
+  REPORT_PDF_DIR,
+} from "./utils/storage.path.js";
 
 dotenv.config();
 
