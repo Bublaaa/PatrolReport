@@ -7,10 +7,12 @@ import { TextInput, DropdownInput } from "../../components/inputs.jsx";
 import { usePatrolPointStore } from "../../stores/patrol.point.store.js";
 import { useWorkLocationStore } from "../../stores/work.location.store.js";
 import { buildDropdownOptions } from "../../utils/constants.js";
+import { useTranslation } from "react-i18next";
 import Button from "../../components/button.jsx";
 import toast from "react-hot-toast";
 
 const UpdatePatrolPointPage = () => {
+  const { t } = useTranslation();
   // * USE PARAMS
   const id = useParams().id;
 
@@ -66,28 +68,29 @@ const UpdatePatrolPointPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (PatrolPointData.name.trim() === "") {
-      toast.error("Patrol Point name is required");
+      toast.error(t("patrol_point_utils.patrol_point_name_required"));
       return;
     }
     if (PatrolPointData.latitude === 0 || PatrolPointData.longitude === 0) {
-      toast.error("Please recalibrate your coordinates");
+      toast.error(t("patrol_point_utils.patrol_point_coordinates_required"));
       return;
     }
     if (!selectedWorkLocation) {
-      toast.error("Patrol Point name is required");
+      toast.error(t("patrol_point_utils.work_location_required"));
       return;
     }
-    await updatePatrolPoint(
+    const updatedPatrolPoint = await updatePatrolPoint(
       id,
       PatrolPointData.name,
       PatrolPointData.latitude,
       PatrolPointData.longitude,
       selectedWorkLocation,
     );
-    toast.success("Success update new patrol point");
-    setTimeout(() => {
-      navigate(-1);
-    }, 1000);
+    if (updatedPatrolPoint) {
+      setTimeout(() => {
+        navigate(-1);
+      }, 1000);
+    }
   };
 
   // * LOAD QR CODE HANDLER
@@ -140,7 +143,7 @@ const UpdatePatrolPointPage = () => {
         transition={{ duration: 0.5 }}
         className="flex flex-row w-full items-center justify-between"
       >
-        <h6>Update Patrol Point</h6>
+        <h6>{t("update_patrol_point_page.title")}</h6>
         <Button
           buttonType={`${
             PatrolPointData.latitude !== 0 ? "primary" : "disabled"
@@ -152,7 +155,7 @@ const UpdatePatrolPointPage = () => {
             checkLocationPermission();
           }}
         >
-          Recalibrate
+          {t("update_patrol_point_page.recalibrate_location_button_label")}
         </Button>
       </motion.div>
       <div className="grid md:grid-cols-4 grid-cols-1 w-full gap-5">
@@ -165,7 +168,9 @@ const UpdatePatrolPointPage = () => {
             />
           )}
           {!qrCode && (
-            <h6 className="text-center text-red-500">QR Code unavailable</h6>
+            <h6 className="text-center text-red-500">
+              {t("update_patrol_point_page.qr_not_available")}
+            </h6>
           )}
           <Button
             buttonType="secondary"
@@ -173,7 +178,7 @@ const UpdatePatrolPointPage = () => {
             onClick={handleDownloadQrCode}
             icon={Download}
           >
-            Download QR
+            {t("update_patrol_point_page.download_qr_button_label")}
           </Button>
         </div>
         <div className="flex w-full flex-col gap-5 md:col-span-3 col-span-1">
@@ -182,13 +187,17 @@ const UpdatePatrolPointPage = () => {
             name="workLocation"
             value={selectedWorkLocation}
             options={workLocationOptions}
-            placeholder="Select Work Location"
+            placeholder={t(
+              "add_patrol_point_page.select_work_location_placeholder",
+            )}
             onChange={handleSelectWorkLocation}
           />
           <TextInput
             type="text"
-            label={"Patrol Point Name"}
-            placeholder="Outpost Name"
+            label={t("update_patrol_point_page.patrol_point_name_filed_label")}
+            placeholder={t(
+              "update_patrol_point_page.patrol_point_name_placeholder",
+            )}
             value={PatrolPointData.name}
             onChange={(e) =>
               setPatrolPointData((prev) => ({
@@ -218,13 +227,15 @@ const UpdatePatrolPointPage = () => {
           </div>
           {locationGranted === null && (
             <div className="p-2 items-center text-center bg-yellow-100 rounded-lg">
-              <p className="text-yellow-500">Checking location permission</p>
+              <p className="text-yellow-500">
+                {t("patrol_point_utils.location_permission_checking")}
+              </p>
             </div>
           )}
           {locationGranted === false && (
             <div className="p-2 items-center text-center bg-red-100 rounded-lg">
               <p className="text-red-500">
-                ❌ Location permission is required for updating patrol point.
+                {t("patrol_point_utils.location_permission_denied")}
               </p>
             </div>
           )}
@@ -239,7 +250,7 @@ const UpdatePatrolPointPage = () => {
         buttonSize="medium"
         icon={SaveIcon}
       >
-        Save
+        {t("update_patrol_point_page.save_patrol_point_button_label")}
       </Button>
     </form>
   );

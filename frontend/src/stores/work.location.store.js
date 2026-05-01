@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import axios from "../utils/axios";
 import toast from "react-hot-toast";
 
 const API_URL =
@@ -21,7 +21,12 @@ export const useWorkLocationStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get(`${API_URL}work-location/get`);
-      set({ workLocations: response.data.workLocations, isLoading: false });
+      set({
+        workLocations: response.data.workLocations,
+        message: response.data.message,
+        isLoading: false,
+      });
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error fetching work locations";
@@ -38,7 +43,12 @@ export const useWorkLocationStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get(`${API_URL}work-location/${id}`);
-      set({ workLocation: response.data.workLocation, isLoading: false });
+      set({
+        workLocation: response.data.workLocation,
+        message: response.data.message,
+        isLoading: false,
+      });
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error fetching work locations";
@@ -59,6 +69,7 @@ export const useWorkLocationStore = create((set, get) => ({
         address,
       });
       set({ message: response.data.message, isLoading: false });
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error fetching work locations";
@@ -79,6 +90,7 @@ export const useWorkLocationStore = create((set, get) => ({
         address,
       });
       set({ message: response.data.message, isLoading: false });
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error fetching work locations";
@@ -98,6 +110,7 @@ export const useWorkLocationStore = create((set, get) => ({
         `${API_URL}work-location/delete/${id}`,
       );
       set({ message: response.data.message, isLoading: false });
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error fetching work locations";

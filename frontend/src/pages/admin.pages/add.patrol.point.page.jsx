@@ -7,10 +7,12 @@ import { TextInput, DropdownInput } from "../../components/inputs.jsx";
 import { usePatrolPointStore } from "../../stores/patrol.point.store.js";
 import { useWorkLocationStore } from "../../stores/work.location.store.js";
 import { buildDropdownOptions } from "../../utils/constants.js";
+import { useTranslation } from "react-i18next";
 import Button from "../../components/button.jsx";
 import toast from "react-hot-toast";
 
 const AddPatrolPointPage = () => {
+  const { t } = useTranslation();
   // * USE STORE
   const { createPatrolPoint, isLoading: isPatrolPointLoading } =
     usePatrolPointStore();
@@ -52,27 +54,28 @@ const AddPatrolPointPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (PatrolPointData.name.trim() === "") {
-      toast.error("Patrol Point name is required");
+      toast.error(t("patrol_point_utils.patrol_point_name_required"));
       return;
     }
     if (PatrolPointData.latitude === 0 || PatrolPointData.longitude === 0) {
-      toast.error("Please recalibrate your coordinates");
+      toast.error(t("patrol_point_utils.patrol_point_coordinates_required"));
       return;
     }
     if (!selectedWorkLocation) {
-      toast.error("Work location is required");
+      toast.error(t("patrol_point_utils.work_location_required"));
       return;
     }
-    await createPatrolPoint(
+    const newPatrolPoint = await createPatrolPoint(
       PatrolPointData.name,
       PatrolPointData.latitude,
       PatrolPointData.longitude,
       selectedWorkLocation,
     );
-    toast.success("Success add new patrol point");
-    setTimeout(() => {
-      navigate(-1);
-    }, 1000);
+    if (newPatrolPoint) {
+      setTimeout(() => {
+        navigate(-1);
+      }, 1000);
+    }
   };
 
   const handleSelectWorkLocation = (e) => {
@@ -103,7 +106,7 @@ const AddPatrolPointPage = () => {
         transition={{ duration: 0.5 }}
         className="flex flex-row w-full items-center justify-between"
       >
-        <h6>New Patrol Point</h6>
+        <h6>{t("add_patrol_point_page.title")}</h6>
         <Button
           buttonType={`${
             PatrolPointData.latitude !== 0 ? "primary" : "disabled"
@@ -115,7 +118,7 @@ const AddPatrolPointPage = () => {
             checkLocationPermission();
           }}
         >
-          Recalibrate
+          {t("add_patrol_point_page.recalibrate_location_button_label")}
         </Button>
       </motion.div>
       <DropdownInput
@@ -123,14 +126,16 @@ const AddPatrolPointPage = () => {
         name="workLocation"
         value={selectedWorkLocation}
         options={workLocationOptions}
-        placeholder="Select Work Location"
+        placeholder={t(
+          "add_patrol_point_page.select_work_location_placeholder",
+        )}
         onChange={handleSelectWorkLocation}
       />
       {/* Patrol Point Name */}
       <TextInput
         type="text"
-        label={"Patrol Point Name"}
-        placeholder="Outpost Name"
+        label={t("add_patrol_point_page.patrol_point_name_filed_label")}
+        placeholder={t("add_patrol_point_page.patrol_point_name_placeholder")}
         value={PatrolPointData.name}
         onChange={(e) =>
           setPatrolPointData((prev) => ({
@@ -160,13 +165,15 @@ const AddPatrolPointPage = () => {
       </div>
       {locationGranted === null && (
         <div className="p-2 items-center text-center bg-yellow-100 rounded-lg">
-          <p className="text-yellow-500">Checking location permission</p>
+          <p className="text-yellow-500">
+            {t("patrol_point_utils.location_permission_checking")}
+          </p>
         </div>
       )}
       {locationGranted === false && (
         <div className="p-2 items-center text-center bg-red-100 rounded-lg">
           <p className="text-red-500">
-            ❌ Location permission is required for adding new patrol point.
+            {t("patrol_point_utils.location_permission_denied")}
           </p>
         </div>
       )}
@@ -179,7 +186,7 @@ const AddPatrolPointPage = () => {
         buttonSize="medium"
         icon={Plus}
       >
-        Save
+        {t("add_patrol_point_page.save_patrol_point_button_label")}
       </Button>
     </form>
   );

@@ -9,14 +9,14 @@ export const createReportImages = async (req, res) => {
     if (!reportId || !fileName || !localKey) {
       return res.status(400).json({
         success: false,
-        message: "Required fields are missing",
+        message: req.t("common.required_fields"),
       });
     }
     const report = await Report.findById(reportId);
     if (!report) {
       return res.status(404).json({
         success: false,
-        message: "Report not found",
+        message: req.t("report.report_not_found"),
       });
     }
     const reportImage = new ReportImages({
@@ -27,13 +27,13 @@ export const createReportImages = async (req, res) => {
     await reportImage.save();
     res.status(201).json({
       success: true,
-      message: "Report image created successfully",
+      message: req.t("report_images.create_success"),
       reportImage,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: req.t("common.server_error"),
     });
   }
 };
@@ -44,12 +44,13 @@ export const getAllReportImages = async (req, res) => {
     const reportImages = await ReportImages.find();
     res.status(200).json({
       success: true,
+      message: req.t("report.get_all_success"),
       reportImages,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: req.t("common.server_error"),
     });
   }
 };
@@ -60,7 +61,7 @@ export const getReportImagesByReportId = async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({
       success: false,
-      message: "Invalid report ID",
+      message: req.t("common.invalid_id"),
     });
   }
   try {
@@ -68,7 +69,7 @@ export const getReportImagesByReportId = async (req, res) => {
     if (!report) {
       return res.status(404).json({
         success: false,
-        message: "Report not found",
+        message: req.t("report.report_not_found"),
       });
     }
 
@@ -76,12 +77,13 @@ export const getReportImagesByReportId = async (req, res) => {
 
     res.status(200).json({
       success: true,
+      message: req.t("report_images.get_detail_success"),
       reportImages,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: req.t("common.server_error"),
     });
   }
 };
@@ -95,13 +97,13 @@ export const updateReportImages = async (req, res) => {
     if (!isReportImageExist) {
       return res.status(404).json({
         success: false,
-        message: "Report image not found",
+        message: req.t("report_images.not_found_error"),
       });
     }
     if (!reportId || !fileName || !localKey) {
       return res.status(400).json({
         success: false,
-        message: "Required fields are missing",
+        message: req.t("common.required_fields"),
       });
     }
     const updatedReportImage = await ReportImages.findByIdAndUpdate(
@@ -111,17 +113,17 @@ export const updateReportImages = async (req, res) => {
         fileName,
         localKey,
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
     res.status(200).json({
       success: true,
-      message: "Report image updated successfully",
+      message: req.t("report_images.update_success"),
       reportImage: updatedReportImage,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: req.t("common.server_error"),
     });
   }
 };
@@ -139,10 +141,12 @@ export const deleteReportImages = async (req, res) => {
     await ReportImages.findByIdAndDelete(id);
     res.status(200).json({
       success: true,
-      message: "Report image deleted successfully",
+      message: req.t("report_images.delete_success"),
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: req.t("common.server_error") });
   }
 };
 
@@ -161,12 +165,12 @@ export const deleteAllReportImages = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "All report images deleted successfully",
+      message: req.t("report_images.delete_all_success"),
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: req.t("common.server_error"),
     });
   }
 };

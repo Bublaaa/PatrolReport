@@ -16,7 +16,7 @@ export const getReportByDate = async (req, res) => {
     if (!date) {
       return res.status(400).json({
         success: false,
-        message: "Selected date is required",
+        message: req.t("report.selected_date_required"),
       });
     }
     const startOfDay = new Date(`${date}T00:00:00+07:00`);
@@ -38,15 +38,22 @@ export const getReportByDate = async (req, res) => {
       })
       .sort({ createdAt: -1 });
 
+    if (reports.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: req.t("report.report_not_found"),
+        reports: [],
+      });
+    }
     res.status(200).json({
       success: true,
-      message: "Successfully retrieved report",
+      message: req.t("report.get_detail_success"),
       reports,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: req.t("common.server_error"),
     });
   }
 };
@@ -59,7 +66,7 @@ export const getReportByMonth = async (req, res) => {
     if (!month) {
       return res.status(400).json({
         success: false,
-        message: "Selected month is required",
+        message: req.t("report.selected_month_required"),
       });
     }
 
@@ -164,19 +171,19 @@ export const getReportByMonth = async (req, res) => {
     if (reports.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "No reports found for the selected month",
+        message: req.t("report.monthly_report_not_found"),
         reports: [],
       });
     }
     return res.status(200).json({
       success: true,
-      message: "Successfully retrieved report",
+      message: req.t("report.get_all_success"),
       reports,
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: req.t("common.server_error"),
     });
   }
 };
@@ -186,17 +193,21 @@ export const getAllReports = async (req, res) => {
   try {
     const reports = await Report.find().sort({ createdAt: -1 });
     if (reports.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "No reports found", reports: [] });
+      return res.status(404).json({
+        success: false,
+        message: req.t("report.report_not_found"),
+        reports: [],
+      });
     }
     res.status(200).json({
       success: true,
-      message: "Successfully retrieved all reports",
+      message: req.t("report.get_all_success"),
       reports,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: req.t("common.server_error") });
   }
 };
 
@@ -216,15 +227,17 @@ export const getReportDetail = async (req, res) => {
     if (!report) {
       return res
         .status(404)
-        .json({ success: false, message: "Report not found" });
+        .json({ success: false, message: req.t("report.report_not_found") });
     }
     res.status(200).json({
       success: true,
-      message: "Successfully retrieved report detail",
+      message: req.t("report.get_detail_success"),
       report: report,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: req.t("common.server_error") });
   }
 };
 
@@ -242,7 +255,7 @@ export const createReport = async (req, res) => {
     ) {
       return res.status(400).json({
         success: false,
-        message: "Required fields are missing",
+        message: req.t("common.required_fields"),
       });
     }
 
@@ -250,7 +263,7 @@ export const createReport = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found",
+        message: req.t("auth.user_not_found"),
       });
     }
 
@@ -258,7 +271,7 @@ export const createReport = async (req, res) => {
     if (!patrolPoint) {
       return res.status(404).json({
         success: false,
-        message: "Patrol point not found",
+        message: req.t("patrol_point.patrol_point_not_found"),
       });
     }
 
@@ -273,10 +286,10 @@ export const createReport = async (req, res) => {
     if (!result.valid) {
       return res.status(403).json({
         success: false,
-        message: `Too far from patrol point.
-Distance: ${Math.round(result.distance)}m
-Effective distance: ${Math.round(result.effectiveDistance)}m
-GPS accuracy: ±${Math.round(result.accuracy)}m`,
+        message: req.t("report.too_far_from_patrol_point_error"),
+        //     message: `Too far from patrol point.
+        //  Distance: ${Math.round(isAllowedRadius.distance)}m
+        //  GPS accuracy: ±${Math.round(accuracy)}m`,
       });
     }
 
@@ -298,13 +311,13 @@ GPS accuracy: ±${Math.round(result.accuracy)}m`,
 
     res.status(201).json({
       success: true,
-      message: "Report created successfully",
+      message: req.t("report.create_success"),
       report: newReport,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: req.t("common.server_error"),
     });
   }
 };
@@ -318,7 +331,7 @@ export const updateReport = async (req, res) => {
     if (!userId || !patrolPointId || !report) {
       return res.status(400).json({
         success: false,
-        message: "Required fields are missing",
+        message: req.t("common.required_fields"),
       });
     }
 
@@ -326,7 +339,7 @@ export const updateReport = async (req, res) => {
     if (!isReportExist) {
       return res.status(404).json({
         success: false,
-        message: "Report not found",
+        message: req.t("report.report_not_found"),
       });
     }
 
@@ -342,11 +355,13 @@ export const updateReport = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Report updated successfully",
+      message: req.t("report.update_success"),
       report: updatedReport,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: req.t("common.server_error") });
   }
 };
 
@@ -358,7 +373,7 @@ export const deleteReport = async (req, res) => {
     if (!isReportExist) {
       return res
         .status(404)
-        .json({ success: false, message: "Report not found" });
+        .json({ success: false, message: req.t("report.report_not_found") });
     }
     const isReportImagesExist = ReportImages.find({ id });
     if (isReportImagesExist.length > 0) {
@@ -369,10 +384,12 @@ export const deleteReport = async (req, res) => {
     await Report.findByIdAndDelete(id);
     res.status(200).json({
       success: true,
-      message: "Report deleted successfully",
+      message: req.t("report.delete_success"),
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: req.t("common.server_error") });
   }
 };
 
@@ -402,7 +419,10 @@ export const downloadPDF = async (req, res) => {
         imagesByReportId[key].push(image);
       });
 
-      return generateDownloadPDF(res, reports, imagesByReportId);
+    if (!reports.length) {
+      return res
+        .status(404)
+        .json({ message: req.t("report.report_not_found") });
     }
 
     if (kind === "weekly" || kind === "monthly") {
@@ -412,7 +432,7 @@ export const downloadPDF = async (req, res) => {
     // generateDownloadPDF(res, reports, imagesByReportId);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: req.t("common.server_error") });
   }
 };
 

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import axios from "../utils/axios";
 import toast from "react-hot-toast";
 
 const API_URL =
@@ -29,12 +29,13 @@ export const useAuthStore = create((set, get) => ({
       set({
         isAuthenticated: true,
         loggedInUserDetail: response.data.user,
+        message: response.data.message,
         error: null,
         isLoading: false,
       });
     } catch (error) {
       set({
-        error: error.response?.data?.message || "Error logging in",
+        error: response?.data?.message,
         isLoading: false,
       });
       throw error;
@@ -44,15 +45,17 @@ export const useAuthStore = create((set, get) => ({
   logout: async () => {
     set({ isLoading: true, error: null });
     try {
-      await axios.post(`${API_URL}auth/logout`);
+      const response = await axios.post(`${API_URL}auth/logout`);
       set({
         loggedInUserDetail: null,
         userDetail: null,
         isAuthenticated: false,
+        message: response.data.message,
         error: null,
         isLoading: false,
       });
     } catch (error) {
+      console.log("Logout error: ", error);
       set({ error: "Error logging out", isLoading: false });
       throw error;
     }
@@ -77,11 +80,15 @@ export const useAuthStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get(`${API_URL}auth/get`);
-      set({ users: response.data.auths, isLoading: false });
-      toast.success("All accounts fetched successfully");
+      set({
+        users: response.data.auths,
+        isLoading: false,
+        message: response.data.message,
+      });
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || "Error fetching auth";
+        error.response?.data?.message || response.data.message;
       set({
         error: errorMessage,
         isLoading: false,
@@ -95,11 +102,17 @@ export const useAuthStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get(`${API_URL}auth/get/${id}`);
-      set({ userDetail: response.data.authDetail, isLoading: false });
-      toast.success("Account fetched successfully");
+      set({
+        userDetail: response.data.authDetail,
+        message: response.data.message,
+        isLoading: false,
+      });
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || "Error fetching auth";
+        error.response?.data?.message ||
+        response.data.message ||
+        "Error fetching auth";
       set({
         error: errorMessage,
         isLoading: false,
@@ -130,11 +143,11 @@ export const useAuthStore = create((set, get) => ({
         position,
       });
       set({ isLoading: false });
-      toast.success("Auth created successfully");
+      toast.success(response.data.message);
       return response.data;
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || "Error creating auth";
+        error.response?.data?.message || response.data.message;
       set({
         error: errorMessage,
         isLoading: false,
@@ -164,8 +177,8 @@ export const useAuthStore = create((set, get) => ({
         workLocationId,
         position,
       });
-      set({ isLoading: false });
-      toast.success("Auth updated successfully");
+      set({ message: response.data.message, isLoading: false });
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error updating auth";
@@ -197,9 +210,13 @@ export const useAuthStore = create((set, get) => ({
         middleName,
         lastName,
       });
-      set({ isLoading: false, loggedInUserDetail: response.data.auth });
+      set({
+        isLoading: false,
+        message: response.data.message,
+        loggedInUserDetail: response.data.auth,
+      });
+      toast.success(response.data.message);
       return response.data.auth;
-      toast.success("Profile Updated");
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error updating auth";
@@ -216,8 +233,8 @@ export const useAuthStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.delete(`${API_URL}auth/delete/${id}`);
-      set({ isLoading: false });
-      toast.success("Auth deleted successfully");
+      set({ isLoading: false, message: response.data.message });
+      toast.success(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Error deleting auth";

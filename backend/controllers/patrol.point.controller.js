@@ -11,17 +11,19 @@ export const getAllPatrolPoints = async (req, res) => {
     if (patrolPoints.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "No patrol points found",
+        message: req.t("patrol_point.patrol_point_not_found"),
         patrolPoints: [],
       });
     }
     res.status(200).json({
       success: true,
-      message: "Success get all patrol points",
+      message: req.t("patrol_point.get_all_success"),
       patrolPoints: patrolPoints,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: req.t("common.server_error") });
   }
 };
 // * * GET DETAIL
@@ -32,16 +34,18 @@ export const getPatrolPointsDetail = async (req, res) => {
     if (!patrolPoint) {
       return res.status(404).json({
         success: false,
-        message: "Patrol point not found",
+        message: req.t,
       });
     }
     res.status(200).json({
       success: true,
-      message: "Success get patrol point detail",
+      message: req.t("patrol_point.get_detail_success"),
       patrolPoint: patrolPoint,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: req.t("common.server_error") });
   }
 };
 // * * CREATE
@@ -57,16 +61,17 @@ export const createPatrolPoint = async (req, res) => {
     ) {
       return res
         .status(400)
-        .json({ success: false, message: "All fields are required" });
+        .json({ success: false, message: req.t("common.required_fields") });
     }
 
     name = name.toLowerCase();
 
     const isAlreadyExist = await PatrolPoint.findOne({ name });
     if (isAlreadyExist) {
-      return res
-        .status(400)
-        .json({ success: false, message: "PatrolPoint already exist" });
+      return res.status(400).json({
+        success: false,
+        message: req.t("patrol_point.patrol_point_already_exists"),
+      });
     }
 
     const newPatrolPoint = new PatrolPoint({
@@ -83,11 +88,13 @@ export const createPatrolPoint = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "New patrol point created",
+      message: req.t("patrol_point.create_success"),
       patrolPoint: newPatrolPoint,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: req.t("common.server_error") });
   }
 };
 
@@ -105,7 +112,7 @@ export const updatePatrolPoint = async (req, res) => {
     ) {
       return res.status(400).json({
         success: false,
-        message: "All fields are required",
+        message: req.t("common.required_fields"),
       });
     }
 
@@ -113,7 +120,7 @@ export const updatePatrolPoint = async (req, res) => {
     if (!isPatrolPointExist) {
       return res.status(404).json({
         success: false,
-        message: "Patrol point not found",
+        message: req.t("patrol_point.patrol_point_not_found"),
       });
     }
 
@@ -130,11 +137,13 @@ export const updatePatrolPoint = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Patrol point updated successfully",
+      message: req.t("patrol_point.update_success"),
       patrolPoint: updatedPatrolPoint,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: req.t("common.server_error") });
   }
 };
 
@@ -144,25 +153,28 @@ export const deletePatrolPoint = async (req, res) => {
   try {
     const isPatrolPointExist = await PatrolPoint.findById(id);
     if (!isPatrolPointExist) {
-      return res
-        .status(404)
-        .json({ success: false, message: "PatrolPoint not found" });
+      return res.status(404).json({
+        success: false,
+        message: req.t("patrol_point.patrol_point_not_found"),
+      });
     }
     const reportCount = await Report.countDocuments({ patrolPointId: id });
     if (reportCount > 0) {
       return res.status(400).json({
         success: false,
-        message: "Report data for that patrol point exist",
+        message: req.t("patrol_point.report_exist_error"),
       });
     }
     await PatrolPoint.findByIdAndDelete(id);
 
     res.status(200).json({
       success: true,
-      message: "PatrolPoint deleted successfully",
+      message: req.t("patrol_point.delete_success"),
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: req.t("common.server_error") });
   }
 };
 
@@ -174,28 +186,30 @@ export const generatePatrolPointBarcode = async (req, res) => {
   const { id } = req.body;
   try {
     if (!id) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Patrol Point ID is required" });
+      return res.status(400).json({
+        success: false,
+        message: req.t("patrol_point.patrol_point_id_required"),
+      });
     }
     const patrolPointUrl = `${URL}security/report/create/${id}`;
     const qrCodeDataUrl = await QRCode.toDataURL(patrolPointUrl);
 
     if (!qrCodeDataUrl) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Error generating QR" });
+      return res.status(400).json({
+        success: false,
+        message: req.t("patrol_point.qr_code_generate_error"),
+      });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Success generate QR code",
+      message: req.t("patrol_point.qr_code_generate_success"),
       qrCode: qrCodeDataUrl,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Failed to generate QR Code",
+      message: req.t("patrol_point.qr_code_generate_error"),
       error: error.message,
     });
   }

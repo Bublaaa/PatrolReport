@@ -7,10 +7,12 @@ import { toTitleCase } from "../../utils/toTitleCase.js";
 import { DropdownInput, TextInput } from "../../components/inputs.jsx";
 import { buildDropdownOptions } from "../../utils/constants.js";
 import { useWorkLocationStore } from "../../stores/work.location.store.js";
+import { useTranslation } from "react-i18next";
 import Modal from "../../components/modal";
 import Button from "../../components/button";
 
 const PatrolPointPageDashboard = () => {
+  const { t } = useTranslation();
   // * USE STATE
   const [modalState, setModalState] = useState({
     isOpen: false,
@@ -46,7 +48,7 @@ const PatrolPointPageDashboard = () => {
     const deleteButton = e.target.closest(".delete-btn");
     if (deleteButton) {
       openModal(
-        "Delete Account",
+        t("patrol_point_dashboard_page.delete_modal_title"),
         <DeleteConfirmationForm
           itemName={deleteButton.dataset.name}
           onDelete={deletePatrolPoint}
@@ -72,7 +74,7 @@ const PatrolPointPageDashboard = () => {
   const workLocationOptions = useMemo(() =>
     buildDropdownOptions(workLocations, {
       includeAll: true,
-      allLabel: "All locations",
+      allLabel: t("patrol_point_dashboard_page.location_dropdown_placeholder"),
       allValue: "",
     }),
   );
@@ -101,10 +103,10 @@ const PatrolPointPageDashboard = () => {
         body={modalState.body}
       />
       <div className="flex flex-row justify-between">
-        <h5>Patrol Points Dashboard</h5>
+        <h5>{t("patrol_point_dashboard_page.title")}</h5>
         <NavLink to={"/admin/patrol-point/add"}>
           <Button buttonType="primary" buttonSize="medium" icon={Plus}>
-            Add Patrol Point
+            {t("patrol_point_dashboard_page.add_patrol_point_button_label")}
           </Button>
         </NavLink>
       </div>
@@ -120,16 +122,24 @@ const PatrolPointPageDashboard = () => {
         />
         <TextInput
           type="text"
-          placeholder="Search name"
+          placeholder={t("patrol_point_dashboard_page.search_name_placeholder")}
           value={filterName}
           onChange={handleFilterName}
         />
       </div>
 
       {filteredPatrolPoints.length === 0 && (
-        <p className="text-center mt-4">No patrol points found.</p>
+        <p className="text-center mt-4">
+          {t("patrol_point_dashboard_page.patrol_points_not_found")}
+        </p>
       )}
-
+      <div className="grid grid-cols-3 text-center pt-4 pb-2">
+        <h6>
+          {t("patrol_point_dashboard_page.table_header_patrol_point_name")}
+        </h6>
+        <h6>{t("patrol_point_dashboard_page.table_header_work_location")}</h6>
+        <h6>{t("patrol_point_dashboard_page.table_header_actions")}</h6>
+      </div>
       <div
         className="flex flex-col gap-2 w-full justify-between pt-2"
         onClick={(e) => handleDeleteAction(e)}

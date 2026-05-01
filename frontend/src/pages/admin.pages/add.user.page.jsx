@@ -4,15 +4,17 @@ import { useNavigate } from "react-router-dom";
 import { TextInput, DropdownInput } from "../../components/inputs.jsx";
 import { useEffect, useState, useMemo } from "react";
 import { useWorkLocationStore } from "../../stores/work.location.store.js";
-import Button from "../../components/button.jsx";
-import toast from "react-hot-toast";
 import { useAuthStore } from "../../stores/auth.store.js";
+import { useTranslation } from "react-i18next";
 import {
   buildDropdownOptions,
   buildPositionDropdownOptions,
 } from "../../utils/constants.js";
+import Button from "../../components/button.jsx";
+import toast from "react-hot-toast";
 
 const AddUserPage = () => {
+  const { t } = useTranslation();
   // * USE NAVIGATE
   const navigate = useNavigate();
 
@@ -58,7 +60,7 @@ const AddUserPage = () => {
       !selectedWorkLocation ||
       !selectedPosition
     ) {
-      toast.error("Please fill all required fields");
+      toast.error(t("error.all_fields_required"));
       return;
     }
     try {
@@ -72,7 +74,7 @@ const AddUserPage = () => {
         selectedPosition,
       );
       if (newAccount) {
-        toast.success("User created");
+        // toast.success("User created");
         navigate(-1);
       }
     } catch (error) {
@@ -108,7 +110,9 @@ const AddUserPage = () => {
       className="w-full bg-white bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl overflow-auto scrollbar-hidden mx-2"
     >
       <div className="p-8">
-        <h2 className="mb-6 text-center bg-clip-text">Create Account</h2>
+        <h2 className="mb-6 text-center bg-clip-text">
+          {t("add_user_page.title")}
+        </h2>
 
         <form className="space-y-5" onSubmit={handleSignUp}>
           <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
@@ -116,14 +120,14 @@ const AddUserPage = () => {
               <TextInput
                 icon={User}
                 type="text"
-                placeholder="Username"
+                placeholder={t("add_user_page.username_placeholder")}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
               <TextInput
                 icon={Lock}
                 type="password"
-                placeholder="Must be more than 8 characters"
+                placeholder={t("add_user_page.password_placeholder")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -131,14 +135,14 @@ const AddUserPage = () => {
                 name="workLocation"
                 value={selectedWorkLocation}
                 options={workLocationOptions}
-                placeholder="Select Work Location"
+                placeholder={t("add_user_page.work_location_placeholder")}
                 onChange={handleSelectWorkLocation}
               />
               <DropdownInput
                 name="position"
                 value={selectedPosition}
                 options={positionOptions}
-                placeholder="Select User Position"
+                placeholder={t("add_user_page.position_placeholder")}
                 onChange={handleSelectPosition}
               />
             </div>
@@ -146,21 +150,21 @@ const AddUserPage = () => {
               <TextInput
                 icon={User}
                 type="text"
-                placeholder="Fist Name"
+                placeholder={t("add_user_page.first_name_placeholder")}
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
               />
               <TextInput
                 icon={User}
                 type="text"
-                placeholder="Middle Name"
+                placeholder={t("add_user_page.middle_name_placeholder")}
                 value={middleName}
                 onChange={(e) => setMiddleName(e.target.value)}
               />
               <TextInput
                 icon={User}
                 type="text"
-                placeholder="Last Name"
+                placeholder={t("add_user_page.last_name_placeholder")}
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
               />
@@ -181,7 +185,7 @@ const AddUserPage = () => {
             {isAuthLoading ? (
               <Loader className="w-6h-6 animate-spin mx-auto" />
             ) : (
-              "Add User"
+              t("add_user_page.add_user_button_label")
             )}
           </Button>
         </form>
