@@ -2,15 +2,17 @@ import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { formatDateToString, formatTime } from "../../utils/dateTimeFormatter";
 import { DeleteConfirmationForm } from "../../components/delete.confirmation.jsx";
-import Modal from "../../components/modal";
-import Button from "../../components/button.jsx";
 import { useReportStore } from "../../stores/report.store";
 import { ChevronLeft, Loader, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toTitleCase } from "../../utils/toTitleCase.js";
 import { useReportImagesStore } from "../../stores/report.images.store.js";
+import { useTranslation } from "react-i18next";
+import Modal from "../../components/modal";
+import Button from "../../components/button.jsx";
 
 const ReportDetailPage = () => {
+  const { t } = useTranslation();
   const BASE_URL =
     import.meta.env.MODE === "development" ? "http://localhost:5003" : "";
 
@@ -40,7 +42,7 @@ const ReportDetailPage = () => {
     const deleteButton = e.target.closest(".delete-btn");
     if (deleteButton) {
       openModal(
-        "Delete Report",
+        t("report_detail_page.delete_modal_title"),
         <DeleteConfirmationForm
           itemName={deleteButton.dataset.name}
           onDelete={deleteReport}
@@ -88,7 +90,7 @@ const ReportDetailPage = () => {
           icon={ChevronLeft}
           onClick={() => navigate("/admin/report")}
         ></Button>
-        <h5>Report Detail</h5>
+        <h5>{t("report_detail_page.title")}</h5>
         <Button
           className="delete-btn"
           buttonSize="small"
@@ -100,31 +102,31 @@ const ReportDetailPage = () => {
       </div>
       <div className="flex flex-col gap-5">
         <div className="flex flex-row gap-2 items-center">
-          <h6>Date : </h6>
+          <h6>{t("report_detail_page.date_label")} : </h6>
           <p>
             {formatDateToString(reportDetail.createdAt)} -{" "}
             {formatTime(reportDetail.createdAt)}
           </p>
         </div>
         <div className="flex flex-row gap-2 items-center">
-          <h6>User : </h6>
+          <h6>{t("report_detail_page.user_label")} : </h6>
           <p>
             {reportDetail.userId.firstName} {reportDetail.userId.lastName}
           </p>
         </div>
         <div className="flex flex-row gap-2 items-center">
-          <h6>Patrol Point : </h6>
+          <h6>{t("report_detail_page.patrol_point_label")} : </h6>
           <p>{toTitleCase(reportDetail.patrolPointId.name)}</p>
         </div>
         <div className="flex flex-col gap-2 items-start mt-3">
-          <h6>Report : </h6>
+          <h6>{t("report_detail_page.report_label")} : </h6>
           <div className="flex flex-col w-full gap-2 bg-white-shadow px-3 py-4 rounded-md">
             {reportDetail.report}
           </div>
         </div>
 
         <div className="flex flex-col gap-2">
-          <h6>Document / Images</h6>
+          <h6>{t("report_detail_page.document_images_label")}</h6>
 
           {reportDetail.documentUrl ? (
             <a
@@ -133,10 +135,12 @@ const ReportDetailPage = () => {
               rel="noopener noreferrer"
               buttonType="secondary"
             >
-              View Report Document (PDF)
+              {t("report_detail_page.view_pdf_file_button_label")}
             </a>
           ) : reportImages.length === 0 ? (
-            <p className="text-center mt-4">No patrol images found.</p>
+            <p className="text-center mt-4">
+              {t("report_detail_page.no_patrol_images_found")}
+            </p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {reportImages.map((img) => (

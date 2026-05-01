@@ -14,6 +14,7 @@ import workLocationRoutes from "./routes/work.location.route.js";
 import { connection } from "./database/connection.js";
 import { startReportCron } from "./services/scheduler.js";
 import driveUploadRoutes from "./routes/drive.upload.route.js";
+import { i18nMiddleware } from "./middlewares/i18n.js";
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ const __dirname = path.resolve();
 
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
+app.use(i18nMiddleware);
 app.use(express.json()); // Allow to parse incoming requests with json "req.body"
 app.use(cookieParser());
 

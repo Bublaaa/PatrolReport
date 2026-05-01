@@ -1,17 +1,31 @@
 import { useAuthStore } from "../stores/auth.store.js";
 import { Outlet } from "react-router-dom";
 import { LucideLogOut } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import Button from "../components/button.jsx";
 import MenuLink from "../components/menu.link.jsx";
 
 const AdminDashboard = () => {
+  const { t } = useTranslation();
   const menuLinks = [
-    { label: "User", icon: "Users", href: "/admin/user" },
-    { label: "Work Location", icon: "Building2", href: "/admin/work-location" },
-    { label: "Patrol Point", icon: "MapPin", href: "/admin/patrol-point" },
-    { label: "Report", icon: "ClipboardList", href: "/admin/report" },
-    { label: "Setting", icon: "Settings", href: "/admin/setting" },
+    { label: t("menu_link.user"), icon: "Users", href: "/admin/user" },
+    {
+      label: t("menu_link.work_location"),
+      icon: "Building2",
+      href: "/admin/work-location",
+    },
+    {
+      label: t("menu_link.patrol_point"),
+      icon: "MapPin",
+      href: "/admin/patrol-point",
+    },
+    {
+      label: t("menu_link.report"),
+      icon: "ClipboardList",
+      href: "/admin/report",
+    },
+    { label: t("menu_link.setting"), icon: "Settings", href: "/admin/setting" },
   ];
   const { loggedInUserDetail, logout } = useAuthStore();
   const handleLogout = async (e) => {
@@ -30,12 +44,14 @@ const AdminDashboard = () => {
             <h5>
               {loggedInUserDetail.firstName} {loggedInUserDetail.lastName}
             </h5>
-            <Button
-              buttonSize="small"
-              buttonType="secondary"
-              icon={LucideLogOut}
-              onClick={handleLogout}
-            ></Button>
+            <div className="flex flex-row gap-5 items-center">
+              <Button
+                buttonSize="small"
+                buttonType="secondary"
+                icon={LucideLogOut}
+                onClick={handleLogout}
+              ></Button>
+            </div>
           </div>
           {/* NAVIGATION */}
           <MenuLink links={menuLinks} />

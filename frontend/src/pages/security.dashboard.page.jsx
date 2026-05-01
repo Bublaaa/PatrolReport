@@ -4,11 +4,17 @@ import { LucideLogOut } from "lucide-react";
 import toast from "react-hot-toast";
 import Button from "../components/button.jsx";
 import MenuLink from "../components/menu.link.jsx";
+import { useTranslation } from "react-i18next";
 
 const SecurityDashboard = () => {
+  const { t } = useTranslation();
   const menuLinks = [
-    { label: "Scan", icon: "MapPin", href: "/security/scan" },
-    { label: "Setting", icon: "Settings", href: "/security/setting" },
+    { label: t("menu_link.scan"), icon: "MapPin", href: "/security/scan" },
+    {
+      label: t("menu_link.setting"),
+      icon: "Settings",
+      href: "/security/setting",
+    },
   ];
   const { loggedInUserDetail, logout } = useAuthStore();
   const handleLogout = async (e) => {

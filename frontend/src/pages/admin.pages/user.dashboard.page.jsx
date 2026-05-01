@@ -6,15 +6,17 @@ import { DeleteConfirmationForm } from "../../components/delete.confirmation.jsx
 import { useAuthStore } from "../../stores/auth.store.js";
 import { toTitleCase } from "../../utils/toTitleCase.js";
 import { DropdownInput, TextInput } from "../../components/inputs.jsx";
-import Button from "../../components/button";
-import Modal from "../../components/modal.jsx";
 import { useWorkLocationStore } from "../../stores/work.location.store.js";
+import { useTranslation } from "react-i18next";
 import {
   buildDropdownOptions,
   buildPositionDropdownOptions,
 } from "../../utils/constants.js";
+import Button from "../../components/button";
+import Modal from "../../components/modal.jsx";
 
 const UserPageDashboard = () => {
+  const { t } = useTranslation();
   // * USE STATE
   const [modalState, setModalState] = useState({
     isOpen: false,
@@ -48,14 +50,14 @@ const UserPageDashboard = () => {
   const workLocationOptions = useMemo(() =>
     buildDropdownOptions(workLocations, {
       includeAll: true,
-      allLabel: "All Locations",
+      allLabel: t("user_dashboard_page.location_dropdown_placeholder"),
       allValue: "",
     }),
   );
   const positionOptions = useMemo(() =>
     buildPositionDropdownOptions({
       includeAll: true,
-      allLabel: "All Positions",
+      allLabel: t("user_dashboard_page.position_dropdown_placeholder"),
       allValue: "",
     }),
   );
@@ -76,7 +78,7 @@ const UserPageDashboard = () => {
     const deleteButton = e.target.closest(".delete-btn");
     if (deleteButton) {
       openModal(
-        "Delete Account",
+        t("user_dashboard_page.delete_modal_title"),
         <DeleteConfirmationForm
           itemName={deleteButton.dataset.name}
           onDelete={deleteAuth}
@@ -122,10 +124,10 @@ const UserPageDashboard = () => {
         body={modalState.body}
       />
       <div className="flex flex-row justify-between">
-        <h5>User Dashboard</h5>
+        <h5>{t("user_dashboard_page.title")}</h5>
         <NavLink to={"/admin/user/add"}>
           <Button buttonType="primary" buttonSize="medium" icon={Plus}>
-            Add User
+            {t("user_dashboard_page.add_user_button_label")}
           </Button>
         </NavLink>
       </div>
@@ -140,7 +142,7 @@ const UserPageDashboard = () => {
 
         <TextInput
           type="text"
-          placeholder="Search name"
+          placeholder={t("user_dashboard_page.search_name_placeholder")}
           value={filterName}
           onChange={handleFilterName}
         />
@@ -154,13 +156,15 @@ const UserPageDashboard = () => {
         />
       </div>
       <div className="grid grid-cols-4 text-center pt-4 pb-2">
-        <h6>Position</h6>
-        <h6>Full Name</h6>
-        <h6>Work Location</h6>
-        <h6>Actions</h6>
+        <h6>{t("user_dashboard_page.table_header_position")}</h6>
+        <h6>{t("user_dashboard_page.table_header_full_name")}</h6>
+        <h6>{t("user_dashboard_page.table_header_work_location")}</h6>
+        <h6>{t("user_dashboard_page.table_header_actions")}</h6>
       </div>
       {filteredUsers.length === 0 && (
-        <p className="text-center mt-4">No users found.</p>
+        <p className="text-center mt-4">
+          {t("user_dashboard_page.user_not_found")}
+        </p>
       )}
 
       <div
