@@ -49,10 +49,10 @@ const ReportPageDashboard = () => {
   }, [selectedDate]);
 
   // * GENERATE PDF TO DOWNLOAD
-  const handleGeneratePDF = async (reports) => {
+  const handleGeneratePDF = async (reports, kind, workLocation = null) => {
     try {
       if (reports.length !== 0) {
-        const res = await downloadPDF(reports);
+        const res = await downloadPDF(reports, kind, workLocation);
 
         const disposition = res.headers["content-disposition"];
         const filenameMatch = disposition?.match(/filename="?(.+)"?/);

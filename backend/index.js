@@ -14,6 +14,11 @@ import workLocationRoutes from "./routes/work.location.route.js";
 import { connection } from "./database/connection.js";
 import { startReportCron } from "./services/scheduler.js";
 import driveUploadRoutes from "./routes/drive.upload.route.js";
+import {
+  UPLOAD_ROOT,
+  REPORT_IMAGES_DIR,
+  REPORT_PDF_DIR,
+} from "./utils/storage.path.js";
 import { i18nMiddleware } from "./middlewares/i18n.js";
 
 dotenv.config();
@@ -24,11 +29,17 @@ const __dirname = path.resolve();
 
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
+app.use(express.json()); // * Allow to parse incoming requests with json "req.body"
 app.use(i18nMiddleware);
 app.use(express.json()); // Allow to parse incoming requests with json "req.body"
 app.use(cookieParser());
 
-// Prefix for auth routes "/api/auth/login"
+// app.use((req, res, next) => {
+//   console.log("REQUEST:", req.method, req.url);
+//   next();
+// });
+
+// * ADD PREFIX FOR EACH ROUTE
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/patrol-point", patrolPointRoutes);
@@ -39,8 +50,6 @@ app.use("/api/work-location", workLocationRoutes);
 app.use("/api/drive", driveUploadRoutes);
 app.use("/api/system-setting", systemSettingRoutes);
 
-// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-// app.use("/uploads", express.static(path.join(ROOT_DIR, "uploads")));
 app.use("/uploads", express.static(UPLOAD_ROOT));
 
 if (process.env.NODE_ENV === "production") {
