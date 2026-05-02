@@ -2,13 +2,6 @@ import { create } from "zustand";
 import axios from "../utils/axios";
 import toast from "react-hot-toast";
 
-const API_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:5003/api/"
-    : "/api/";
-
-axios.defaults.withCredentials = true;
-
 export const useReportImagesStore = create((set, get) => ({
   reportImages: [],
   error: null,
@@ -18,7 +11,7 @@ export const useReportImagesStore = create((set, get) => ({
   fetchReportImages: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}report-images/get`);
+      const response = await axios.get("report-images/get");
       set({ reportImages: response.data.reportImages, isLoading: false });
     } catch (error) {
       const errorMessage =
@@ -34,7 +27,7 @@ export const useReportImagesStore = create((set, get) => ({
   fetchReportImagesByReportId: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}report-images/${id}`);
+      const response = await axios.get(`report-images/${id}`);
       set({ reportImages: response.data.reportImages, isLoading: false });
     } catch (error) {
       const errorMessage =
@@ -63,7 +56,7 @@ export const useReportImagesStore = create((set, get) => ({
 
       await Promise.all(
         images.map((img) =>
-          axios.post(`${API_URL}report-images/create`, {
+          axios.post("report-images/create", {
             reportId,
             fileName: img.fileName,
             localKey: img.localKey,
@@ -86,7 +79,7 @@ export const useReportImagesStore = create((set, get) => ({
   updateReportImages: async (id, reportId, fileName, localKey) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.put(`${API_URL}report-images/update/${id}`, {
+      const response = await axios.put(`report-images/update/${id}`, {
         reportId,
         fileName,
         localKey,
@@ -106,9 +99,7 @@ export const useReportImagesStore = create((set, get) => ({
   deleteReportImages: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.delete(
-        `${API_URL}report-images/delete/${id}`,
-      );
+      const response = await axios.delete(`report-images/delete/${id}`);
       set({ message: response.data.message, isLoading: false });
     } catch (error) {
       const errorMessage =

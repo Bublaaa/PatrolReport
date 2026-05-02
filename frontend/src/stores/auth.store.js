@@ -2,13 +2,6 @@ import { create } from "zustand";
 import axios from "../utils/axios";
 import toast from "react-hot-toast";
 
-const API_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:5003/api/"
-    : "/api/";
-
-axios.defaults.withCredentials = true;
-
 export const useAuthStore = create((set, get) => ({
   users: [],
   userDetail: null,
@@ -22,7 +15,7 @@ export const useAuthStore = create((set, get) => ({
   login: async (username, password) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.post(`${API_URL}auth/login`, {
+      const response = await axios.post("auth/login", {
         username,
         password,
       });
@@ -45,7 +38,7 @@ export const useAuthStore = create((set, get) => ({
   logout: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.post(`${API_URL}auth/logout`);
+      const response = await axios.post("auth/logout");
       set({
         loggedInUserDetail: null,
         userDetail: null,
@@ -64,7 +57,7 @@ export const useAuthStore = create((set, get) => ({
   checkAuth: async () => {
     set({ isCheckingAuth: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}auth/check-auth`);
+      const response = await axios.get("auth/check-auth");
       set({
         loggedInUserDetail: response.data.auth,
         isAuthenticated: true,
@@ -79,7 +72,7 @@ export const useAuthStore = create((set, get) => ({
   getAllAuth: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}auth/get`);
+      const response = await axios.get("auth/get");
       set({
         users: response.data.auths,
         isLoading: false,
@@ -101,7 +94,7 @@ export const useAuthStore = create((set, get) => ({
   getAuthDetail: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}auth/get/${id}`);
+      const response = await axios.get(`auth/get/${id}`);
       set({
         userDetail: response.data.authDetail,
         message: response.data.message,
@@ -133,7 +126,7 @@ export const useAuthStore = create((set, get) => ({
   ) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.post(`${API_URL}auth/create`, {
+      const response = await axios.post("auth/create", {
         username,
         password,
         firstName,
@@ -169,7 +162,7 @@ export const useAuthStore = create((set, get) => ({
   ) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.put(`${API_URL}auth/update/${id}`, {
+      const response = await axios.put(`auth/update/${id}`, {
         username,
         firstName,
         middleName,
@@ -202,7 +195,7 @@ export const useAuthStore = create((set, get) => ({
   ) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.put(`${API_URL}auth/profile/update/${id}`, {
+      const response = await axios.put(`auth/profile/update/${id}`, {
         username,
         oldPassword,
         newPassword,
@@ -232,7 +225,7 @@ export const useAuthStore = create((set, get) => ({
   deleteAuth: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.delete(`${API_URL}auth/delete/${id}`);
+      const response = await axios.delete(`auth/delete/${id}`);
       set({ isLoading: false, message: response.data.message });
       toast.success(response.data.message);
     } catch (error) {
