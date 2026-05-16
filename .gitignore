@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 uploads
+uploads/report-images/
 patrol.report.credentials.json
 *.local
 

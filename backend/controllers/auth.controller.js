@@ -327,17 +327,32 @@ export const deleteAuth = async (req, res) => {
 //*  GET ALL THE ACCOUNT
 export const getAllAuths = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const safeLimit = Math.min(limit, 100);
+    const skip = (page - 1) * safeLimit;
+    const total = await Auth.countDocuments();
+
     const auths = await Auth.find()
       .populate("workLocationId", "name address")
-      .select("-password");
+      .select("-password")
+      .skip(skip)
+      .limit(safeLimit)
+      .sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
       message: req.t("auth.get_all_auth_success"),
       auths,
+      pagination: {
+        total,
+        page,
+        limit: safeLimit,
+        totalPages: Math.ceil(total / safeLimit),
+      },
     });
   } catch (error) {
     res
-      .status(400)
+      .status(500)
       .json({ success: false, message: req.t("common.server_error") });
   }
 };

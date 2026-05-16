@@ -2,13 +2,6 @@ import { create } from "zustand";
 import axios from "../utils/axios";
 import toast from "react-hot-toast";
 
-const API_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:5003/api/"
-    : "/api/";
-
-axios.defaults.withCredentials = true;
-
 export const useReportStore = create((set, get) => ({
   reports: [],
   monthlyReports: [],
@@ -23,7 +16,7 @@ export const useReportStore = create((set, get) => ({
       const formattedDate =
         typeof date === "string" ? date : date.toISOString().split("T")[0];
 
-      const response = await axios.get(`${API_URL}report/${formattedDate}`);
+      const response = await axios.get(`report/date/${formattedDate}`);
 
       set({
         reports: response.data.reports || [],
@@ -46,7 +39,7 @@ export const useReportStore = create((set, get) => ({
   fetchReportDetailByMonth: async (month) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}report/month/${month}`);
+      const response = await axios.get(`report/month/${month}`);
       set({
         monthlyReports: response.data.reports || [],
         message: response.data.message,
@@ -64,7 +57,7 @@ export const useReportStore = create((set, get) => ({
   fetchReports: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}report/get`);
+      const response = await axios.get("report/get");
       set({
         reports: response.data.reports,
         message: response.data.message,
@@ -85,7 +78,7 @@ export const useReportStore = create((set, get) => ({
   fetchReportDetail: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}report/get/${id}`);
+      const response = await axios.get(`report/get/${id}`);
       set({
         reportDetail: response.data.report,
         message: response.data.message,
@@ -106,7 +99,7 @@ export const useReportStore = create((set, get) => ({
   createReport: async (formData) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.post(`${API_URL}report/create`, formData, {
+      const response = await axios.post("report/create", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -133,7 +126,7 @@ export const useReportStore = create((set, get) => ({
   updateReport: async (id, report, userId, patrolPointId) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.put(`${API_URL}report/update/${id}`, {
+      const response = await axios.put(`report/update/${id}`, {
         report,
         userId,
         patrolPointId,
@@ -151,15 +144,26 @@ export const useReportStore = create((set, get) => ({
     }
   },
 
-  downloadPDF: async (reports) => {
+  downloadPDF: async (reports, kind, workLocation = null) => {
+    const cleanedReports = reports.map((report) => ({
+      _id: report._id,
+      createdAt: report.createdAt,
+      report: report.report,
+      userId: report.userId,
+      patrolPointId: report.patrolPointId,
+      documentUrl: report.documentUrl,
+      workLocation: workLocation,
+    }));
     set({ isLoading: true, error: null });
     try {
       const response = await axios.post(
-        `${API_URL}report/export/pdf`,
+        "report/export/pdf",
         {
-          reports: reports,
+          reports: cleanedReports,
+          workLocation,
         },
         {
+          params: { kind },
           responseType: "blob",
         },
       );
@@ -180,7 +184,7 @@ export const useReportStore = create((set, get) => ({
   deleteReport: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.delete(`${API_URL}report/delete/${id}`);
+      const response = await axios.delete(`report/delete/${id}`);
       set({ message: response.data.message, isLoading: false });
     } catch (error) {
       const errorMessage =

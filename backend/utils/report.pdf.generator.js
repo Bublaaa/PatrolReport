@@ -30,6 +30,44 @@ const IMAGE_GAP = 10;
 const DEFAULT_BORDER_COLOR = "#9ca3af";
 const DEFAULT_TEXT_COLOR = "#111827";
 
+// * FORMATTING HELPER FUNCTIONS
+//* GET THE WEEK OF MONTH
+function getWeekOfMonth(date) {
+  const d = new Date(date);
+
+  const startOfMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+
+  const dayOfMonth = d.getDate();
+  const dayOfWeekStart = startOfMonth.getDay();
+
+  return Math.ceil((dayOfMonth + dayOfWeekStart) / 7);
+}
+// * GENERATE THE FORMATTED DATE
+function getReportPeriod(createdAt, kind) {
+  const date = new Date(createdAt);
+
+  const month = date.toLocaleString("id-ID", {
+    month: "long",
+    timeZone: "Asia/Jakarta",
+  });
+
+  const year = date.getFullYear();
+
+  if (kind === "weekly") {
+    const week = getWeekOfMonth(date);
+
+    const weekLabels = ["First", "Second", "Third", "Fourth", "Fifth"];
+
+    return `${weekLabels[week - 1]} Week ${month} ${year}`;
+  }
+
+  if (kind === "monthly") {
+    return `${month} ${year}`;
+  }
+
+  return "";
+}
+
 // * HELPER FUNCTIONS
 const drawDivider = (doc) => {
   doc
@@ -281,6 +319,80 @@ const renderReportBlock = async (doc, report, images) => {
   row = 0;
 };
 
+//* RENDER RANGED REPORT BLOCK
+const renderRangedReportBlock = async (doc, report, kind) => {
+  ensureSpace(doc, 120);
+
+  let y = doc.y + ROW_HEIGHT;
+  // HEADER
+  doc
+    .fillColor("#1a73e8")
+    .font("Helvetica")
+    .fontSize(10)
+    .text("View Document", {
+      link: report.documentUrl,
+      underline: true,
+    })
+    .fillColor("black");
+  doc.moveDown(1);
+  y = doc.y;
+  drawTextCell(doc, PAGE_MARGIN, y, COLS.time, ROW_HEIGHT, "Time", {
+    isHeader: true,
+  });
+  drawTextCell(doc, PAGE_MARGIN + COLS.time, y, COLS.user, ROW_HEIGHT, "User", {
+    isHeader: true,
+  });
+  drawTextCell(
+    doc,
+    PAGE_MARGIN + COLS.time + COLS.user,
+    y,
+    COLS.point,
+    ROW_HEIGHT,
+    "Patrol Point",
+    { isHeader: true },
+  );
+
+  // VALUES
+  y += ROW_HEIGHT;
+  drawTextCell(doc, PAGE_MARGIN, y, COLS.time, ROW_HEIGHT, report.time);
+  drawTextCell(
+    doc,
+    PAGE_MARGIN + COLS.time,
+    y,
+    COLS.user,
+    ROW_HEIGHT,
+    report.user,
+  );
+  drawTextCell(
+    doc,
+    PAGE_MARGIN + COLS.time + COLS.user,
+    y,
+    COLS.point,
+    ROW_HEIGHT,
+    toTitleCase(report.point),
+  );
+
+  doc.y = y + ROW_HEIGHT;
+
+  /* ----- REPORT TEXT ----- */
+  drawTextCell(doc, PAGE_MARGIN, doc.y, USABLE_WIDTH, ROW_HEIGHT, "Report", {
+    isHeader: true,
+    align: "left",
+  });
+
+  doc.y += 15;
+  renderTextBlock(
+    doc,
+    report.text
+      .replace(/\r\n|\r/g, "\n")
+      .replace(/Ð/g, "\n")
+      .replace(/\u00A0/g, " ")
+      .replace(/[\u200B-\u200D]/g, ""),
+    USABLE_WIDTH,
+  );
+  doc.y += 8;
+};
+
 // * GENERATE TO DOWNLOAD
 export const generateDownloadPDF = async (res, reports, imagesByReportId) => {
   const doc = new PDFDocument({ size: "A4", margin: PAGE_MARGIN });
@@ -409,4 +521,72 @@ export const generateUploadPDF = async (reports, imagesByReportId) => {
     originalName: fileName,
     mimetype: "application/pdf",
   };
+};
+
+export const generateRangedReportPDF = async (res, reports, kind) => {
+  const doc = new PDFDocument({ size: "A4", margin: PAGE_MARGIN });
+  const periodLabel = getReportPeriod(reports[0]?.createdAt, kind);
+
+  const fileName = `${kind}-report.pdf`;
+  const encodedFilename = encodeURIComponent(fileName);
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename="${fileName}"; filename*=UTF-8''${encodedFilename}`,
+  );
+
+  doc.on("error", (err) => {
+    console.error("PDF generation error:", err);
+    if (!res.headersSent) {
+      res.status(500).json({ message: "Failed to generate PDF" });
+    }
+  });
+
+  doc.pipe(res);
+
+  doc.font("Helvetica-Bold").fontSize(14).text("Report Patrol");
+
+  doc.moveDown(1);
+  drawDivider(doc);
+
+  doc
+    .font("Helvetica")
+    .fontSize(10)
+    .text("Work Location : " + (reports[0]?.workLocation || "Unknown"));
+  doc.moveDown(1);
+
+  doc
+    .font("Helvetica")
+    .fontSize(10)
+    .text(`${toTitleCase(kind)} Report : ${periodLabel}`);
+  doc.moveDown(0.5);
+
+  for (const report of reports) {
+    const firstName = report.userId?.firstName ?? "Unknown";
+    const lastName = report.userId?.lastName ?? "";
+
+    const user = `${firstName} ${lastName}`.trim();
+    await renderRangedReportBlock(
+      doc,
+      {
+        id: report._id,
+        time: new Date(report.createdAt).toLocaleTimeString("id-ID", {
+          timeZone: "Asia/Jakarta",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        workLocation: report.workLocation,
+        createdAt: report.createdAt,
+        user: user,
+        point: report.patrolPointId.name,
+        text: report.report,
+        documentUrl: report.documentUrl || "Error on uploading PDF",
+      },
+      kind,
+    );
+    drawDivider(doc);
+  }
+
+  doc.end();
 };

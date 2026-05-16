@@ -14,10 +14,10 @@ const buttonVariants = {
 
 //  Button Sizes
 const buttonSizes = {
-  icon: "p-2",
-  small: "md:px-3 px-1.5 md:py-2 py-1 text-sm max-w-sm",
-  medium: "md:px-4 px-2 md:py-2 py-1 text-base max-w-md",
-  large: "md:px-6 px-3 md:py-3 py-1.5 text-lg max-w-lg",
+  icon: "p-2 w-fit ",
+  small: "md:px-3 px-1.5 md:py-2 py-1 text-sm w-fit max-w-sm",
+  medium: "md:px-4 px-2 md:py-2 py-1 text-base w-fit max-w-md",
+  large: "md:px-6 px-3 md:py-3 py-1.5 text-lg w-fit  max-w-lg",
   full: "md:px-4 px-2 md:py-2 py-1 text-base max-w-full w-full",
 };
 
@@ -39,7 +39,7 @@ const Button = ({
         "flex items-center text-left  justify-center gap-2 rounded-lg transition  duration-200",
         buttonVariants[buttonType], //  Use variant styles
         buttonSizes[buttonSize], //  Use size styles
-        className
+        className,
       )}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}

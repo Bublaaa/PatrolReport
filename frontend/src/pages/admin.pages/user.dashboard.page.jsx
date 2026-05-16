@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Loader, PenBoxIcon, Trash2 } from "lucide-react";
+import { Loader, MoveLeft, MoveRight, PenBoxIcon, Trash2 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { DeleteConfirmationForm } from "../../components/delete.confirmation.jsx";
@@ -32,8 +32,11 @@ const UserPageDashboard = () => {
   const closeModal = () =>
     setModalState({ isOpen: false, title: "", body: null });
 
+  const [currentPage, setCurrentPage] = useState(1);
+
   // * USE STORE
-  const { isLoading, users, getAllAuth, deleteAuth } = useAuthStore();
+  const { isLoading, users, pagination, getAllAuth, deleteAuth } =
+    useAuthStore();
   const {
     isLoading: isWorkLocationLoading,
     fetchWorkLocations,
@@ -42,7 +45,9 @@ const UserPageDashboard = () => {
 
   // * USE EFFECT - INITIAL DATA LOAD
   useEffect(() => {
-    getAllAuth();
+    getAllAuth(currentPage, pagination.limit);
+  }, [currentPage]);
+  useEffect(() => {
     fetchWorkLocations();
   }, []);
 
@@ -113,7 +118,7 @@ const UserPageDashboard = () => {
   });
 
   if (isLoading || isWorkLocationLoading) {
-    return <Loader className="w-6h-6 animate-spin mx-auto" />;
+    return <Loader className="w-6 h-6 animate-spin mx-auto" />;
   }
   return (
     <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md">
@@ -131,7 +136,7 @@ const UserPageDashboard = () => {
           </Button>
         </NavLink>
       </div>
-      <div className="grid grid-cols-4 gap-5 items-center pt-4 pb-2">
+      <div className="grid md:grid-cols-4 grid-cols-1 gap-5 items-center pt-4 pb-2">
         <DropdownInput
           name="position"
           value={selectedPosition}
@@ -166,7 +171,6 @@ const UserPageDashboard = () => {
           {t("user_dashboard_page.user_not_found")}
         </p>
       )}
-
       <div
         className="flex flex-col gap-2 w-full justify-between pt-2"
         onClick={(e) => handleDeleteAction(e)}
@@ -178,22 +182,20 @@ const UserPageDashboard = () => {
               className="grid grid-cols-4 gap-4 px-3 py-2 hover:bg-gray-100 items-center rounded-md cursor-pointer"
             >
               <div className="bg-white-shadow bg-opacity-50 rounded-full items-center text-center">
-                <h6 className="text-accent">{toTitleCase(user.position)}</h6>
+                <h6 className="text-accent md:hidden">
+                  {toTitleCase(user.position).charAt(0)}
+                </h6>
+                <h6 className="text-accent hidden md:inline">
+                  {toTitleCase(user.position)}
+                </h6>
               </div>
-              <p className="text-center">
+              <p className="text-center  md:hidden">{user.lastName}</p>
+              <p className="text-center hidden md:inline">
                 {user.firstName} {user.middleName} {user.lastName}
               </p>
               <p className="text-center">{user.workLocationId.name}</p>
 
-              <div className="ml-auto flex flex-row gap-2 items-end">
-                <Button
-                  className="delete-btn"
-                  buttonSize="small"
-                  buttonType="danger"
-                  icon={Trash2}
-                  data-id={user._id}
-                  data-name={user.firstName + user.lastName}
-                ></Button>
+              <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
                 <NavLink to={`/admin/user/${user._id}`}>
                   <Button
                     buttonType="secondary"
@@ -201,12 +203,51 @@ const UserPageDashboard = () => {
                     icon={PenBoxIcon}
                   />
                 </NavLink>
+                <Button
+                  className="delete-btn"
+                  buttonSize="icon"
+                  buttonType="danger"
+                  icon={Trash2}
+                  data-id={user._id}
+                  data-name={user.firstName + user.lastName}
+                ></Button>
               </div>
             </div>
           ))}
       </div>
 
-      <div className="flex flex-row gap-3"></div>
+      <div className="flex flex-wrap w-full items-center gap-2 md:gap-5 mt-5">
+        {/* PREV BUTTON */}
+        <Button
+          buttonSize="icon"
+          buttonType={currentPage === 1 ? "disabled" : "primary"}
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage((prev) => prev - 1)}
+          icon={MoveLeft}
+        ></Button>
+
+        {/* PAGE BUTTONS */}
+        {Array.from({ length: pagination.totalPages }, (_, index) => (
+          <Button
+            buttonType={currentPage === index + 1 ? "primary" : "secondary"}
+            key={index}
+            onClick={() => setCurrentPage(index + 1)}
+          >
+            {index + 1}
+          </Button>
+        ))}
+
+        {/* NEXT BUTTON */}
+        <Button
+          disabled={currentPage === pagination.totalPages}
+          buttonSize="icon"
+          buttonType={
+            currentPage === pagination.totalPages ? "disabled" : "primary"
+          }
+          onClick={() => setCurrentPage((prev) => prev + 1)}
+          icon={MoveRight}
+        ></Button>
+      </div>
     </div>
   );
 };

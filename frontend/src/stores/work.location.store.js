@@ -2,13 +2,6 @@ import { create } from "zustand";
 import axios from "../utils/axios";
 import toast from "react-hot-toast";
 
-const API_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:5003/api/"
-    : "/api/";
-
-axios.defaults.withCredentials = true;
-
 export const useWorkLocationStore = create((set, get) => ({
   workLocations: [],
   workLocation: null,
@@ -20,7 +13,7 @@ export const useWorkLocationStore = create((set, get) => ({
   fetchWorkLocations: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}work-location/get`);
+      const response = await axios.get(`work-location/get`);
       set({
         workLocations: response.data.workLocations,
         message: response.data.message,
@@ -42,7 +35,7 @@ export const useWorkLocationStore = create((set, get) => ({
   fetchWorkLocationDetail: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}work-location/${id}`);
+      const response = await axios.get(`work-location/${id}`);
       set({
         workLocation: response.data.workLocation,
         message: response.data.message,
@@ -64,7 +57,7 @@ export const useWorkLocationStore = create((set, get) => ({
   createWorkLocation: async (name, address) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.post(`${API_URL}work-location/create`, {
+      const response = await axios.post(`work-location/create`, {
         name,
         address,
       });
@@ -85,7 +78,7 @@ export const useWorkLocationStore = create((set, get) => ({
   updateWorkLocation: async (id, name, address) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.put(`${API_URL}work-location/update/${id}`, {
+      const response = await axios.put(`work-location/update/${id}`, {
         name,
         address,
       });
@@ -106,9 +99,7 @@ export const useWorkLocationStore = create((set, get) => ({
   deleteWorkLocation: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.delete(
-        `${API_URL}work-location/delete/${id}`,
-      );
+      const response = await axios.delete(`work-location/delete/${id}`);
       set({ message: response.data.message, isLoading: false });
       toast.success(response.data.message);
     } catch (error) {

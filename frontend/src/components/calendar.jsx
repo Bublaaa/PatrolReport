@@ -29,7 +29,6 @@ const ReportCalendar = ({ reportsByDate }) => {
         headerToolbar={false}
         dayCellDidMount={(info) => {
           const date = info.date.toISOString().split("T")[0];
-          console.log(date);
           const count = reportsByDate?.[date] || 0;
 
           // Highlight days with reports

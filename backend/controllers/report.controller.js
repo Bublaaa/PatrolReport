@@ -2,7 +2,10 @@ import { Auth } from "../models/Auth.js";
 import { Report } from "../models/Report.js";
 import { PatrolPoint } from "../models/PatrolPoint.js";
 import { ReportImages } from "../models/ReportImages.js";
-import { generateDownloadPDF } from "../utils/report.pdf.generator.js";
+import {
+  generateDownloadPDF,
+  generateRangedReportPDF,
+} from "../utils/report.pdf.generator.js";
 import { isWithinPatrolRadius } from "../../frontend/src/utils/location.js";
 import { fromZonedTime } from "date-fns-tz";
 
@@ -139,6 +142,7 @@ export const getReportByMonth = async (req, res) => {
               _id: "$_id",
               report: "$report",
               createdAt: "$createdAt",
+              documentUrl: "$documentUrl",
               userId: {
                 _id: "$user._id",
                 firstName: "$user.firstName",

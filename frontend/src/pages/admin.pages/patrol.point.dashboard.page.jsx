@@ -111,7 +111,7 @@ const PatrolPointPageDashboard = () => {
         </NavLink>
       </div>
 
-      <div className="grid grid-cols-3 gap-5 items-center pt-4 pb-2">
+      <div className="grid md:grid-cols-3 grid-cols-2 gap-5 items-center pt-4 pb-2">
         <DropdownInput
           className="span-2"
           name="workLocation"

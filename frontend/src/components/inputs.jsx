@@ -396,9 +396,9 @@ export const DateInput = ({
   error,
   ...props
 }) => (
-  <div className="relative">
+  <div className="relative w-full">
     {label && (
-      <label className="block text-sm font-medium text-gray-600 mb-1">
+      <label className="block  text-sm font-medium text-gray-600 mb-1">
         {label}
       </label>
     )}
