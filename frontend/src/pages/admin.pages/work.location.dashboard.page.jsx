@@ -7,6 +7,7 @@ import { Loader, PenBoxIcon, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Modal from "../../components/modal.jsx";
 import Button from "../../components/button.jsx";
+import Pagination from "../../components/pagination.jsx";
 
 const WorkLocationDashboardPage = () => {
   const { t } = useTranslation();
@@ -21,15 +22,21 @@ const WorkLocationDashboardPage = () => {
     setModalState({ isOpen: true, title, body });
   const closeModal = () =>
     setModalState({ isOpen: false, title: "", body: null });
+  const [currentPage, setCurrentPage] = useState(1);
 
   //* USE STORE
-  const { isLoading, workLocations, fetchWorkLocations, deleteWorkLocation } =
-    useWorkLocationStore();
+  const {
+    isLoading,
+    workLocations,
+    pagination,
+    fetchWorkLocations,
+    deleteWorkLocation,
+  } = useWorkLocationStore();
 
   //* USE EFFECT
   useEffect(() => {
-    fetchWorkLocations();
-  }, []);
+    fetchWorkLocations(currentPage, pagination.limit);
+  }, [currentPage]);
 
   // * DELETE ACTION HANDLER
   const handleDeleteAction = (e) => {
@@ -79,7 +86,7 @@ const WorkLocationDashboardPage = () => {
       )}
 
       <div
-        className="grid md:grid-cols-2 grid-cols-1 gap-2 w-full justify-between pt-2"
+        className="grid grid-cols-1 gap-2 w-full justify-between pt-2"
         onClick={(e) => handleDeleteAction(e)}
       >
         {workLocations.length > 0 &&
@@ -114,7 +121,11 @@ const WorkLocationDashboardPage = () => {
           ))}
       </div>
 
-      <div className="flex flex-row gap-3"></div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={pagination.totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

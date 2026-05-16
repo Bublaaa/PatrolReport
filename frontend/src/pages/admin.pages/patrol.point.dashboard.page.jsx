@@ -10,6 +10,7 @@ import { useWorkLocationStore } from "../../stores/work.location.store.js";
 import { useTranslation } from "react-i18next";
 import Modal from "../../components/modal";
 import Button from "../../components/button";
+import Pagination from "../../components/pagination.jsx";
 
 const PatrolPointPageDashboard = () => {
   const { t } = useTranslation();
@@ -19,6 +20,7 @@ const PatrolPointPageDashboard = () => {
     title: "",
     body: "",
   });
+  const [currentPage, setCurrentPage] = useState(1);
   const [filterName, setFilterName] = useState("");
   const [selectedWorkLocation, setSelectedWorkLocation] = useState("");
   // * MODAL FUNCTION
@@ -28,8 +30,13 @@ const PatrolPointPageDashboard = () => {
     setModalState({ isOpen: false, title: "", body: null });
 
   // * USE STORE
-  const { isLoading, patrolPoints, deletePatrolPoint, fetchPatrolPoints } =
-    usePatrolPointStore();
+  const {
+    isLoading,
+    patrolPoints,
+    pagination,
+    deletePatrolPoint,
+    fetchPatrolPoints,
+  } = usePatrolPointStore();
 
   const {
     workLocations,
@@ -39,7 +46,9 @@ const PatrolPointPageDashboard = () => {
   } = useWorkLocationStore();
 
   useEffect(() => {
-    fetchPatrolPoints();
+    fetchPatrolPoints(currentPage, pagination.limit);
+  }, [currentPage]);
+  useEffect(() => {
     fetchWorkLocations();
   }, []);
 
@@ -55,7 +64,7 @@ const PatrolPointPageDashboard = () => {
           itemId={deleteButton.dataset.id}
           onClose={() => {
             closeModal();
-            fetchPatrolPoints();
+            fetchPatrolPoints(currentPage, pagination.limit);
           }}
         />,
       );
@@ -172,6 +181,11 @@ const PatrolPointPageDashboard = () => {
             </div>
           ))}
       </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={pagination.totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

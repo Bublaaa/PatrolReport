@@ -5,8 +5,16 @@ import QRCode from "qrcode";
 // * * GET ALL
 export const getAllPatrolPoints = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const safeLimit = Math.min(limit, 100);
+    const skip = (page - 1) * safeLimit;
+    const total = await PatrolPoint.countDocuments();
+
     const patrolPoints = await PatrolPoint.find()
       .populate("workLocationId", "name address")
+      .skip(skip)
+      .limit(safeLimit)
       .sort({ name: 1 });
     if (patrolPoints.length === 0) {
       return res.status(404).json({
@@ -19,6 +27,12 @@ export const getAllPatrolPoints = async (req, res) => {
       success: true,
       message: req.t("patrol_point.get_all_success"),
       patrolPoints: patrolPoints,
+      pagination: {
+        total,
+        page,
+        limit: safeLimit,
+        totalPages: Math.ceil(total / safeLimit),
+      },
     });
   } catch (error) {
     res

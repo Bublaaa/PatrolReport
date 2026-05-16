@@ -14,6 +14,7 @@ import {
 } from "../../utils/constants.js";
 import Button from "../../components/button";
 import Modal from "../../components/modal.jsx";
+import Pagination from "../../components/pagination.jsx";
 
 const UserPageDashboard = () => {
   const { t } = useTranslation();
@@ -90,7 +91,7 @@ const UserPageDashboard = () => {
           itemId={deleteButton.dataset.id}
           onClose={() => {
             closeModal();
-            getAllAuth();
+            getAllAuth(currentPage, pagination.limit);
           }}
         />,
       );
@@ -216,38 +217,11 @@ const UserPageDashboard = () => {
           ))}
       </div>
 
-      <div className="flex flex-wrap w-full items-center gap-2 md:gap-5 mt-5">
-        {/* PREV BUTTON */}
-        <Button
-          buttonSize="icon"
-          buttonType={currentPage === 1 ? "disabled" : "primary"}
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage((prev) => prev - 1)}
-          icon={MoveLeft}
-        ></Button>
-
-        {/* PAGE BUTTONS */}
-        {Array.from({ length: pagination.totalPages }, (_, index) => (
-          <Button
-            buttonType={currentPage === index + 1 ? "primary" : "secondary"}
-            key={index}
-            onClick={() => setCurrentPage(index + 1)}
-          >
-            {index + 1}
-          </Button>
-        ))}
-
-        {/* NEXT BUTTON */}
-        <Button
-          disabled={currentPage === pagination.totalPages}
-          buttonSize="icon"
-          buttonType={
-            currentPage === pagination.totalPages ? "disabled" : "primary"
-          }
-          onClick={() => setCurrentPage((prev) => prev + 1)}
-          icon={MoveRight}
-        ></Button>
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={pagination.totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

@@ -5,19 +5,28 @@ import toast from "react-hot-toast";
 export const useWorkLocationStore = create((set, get) => ({
   workLocations: [],
   workLocation: null,
+  pagination: {
+    total: 0,
+    page: 1,
+    limit: 5,
+    totalPages: 1,
+  },
   error: null,
   isLoading: false,
   message: null,
 
   // * FETCH ALL WORK LOCATIONS
-  fetchWorkLocations: async () => {
+  fetchWorkLocations: async (page = 1, limit = 5) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`work-location/get`);
+      const response = await axios.get(
+        `work-location/get?page=${page}&limit=${limit}`,
+      );
       set({
         workLocations: response.data.workLocations,
         message: response.data.message,
         isLoading: false,
+        pagination: response.data.pagination,
       });
       toast.success(response.data.message);
     } catch (error) {

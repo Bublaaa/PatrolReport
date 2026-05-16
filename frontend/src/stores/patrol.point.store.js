@@ -6,18 +6,27 @@ export const usePatrolPointStore = create((set, get) => ({
   patrolPoints: [],
   patrolPointDetail: null,
   qrCode: null,
+  pagination: {
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 1,
+  },
   error: null,
   isLoading: false,
   message: null,
 
-  fetchPatrolPoints: async () => {
+  fetchPatrolPoints: async (page = 1, limit = 10) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get("patrol-point/get");
+      const response = await axios.get(
+        `patrol-point/get?page=${page}&limit=${limit}`,
+      );
       set({
         patrolPoints: response.data.patrolPoints,
         message: response.data.message,
         isLoading: false,
+        pagination: response.data.pagination,
       });
       toast.success(response.data.message);
     } catch (error) {

@@ -3,11 +3,26 @@ import { WorkLocation } from "../models/WorkLocation.js";
 //* GET ALL WORK LOCATIONS
 export const getAllWorkLocations = async (req, res) => {
   try {
-    const workLocations = await WorkLocation.find();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const safeLimit = Math.min(limit, 100);
+    const skip = (page - 1) * safeLimit;
+    const total = await WorkLocation.countDocuments();
+
+    const workLocations = await WorkLocation.find()
+      .skip(skip)
+      .limit(safeLimit)
+      .sort({ name: 1 });
     res.status(200).json({
       success: true,
       message: req.t("work_location.get_all_success"),
       workLocations,
+      pagination: {
+        total,
+        page,
+        limit: safeLimit,
+        totalPages: Math.ceil(total / safeLimit),
+      },
     });
   } catch (error) {
     res.status(500).json({
