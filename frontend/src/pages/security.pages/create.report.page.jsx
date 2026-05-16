@@ -14,8 +14,10 @@ import { compressImages } from "../../utils/compressImage.js";
 import toast from "react-hot-toast";
 import Button from "../../components/button.jsx";
 import { useAuthStore } from "../../stores/auth.store.js";
+import { useTranslation } from "react-i18next";
 
 const CreateReportPage = () => {
+  const { t } = useTranslation();
   // * USE PARAMS
   const { id } = useParams();
   // * USE STORE
@@ -136,20 +138,23 @@ const CreateReportPage = () => {
       <div className="max-w-3xl w-full mx-auto h-fit p-3">
         <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4 justify-between bg-white rounded-lg bg-white shadow-md px-6 py-4">
-            <h2> Create Report</h2>
-            <h6>Patrol Point : {toTitleCase(patrolPointDetail.name)}</h6>
+            <h2>{t("create_report_page.title")}</h2>
+            <h6>
+              {t("create_report_page.title")} :
+              {toTitleCase(patrolPointDetail.name)}
+            </h6>
           </div>
 
           <div className="flex flex-col gap-5 bg-white shadow-md rounded-lg px-6 py-4">
             <div className="flex flex-row justify-between w-full">
-              <h5>Current Location</h5>
+              <h5>{t("create_report_page.current_location_label")}</h5>
               <Button
                 type="button"
                 buttonSize="medium"
                 buttonType="primary"
                 onClick={checkLocationPermission}
               >
-                Recalibrate
+                {t("create_report_page.recalibrate_button_label")}
               </Button>
             </div>
             <div className="grid grid-cols-2 gap-5">
@@ -172,13 +177,16 @@ const CreateReportPage = () => {
             </div>
             {locationGranted === null && (
               <div className="p-2 items-center text-center bg-yellow-100 rounded-lg">
-                <p className="text-yellow-500">Checking location permission</p>
+                <p className="text-yellow-500">
+                  {t("create_report_page.checking_location_permission_message")}
+                </p>
               </div>
             )}
             {locationGranted === false && (
               <div className="p-2 items-center text-center bg-red-100 rounded-lg">
                 <p className="text-red-500">
-                  ❌ Location permission is required for create new report.
+                  ❌{" "}
+                  {t("create_report_page.location_permission_denied_message")}
                 </p>
               </div>
             )}
@@ -186,10 +194,12 @@ const CreateReportPage = () => {
 
           <div className="flex flex-col gap-5 px-6 py-4 bg-white shadow-md rounded-lg">
             <TextareaInput
-              label="Report Description"
+              label={t("create_report_page.report_description_label")}
               name="report"
               value={reportData.report}
-              placeholder="Enter report description"
+              placeholder={t(
+                "create_report_page.report_description_placeholder",
+              )}
               onChange={(e) =>
                 setReportData((prev) => ({
                   ...prev,
@@ -199,7 +209,7 @@ const CreateReportPage = () => {
             />
             <CameraInput
               key={cameraKey}
-              label="Upload Report Images"
+              label={t("create_report_page.upload_report_images_label")}
               maxFiles={5}
               onFilesChange={(files) =>
                 setReportData((prev) => ({
@@ -216,7 +226,7 @@ const CreateReportPage = () => {
               buttonType={isReportDataValid ? "primary" : "disabled"}
               disabled={!isReportDataValid}
             >
-              Submit
+              {t("create_report_page.save_report_button_label")}
             </Button>
           </div>
         </form>

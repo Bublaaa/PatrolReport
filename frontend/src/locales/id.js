@@ -118,6 +118,19 @@ const id = {
     delete_modal_title: "Hapus Laporan",
     no_patrol_images_found: "Tidak ada gambar patroli ditemukan.",
   },
+  create_report_page: {
+    title: "Buat Laporan Baru",
+    patrol_point_label: "Titik Patroli",
+    current_location_label: "Lokasi Saat Ini",
+    recalibrate_button_label: "Kalibrasi",
+    checking_location_permission_message: "Memeriksa izin lokasi",
+    location_permission_denied_message:
+      "❌ Izin lokasi diperlukan untuk membuat laporan baru.",
+    report_description_label: "Deskripsi Laporan",
+    report_description_placeholder: "Masukkan deskripsi laporan",
+    upload_report_images_label: "Unggah Gambar Laporan Maks 5 gambar",
+    save_report_button_label: "Kirim",
+  },
   setting_page: {
     storage_setting: "Pengaturan Penyimpanan (Google Drive)",
     language_setting: "Pengaturan Bahasa",
