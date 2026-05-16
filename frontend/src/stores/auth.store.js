@@ -7,6 +7,12 @@ export const useAuthStore = create((set, get) => ({
   userDetail: null,
   loggedInUserDetail: null,
   isAuthenticated: false,
+  pagination: {
+    total: 0,
+    page: 1,
+    limit: 5,
+    totalPages: 1,
+  },
   error: null,
   isLoading: false,
   isCheckingAuth: true,
@@ -69,12 +75,13 @@ export const useAuthStore = create((set, get) => ({
   },
 
   //* FETCH ALL ACCOUNT
-  getAllAuth: async () => {
+  getAllAuth: async (page = 1, limit = 10) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get("auth/get");
+      const response = await axios.get(`/auth/get?page=${page}&limit=${limit}`);
       set({
         users: response.data.auths,
+        pagination: response.data.pagination,
         isLoading: false,
         message: response.data.message,
       });
