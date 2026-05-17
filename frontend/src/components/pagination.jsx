@@ -7,21 +7,15 @@ const Pagination = ({
   onPageChange,
   className = "",
 }) => {
-  const generatePages = () => {
-    const pages = [];
+  const pages = [];
 
-    const startPage = Math.max(1, currentPage - 2);
-    const endPage = Math.min(totalPages, currentPage + 2);
+  const hasNoData = totalPages === 0;
+  const isPrevDisabled = currentPage <= 1 || hasNoData;
+  const isNextDisabled = currentPage >= totalPages || hasNoData;
 
-    // for (let i = startPage; i <= endPage; i++) {
-    //   pages.push(i);
-    // }
-    for (let i = 1; i <= totalPages; i++) {
-      pages.push(i);
-    }
-
-    return pages;
-  };
+  for (let i = 1; i <= totalPages; i++) {
+    pages.push(i);
+  }
 
   return (
     <div
@@ -33,14 +27,14 @@ const Pagination = ({
       {/* PREV BUTTON */}
       <Button
         buttonSize="icon"
-        buttonType={currentPage === 1 ? "disabled" : "primary"}
-        disabled={currentPage === 1}
+        buttonType={isPrevDisabled ? "disabled" : "primary"}
+        disabled={isPrevDisabled}
         onClick={() => onPageChange(currentPage - 1)}
         icon={MoveLeft}
       />
 
       {/* PAGE BUTTONS */}
-      {generatePages().map((page) => (
+      {pages.map((page) => (
         <Button
           key={page}
           buttonType={currentPage === page ? "primary" : "secondary"}
@@ -53,8 +47,8 @@ const Pagination = ({
       {/* NEXT BUTTON */}
       <Button
         buttonSize="icon"
-        buttonType={currentPage === totalPages ? "disabled" : "primary"}
-        disabled={currentPage === totalPages}
+        buttonType={isNextDisabled ? "disabled" : "primary"}
+        disabled={isNextDisabled}
         onClick={() => onPageChange(currentPage + 1)}
         icon={MoveRight}
       />

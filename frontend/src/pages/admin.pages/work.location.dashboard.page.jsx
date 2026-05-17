@@ -38,7 +38,7 @@ const WorkLocationDashboardPage = () => {
   } = useWorkLocationStore();
 
   const fetchWorkLocationData = async () => {
-    await fetchWorkLocations(currentPage, pagination.limit, debounceSearch);
+    await fetchWorkLocations(currentPage, debounceSearch);
   };
 
   const handleSearchName = (e) => {
@@ -80,10 +80,6 @@ const WorkLocationDashboardPage = () => {
     }
   };
 
-  if (isLoading) {
-    return <Loader className="w-6h-6 animate-spin mx-auto" />;
-  }
-
   return (
     <div className="flex flex-col w-full bg-white rounded-lg px-6 py-4 shadow-md">
       <Modal
@@ -109,6 +105,7 @@ const WorkLocationDashboardPage = () => {
         />
       </div>
 
+      {isLoading && <Loader className="w-6h-6 animate-spin mx-auto" />}
       {workLocations.length === 0 && (
         <p className="text-center mt-4">
           {t("work_location_dashboard_page.work_locations_not_found")}
@@ -121,41 +118,45 @@ const WorkLocationDashboardPage = () => {
       >
         {workLocations.length > 0 &&
           workLocations.map((workLocation) => (
-            <div
+            <WorkLocationCard
               key={workLocation._id}
-              className="flex flex-row gap-4 px-3 py-2 hover:bg-gray-100 rounded-md justify-between items-center cursor-pointer"
-            >
-              <div className="flex flex-col items-start">
-                <h6>{workLocation.name}</h6>
-                <p className="line-clamp-2">{workLocation.address}</p>
-              </div>
-
-              <div className="flex flex-row gap-2">
-                <Button
-                  className="delete-btn"
-                  buttonSize="small"
-                  buttonType="danger"
-                  icon={Trash2}
-                  data-id={workLocation._id}
-                  data-name={workLocation.name}
-                ></Button>
-                <NavLink to={`/admin/work-location/${workLocation._id}`}>
-                  <Button
-                    buttonType="secondary"
-                    buttonSize="icon"
-                    icon={PenBoxIcon}
-                  />
-                </NavLink>
-              </div>
-            </div>
+              workLocation={workLocation}
+            />
           ))}
       </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={pagination.totalPages}
-        onPageChange={setCurrentPage}
-      />
+      {pagination.totalPages > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={pagination.totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
+    </div>
+  );
+};
+
+const WorkLocationCard = ({ workLocation }) => {
+  return (
+    <div className="flex flex-row gap-4 px-3 py-2 hover:bg-gray-100 rounded-md justify-between items-center cursor-pointer">
+      <div className="flex flex-col items-start">
+        <h6>{workLocation.name}</h6>
+        <p className="line-clamp-2">{workLocation.address}</p>
+      </div>
+
+      <div className="flex flex-row gap-2">
+        <Button
+          className="delete-btn"
+          buttonSize="small"
+          buttonType="danger"
+          icon={Trash2}
+          data-id={workLocation._id}
+          data-name={workLocation.name}
+        ></Button>
+        <NavLink to={`/admin/work-location/${workLocation._id}`}>
+          <Button buttonType="secondary" buttonSize="icon" icon={PenBoxIcon} />
+        </NavLink>
+      </div>
     </div>
   );
 };

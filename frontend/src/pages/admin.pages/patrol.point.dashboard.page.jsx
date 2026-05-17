@@ -129,7 +129,7 @@ const PatrolPointPageDashboard = () => {
         </NavLink>
       </div>
 
-      <div className="grid md:grid-cols-3 grid-cols-2 gap-5 items-center pt-4 pb-2">
+      <div className="grid md:grid-cols-2 grid-cols-1 gap-5 items-center pt-4 pb-2">
         <DropdownInput
           className="span-2"
           name="workLocation"
@@ -164,39 +164,39 @@ const PatrolPointPageDashboard = () => {
       >
         {patrolPoints.length > 0 &&
           patrolPoints.map((point) => (
-            <div
-              key={point._id}
-              className="grid grid-cols-3 gap-4 px-3 py-2 hover:bg-gray-100 rounded-md justify-between items-center cursor-pointer"
-            >
-              <p>{toTitleCase(point.workLocationId.name)}</p>
-              <p>{toTitleCase(point.name)}</p>
-              <div className="flex flex-row gap-2 justify-end">
-                <Button
-                  className="delete-btn"
-                  buttonSize="small"
-                  buttonType="danger"
-                  icon={Trash2}
-                  data-id={point._id}
-                  data-name={point.name}
-                ></Button>
-                <NavLink to={`/admin/patrol-point/${point._id}`}>
-                  <Button
-                    buttonType="secondary"
-                    buttonSize="icon"
-                    icon={PenBoxIcon}
-                  />
-                </NavLink>
-              </div>
-            </div>
+            <PatrolPointCard key={point._id} patrolPoint={point} />
           ))}
       </div>
-      <Pagination
-        currentPage={currentPage}
-        totalPages={pagination.totalPages}
-        onPageChange={setCurrentPage}
-      />
+      {pagination.totalPages > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={pagination.totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
     </div>
   );
 };
 
+const PatrolPointCard = ({ patrolPoint }) => {
+  return (
+    <div className="grid grid-cols-3 gap-4 px-3 py-2 hover:bg-gray-100 rounded-md justify-between items-center cursor-pointer">
+      <p>{toTitleCase(patrolPoint.workLocationId.name)}</p>
+      <p>{toTitleCase(patrolPoint.name)}</p>
+      <div className="flex flex-row gap-2 justify-end">
+        <Button
+          className="delete-btn"
+          buttonSize="small"
+          buttonType="danger"
+          icon={Trash2}
+          data-id={patrolPoint._id}
+          data-name={patrolPoint.name}
+        ></Button>
+        <NavLink to={`/admin/patrol-point/${patrolPoint._id}`}>
+          <Button buttonType="secondary" buttonSize="icon" icon={PenBoxIcon} />
+        </NavLink>
+      </div>
+    </div>
+  );
+};
 export default PatrolPointPageDashboard;

@@ -148,7 +148,7 @@ const UserPageDashboard = () => {
     }
   };
 
-  if (isAuthLoading || isWorkLocationLoading) {
+  if (isWorkLocationLoading) {
     return <Loader className="w-6 h-6 animate-spin mx-auto" />;
   }
   return (
@@ -197,61 +197,67 @@ const UserPageDashboard = () => {
         <h6>{t("user_dashboard_page.table_header_work_location")}</h6>
         <h6>{t("user_dashboard_page.table_header_actions")}</h6>
       </div>
-      {users.length === 0 && (
-        <p className="text-center mt-4">
-          {t("user_dashboard_page.user_not_found")}
-        </p>
-      )}
       <div
         className="flex flex-col gap-2 w-full justify-between pt-2"
         onClick={(e) => handleDeleteAction(e)}
       >
-        {users.length > 0 &&
-          users.map((user) => (
-            <div
-              key={user._id}
-              className="grid grid-cols-4 gap-4 px-3 py-2 hover:bg-gray-100 items-center rounded-md cursor-pointer"
-            >
-              <div className="bg-white-shadow bg-opacity-50 rounded-full items-center text-center">
-                <h6 className="text-accent md:hidden">
-                  {toTitleCase(user.position).charAt(0)}
-                </h6>
-                <h6 className="text-accent hidden md:inline">
-                  {toTitleCase(user.position)}
-                </h6>
-              </div>
-              <p className="text-center  md:hidden">{user.lastName}</p>
-              <p className="text-center hidden md:inline">
-                {user.firstName} {user.middleName} {user.lastName}
-              </p>
-              <p className="text-center">{user.workLocationId?.name || "-"}</p>
-
-              <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
-                <NavLink to={`/admin/user/${user._id}`}>
-                  <Button
-                    buttonType="secondary"
-                    buttonSize="icon"
-                    icon={PenBoxIcon}
-                  />
-                </NavLink>
-                <Button
-                  className="delete-btn"
-                  buttonSize="icon"
-                  buttonType="danger"
-                  icon={Trash2}
-                  data-id={user._id}
-                  data-name={user.firstName + user.lastName}
-                ></Button>
-              </div>
-            </div>
-          ))}
+        {isAuthLoading ? (
+          <Loader className="w-6 h-6 animate-spin mx-auto" />
+        ) : users.length === 0 ? (
+          <p className="text-center mt-4">
+            {t("user_dashboard_page.user_not_found")}
+          </p>
+        ) : (
+          users.map((user) => <UserCard key={user._id} user={user} />)
+        )}
       </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={pagination.totalPages}
-        onPageChange={setCurrentPage}
-      />
+      {pagination.totalPages > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={pagination.totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
+    </div>
+  );
+};
+
+const UserCard = ({ user }) => {
+  return (
+    <div className="grid grid-cols-4 gap-4 px-3 py-2 hover:bg-gray-100 items-center rounded-md cursor-pointer">
+      <div className="bg-white-shadow bg-opacity-50 rounded-full items-center text-center">
+        <h6 className="text-accent md:hidden">
+          {toTitleCase(user.position).charAt(0)}
+        </h6>
+
+        <h6 className="text-accent hidden md:inline">
+          {toTitleCase(user.position)}
+        </h6>
+      </div>
+
+      <p className="text-center md:hidden">{user.lastName}</p>
+
+      <p className="text-center hidden md:inline">
+        {user.firstName} {user.middleName} {user.lastName}
+      </p>
+
+      <p className="text-center">{user.workLocationId?.name || "-"}</p>
+
+      <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
+        <NavLink to={`/admin/user/${user._id}`}>
+          <Button buttonType="secondary" buttonSize="icon" icon={PenBoxIcon} />
+        </NavLink>
+
+        <Button
+          className="delete-btn"
+          buttonSize="icon"
+          buttonType="danger"
+          icon={Trash2}
+          data-id={user._id}
+          data-name={`${user.firstName} ${user.lastName}`}
+        />
+      </div>
     </div>
   );
 };
