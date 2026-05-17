@@ -7,9 +7,21 @@ export const getAllWorkLocations = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const safeLimit = Math.min(limit, 100);
     const skip = (page - 1) * safeLimit;
-    const total = await WorkLocation.countDocuments();
 
-    const workLocations = await WorkLocation.find()
+    const search = req.query.search || "";
+
+    const query = {};
+
+    if (search.trim()) {
+      query.name = {
+        $regex: search,
+        $options: "i",
+      };
+    }
+
+    const total = await WorkLocation.countDocuments(query);
+
+    const workLocations = await WorkLocation.find(query)
       .skip(skip)
       .limit(safeLimit)
       .sort({ name: 1 });

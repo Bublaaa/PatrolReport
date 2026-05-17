@@ -16,11 +16,11 @@ export const useWorkLocationStore = create((set, get) => ({
   message: null,
 
   // * FETCH ALL WORK LOCATIONS
-  fetchWorkLocations: async (page = 1, limit = 5) => {
+  fetchWorkLocations: async (page = 1, limit = 5, search = "") => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get(
-        `work-location/get?page=${page}&limit=${limit}`,
+        `work-location/get?page=${page}&limit=${limit}&search=${search}`,
       );
       set({
         workLocations: response.data.workLocations,

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useWorkLocationStore } from "../../stores/work.location.store.js";
 import { Loader, PenBoxIcon, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { TextInput } from "../../components/inputs.jsx";
 import Modal from "../../components/modal.jsx";
 import Button from "../../components/button.jsx";
 import Pagination from "../../components/pagination.jsx";
@@ -12,6 +13,10 @@ import Pagination from "../../components/pagination.jsx";
 const WorkLocationDashboardPage = () => {
   const { t } = useTranslation();
   // * USE STATE
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchName, setSearchName] = useState("");
+  const [debounceSearch, setDebounceSearch] = useState(searchName);
+
   const [modalState, setModalState] = useState({
     isOpen: false,
     title: "",
@@ -22,7 +27,6 @@ const WorkLocationDashboardPage = () => {
     setModalState({ isOpen: true, title, body });
   const closeModal = () =>
     setModalState({ isOpen: false, title: "", body: null });
-  const [currentPage, setCurrentPage] = useState(1);
 
   //* USE STORE
   const {
@@ -33,10 +37,28 @@ const WorkLocationDashboardPage = () => {
     deleteWorkLocation,
   } = useWorkLocationStore();
 
+  const fetchWorkLocationData = async () => {
+    await fetchWorkLocations(currentPage, pagination.limit, debounceSearch);
+  };
+
+  const handleSearchName = (e) => {
+    setCurrentPage(1);
+    setSearchName(e.target.value);
+  };
+
   //* USE EFFECT
   useEffect(() => {
-    fetchWorkLocations(currentPage, pagination.limit);
-  }, [currentPage]);
+    fetchWorkLocationData();
+  }, [currentPage, debounceSearch]);
+
+  // * DEBOUNCE SEARCH
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebounceSearch(searchName);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchName]);
 
   // * DELETE ACTION HANDLER
   const handleDeleteAction = (e) => {
@@ -50,7 +72,7 @@ const WorkLocationDashboardPage = () => {
           itemId={deleteButton.dataset.id}
           onClose={() => {
             closeModal();
-            fetchWorkLocations(currentPage, pagination.limit);
+            fetchWorkLocationData();
           }}
         />,
       );
@@ -70,13 +92,21 @@ const WorkLocationDashboardPage = () => {
         title={modalState.title}
         body={modalState.body}
       />
-      <div className="flex flex-row justify-between">
-        <h5>{t("work_location_dashboard_page.title")}</h5>
-        <NavLink to={"/admin/work-location/add"}>
-          <Button buttonType="primary" buttonSize="medium" icon={Plus}>
-            {t("work_location_dashboard_page.add_work_location_button_label")}
-          </Button>
-        </NavLink>
+      <div className="flex flex-col gap-2 md:gap-5 w-full">
+        <div className="flex flex-row justify-between">
+          <h5>{t("work_location_dashboard_page.title")}</h5>
+          <NavLink to={"/admin/work-location/add"}>
+            <Button buttonType="primary" buttonSize="medium" icon={Plus}>
+              {t("work_location_dashboard_page.add_work_location_button_label")}
+            </Button>
+          </NavLink>
+        </div>
+        <TextInput
+          type="text"
+          placeholder={t("user_dashboard_page.search_name_placeholder")}
+          value={searchName}
+          onChange={handleSearchName}
+        />
       </div>
 
       {workLocations.length === 0 && (
