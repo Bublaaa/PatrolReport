@@ -1,6 +1,7 @@
 import { PatrolPoint } from "../models/PatrolPoint.js";
 import { Report } from "../models/Report.js";
 import QRCode from "qrcode";
+import mongoose from "mongoose";
 
 // * * GET ALL
 export const getAllPatrolPoints = async (req, res) => {
@@ -9,20 +10,30 @@ export const getAllPatrolPoints = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const safeLimit = Math.min(limit, 100);
     const skip = (page - 1) * safeLimit;
-    const total = await PatrolPoint.countDocuments();
 
-    const patrolPoints = await PatrolPoint.find()
+    const searchName = req.query.searchName || "";
+    const workLocationId = req.query.workLocationId || "";
+
+    const query = {};
+
+    if (searchName.trim()) {
+      query.name = { $regex: searchName, $options: "i" };
+    }
+
+    if (
+      workLocationId.trim() &&
+      mongoose.Types.ObjectId.isValid(workLocationId)
+    ) {
+      query.workLocationId = new mongoose.Types.ObjectId(workLocationId);
+    }
+
+    const total = await PatrolPoint.countDocuments(query);
+
+    const patrolPoints = await PatrolPoint.find(query)
       .populate("workLocationId", "name address")
       .skip(skip)
       .limit(safeLimit)
       .sort({ name: 1 });
-    if (patrolPoints.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: req.t("patrol_point.patrol_point_not_found"),
-        patrolPoints: [],
-      });
-    }
     res.status(200).json({
       success: true,
       message: req.t("patrol_point.get_all_success"),

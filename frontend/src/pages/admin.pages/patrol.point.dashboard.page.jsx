@@ -23,6 +23,8 @@ const PatrolPointPageDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [filterName, setFilterName] = useState("");
   const [selectedWorkLocation, setSelectedWorkLocation] = useState("");
+  const [debounceSearch, setDebouncedSearch] = useState(filterName);
+
   // * MODAL FUNCTION
   const openModal = (title, body) =>
     setModalState({ isOpen: true, title, body });
@@ -45,12 +47,29 @@ const PatrolPointPageDashboard = () => {
     error: workLocationError,
   } = useWorkLocationStore();
 
+  const fetchPatrolPoint = () => {
+    fetchPatrolPoints(
+      currentPage,
+      pagination.limit,
+      debounceSearch,
+      selectedWorkLocation,
+    );
+  };
+
   useEffect(() => {
-    fetchPatrolPoints(currentPage, pagination.limit);
-  }, [currentPage]);
+    fetchPatrolPoint();
+  }, [currentPage, debounceSearch, selectedWorkLocation]);
   useEffect(() => {
-    fetchWorkLocations();
+    fetchWorkLocations(1, 1000);
   }, []);
+  // * DEBOUNCE SEARCH
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(filterName);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [filterName]);
 
   // * DELETE ACTION HANDLER
   const handleDeleteAction = (e) => {
@@ -64,7 +83,7 @@ const PatrolPointPageDashboard = () => {
           itemId={deleteButton.dataset.id}
           onClose={() => {
             closeModal();
-            fetchPatrolPoints(currentPage, pagination.limit);
+            fetchPatrolPoint();
           }}
         />,
       );
@@ -73,10 +92,12 @@ const PatrolPointPageDashboard = () => {
   };
 
   const handleFilterName = (e) => {
+    setCurrentPage(1);
     setFilterName(e.target.value);
   };
 
   const handleFilterWorkLocation = (e) => {
+    setCurrentPage(1);
     setSelectedWorkLocation(e.target.value);
   };
 
@@ -87,18 +108,6 @@ const PatrolPointPageDashboard = () => {
       allValue: "",
     }),
   );
-
-  // * FILTERED LIST
-  const filteredPatrolPoints = patrolPoints.filter((point) => {
-    const matchWorkLocation =
-      !selectedWorkLocation ||
-      point.workLocationId._id === selectedWorkLocation;
-
-    const matchName =
-      !filterName || point.name.includes(filterName.toLowerCase());
-
-    return matchWorkLocation && matchName;
-  });
 
   if (isLoading || isWorkLocationLoading) {
     return <Loader className="w-6h-6 animate-spin mx-auto" />;
@@ -137,7 +146,7 @@ const PatrolPointPageDashboard = () => {
         />
       </div>
 
-      {filteredPatrolPoints.length === 0 && (
+      {patrolPoints.length === 0 && (
         <p className="text-center mt-4">
           {t("patrol_point_dashboard_page.patrol_points_not_found")}
         </p>
@@ -153,8 +162,8 @@ const PatrolPointPageDashboard = () => {
         className="flex flex-col gap-2 w-full justify-between pt-2"
         onClick={(e) => handleDeleteAction(e)}
       >
-        {filteredPatrolPoints.length > 0 &&
-          filteredPatrolPoints.map((point) => (
+        {patrolPoints.length > 0 &&
+          patrolPoints.map((point) => (
             <div
               key={point._id}
               className="grid grid-cols-3 gap-4 px-3 py-2 hover:bg-gray-100 rounded-md justify-between items-center cursor-pointer"

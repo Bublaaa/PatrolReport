@@ -16,11 +16,16 @@ export const usePatrolPointStore = create((set, get) => ({
   isLoading: false,
   message: null,
 
-  fetchPatrolPoints: async (page = 1, limit = 10) => {
+  fetchPatrolPoints: async (
+    page = 1,
+    limit = 10,
+    searchName = "",
+    workLocationId = "",
+  ) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get(
-        `patrol-point/get?page=${page}&limit=${limit}`,
+        `patrol-point/get?page=${page}&limit=${limit}&searchName=${searchName}&workLocationId=${workLocationId}`,
       );
       set({
         patrolPoints: response.data.patrolPoints,
