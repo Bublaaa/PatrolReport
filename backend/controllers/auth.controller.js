@@ -1,6 +1,7 @@
 import { Auth } from "../models/Auth.js";
 import bcrypt from "bcryptjs";
 import generateTokenAndSetCookie from "../utils/generateTokenAndSetCookie.js";
+import mongoose from "mongoose";
 
 //* LOGIN
 export const login = async (req, res) => {
@@ -331,14 +332,56 @@ export const getAllAuths = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const safeLimit = Math.min(limit, 100);
     const skip = (page - 1) * safeLimit;
-    const total = await Auth.countDocuments();
 
-    const auths = await Auth.find()
+    const search = req.query.search || "";
+    const position = req.query.position || "";
+    const workLocationId = req.query.workLocationId || "";
+
+    const query = {};
+
+    if (search.trim()) {
+      query.$or = [
+        {
+          firstName: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+        {
+          middleName: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+        {
+          lastName: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    if (position.trim()) {
+      query.position = position;
+    }
+
+    if (
+      workLocationId.trim() &&
+      mongoose.Types.ObjectId.isValid(workLocationId)
+    ) {
+      query.workLocationId = new mongoose.Types.ObjectId(workLocationId);
+    }
+
+    const total = await Auth.countDocuments(query);
+
+    const auths = await Auth.find(query)
       .populate("workLocationId", "name address")
       .select("-password")
       .skip(skip)
       .limit(safeLimit)
       .sort({ createdAt: -1 });
+
     res.status(200).json({
       success: true,
       message: req.t("auth.get_all_auth_success"),

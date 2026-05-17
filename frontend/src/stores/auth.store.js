@@ -75,10 +75,18 @@ export const useAuthStore = create((set, get) => ({
   },
 
   //* FETCH ALL ACCOUNT
-  getAllAuth: async (page = 1, limit = 10) => {
+  getAllAuth: async (
+    page = 1,
+    limit = 10,
+    searchName = "",
+    filterPosition = "",
+    filterWorkLocation = "",
+  ) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`/auth/get?page=${page}&limit=${limit}`);
+      const response = await axios.get(
+        `/auth/get?page=${page}&limit=${limit}&search=${searchName}&position=${filterPosition}&workLocationId=${filterWorkLocation}`,
+      );
       set({
         users: response.data.auths,
         pagination: response.data.pagination,

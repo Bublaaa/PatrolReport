@@ -50,7 +50,7 @@ const WorkLocationDashboardPage = () => {
           itemId={deleteButton.dataset.id}
           onClose={() => {
             closeModal();
-            fetchWorkLocations();
+            fetchWorkLocations(currentPage, pagination.limit);
           }}
         />,
       );
