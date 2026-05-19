@@ -11,6 +11,7 @@ import reportRoutes from "./routes/report.route.js";
 import reportImagesRoutes from "./routes/report.images.route.js";
 import systemSettingRoutes from "./routes/system.setting.route.js";
 import workLocationRoutes from "./routes/work.location.route.js";
+import { globalLimiter } from "./middlewares/rateLimiter.js";
 import { connection } from "./database/connection.js";
 import { startReportCron } from "./services/scheduler.js";
 import driveUploadRoutes from "./routes/drive.upload.route.js";
@@ -32,7 +33,8 @@ app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.json()); // * Allow to parse incoming requests with json "req.body"
 app.use(i18nMiddleware);
 app.use(cookieParser());
-
+app.set("trust proxy", 1);
+app.use(globalLimiter); // * Apply rate limiter to all requests
 // app.use((req, res, next) => {
 //   console.log("REQUEST:", req.method, req.url);
 //   next();

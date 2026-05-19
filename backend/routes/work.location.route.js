@@ -6,6 +6,7 @@ import {
   updateWorkLocation,
   deleteWorkLocation,
 } from "../controllers/work.location.controller.js";
+import { workLocationLimiter } from "../middlewares/rateLimiter.js";
 
 const router = express.Router();
 
@@ -16,12 +17,12 @@ router.get("/get", getAllWorkLocations);
 router.get("/:id", getWorkLocationDetail);
 
 // CREATE NEW WORK LOCATION
-router.post("/create", createWorkLocation);
+router.post("/create", workLocationLimiter, createWorkLocation);
 
 // UPDATE WORK LOCATION
-router.put("/update/:id", updateWorkLocation);
+router.put("/update/:id", workLocationLimiter, updateWorkLocation);
 
 // DELETE WORK LOCATION
-router.delete("/delete/:id", deleteWorkLocation);
+router.delete("/delete/:id", workLocationLimiter, deleteWorkLocation);
 
 export default router;

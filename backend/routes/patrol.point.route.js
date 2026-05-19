@@ -7,6 +7,7 @@ import {
   deletePatrolPoint,
   generatePatrolPointBarcode,
 } from "../controllers/patrol.point.controller.js";
+import { patrolReportLimiter } from "../middlewares/rateLimiter.js";
 
 const router = express.Router();
 
@@ -17,13 +18,13 @@ router.get("/get", getAllPatrolPoints);
 router.get("/:id", getPatrolPointsDetail);
 
 // CREATE NEW PATROL POINT
-router.post("/create", createPatrolPoint);
+router.post("/create", patrolReportLimiter, createPatrolPoint);
 
 // UPDATE PATROL POINT
-router.put("/update/:id", updatePatrolPoint);
+router.put("/update/:id", patrolReportLimiter, updatePatrolPoint);
 
 // DELETE PATROL POINT
-router.delete("/delete/:id", deletePatrolPoint);
+router.delete("/delete/:id", patrolReportLimiter, deletePatrolPoint);
 
 router.post("/generate-qr", generatePatrolPointBarcode);
 

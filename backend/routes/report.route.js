@@ -9,6 +9,10 @@ import {
   deleteReport,
   downloadPDF,
 } from "../controllers/report.controller.js";
+import {
+  uploadImagesLimiter,
+  editReportLimiter,
+} from "../middlewares/rateLimiter.js";
 import { uploadReportImages } from "../middlewares/multer.js";
 
 const router = express.Router();
@@ -29,12 +33,17 @@ router.get("/month/:month", getReportByMonth);
 router.get("/get/:id", getReportDetail);
 
 // CREATE NEW REPORT
-router.post("/create", uploadReportImages.array("images", 5), createReport);
+router.post(
+  "/create",
+  uploadImagesLimiter,
+  uploadReportImages.array("images", 5),
+  createReport,
+);
 
 // UPDATE REPORT
-router.put("/update/:id", updateReport);
+router.put("/update/:id", editReportLimiter, updateReport);
 
 // DELETE REPORT
-router.delete("/delete/:id", deleteReport);
+router.delete("/delete/:id", editReportLimiter, deleteReport);
 
 export default router;

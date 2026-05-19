@@ -7,6 +7,7 @@ import {
   getAllReportImages,
   deleteAllReportImages,
 } from "../controllers/report.images.controller.js";
+import { reportImagesLimiter } from "../middlewares/rateLimiter.js";
 
 const router = express.Router();
 
@@ -17,13 +18,13 @@ router.get("/get", getAllReportImages);
 router.get("/:id", getReportImagesByReportId);
 
 // CREATE NEW REPORT IMAGES
-router.post("/create", createReportImages);
+router.post("/create", reportImagesLimiter, createReportImages);
 
 // UPDATE REPORT IMAGES
-router.put("/update/:id", updateReportImages);
+router.put("/update/:id", reportImagesLimiter, updateReportImages);
 
 // DELETE REPORT IMAGES
-router.delete("/delete/:id", deleteReportImages);
+router.delete("/delete/:id", reportImagesLimiter, deleteReportImages);
 
 // DELETE ALL REPORT  IMAGES
 router.delete("/delete-all", deleteAllReportImages);
