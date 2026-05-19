@@ -397,27 +397,21 @@ export const deleteReport = async (req, res) => {
 export const downloadPDF = async (req, res) => {
   try {
     const { reports } = req.body;
-    const { kind } = req.query;
 
-    if (!reports || reports.length === 0) {
-      return res.status(404).json({ message: "No reports found" });
-    }
+    // const start = new Date(date);
+    // start.setHours(0, 0, 0, 0);
 
-    if (kind === "daily") {
-      const reportIds = reports.map((report) => report._id);
-      const reportImagesByReportId = await ReportImages.find({
-        reportId: { $in: reportIds },
-      });
+    // const end = new Date(date);
+    // end.setHours(23, 59, 59, 999);
 
-      const imagesByReportId = {};
+    // const query = {
+    //   createdAt: { $gte: start, $lte: end },
+    // };
 
-      reportImagesByReportId.forEach((image) => {
-        const key = image.reportId.toString();
-        if (!imagesByReportId[key]) {
-          imagesByReportId[key] = [];
-        }
-        imagesByReportId[key].push(image);
-      });
+    // const reports = await Report.find(query)
+    //   .populate("userId", "firstName lastName")
+    //   .populate("patrolPointId", "name")
+    //   .sort({ createdAt: 1 });
 
     if (!reports.length) {
       return res
@@ -425,11 +419,22 @@ export const downloadPDF = async (req, res) => {
         .json({ message: req.t("report.report_not_found") });
     }
 
-    if (kind === "weekly" || kind === "monthly") {
-      return generateRangedReportPDF(res, reports, kind);
-    }
+    const reportIds = reports.map((report) => report._id);
+    const reportImagesByReportId = await ReportImages.find({
+      reportId: { $in: reportIds },
+    });
 
-    // generateDownloadPDF(res, reports, imagesByReportId);
+    const imagesByReportId = {};
+
+    reportImagesByReportId.forEach((image) => {
+      const key = image.reportId.toString();
+      if (!imagesByReportId[key]) {
+        imagesByReportId[key] = [];
+      }
+      imagesByReportId[key].push(image);
+    });
+
+    generateDownloadPDF(res, reports, imagesByReportId);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: req.t("common.server_error") });

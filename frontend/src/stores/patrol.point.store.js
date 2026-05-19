@@ -2,29 +2,36 @@ import { create } from "zustand";
 import axios from "../utils/axios";
 import toast from "react-hot-toast";
 
-const API_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:5003/api/"
-    : "/api/";
-
-axios.defaults.withCredentials = true;
-
 export const usePatrolPointStore = create((set, get) => ({
   patrolPoints: [],
   patrolPointDetail: null,
   qrCode: null,
+  pagination: {
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 1,
+  },
   error: null,
   isLoading: false,
   message: null,
 
-  fetchPatrolPoints: async () => {
+  fetchPatrolPoints: async (
+    page = 1,
+    limit = 10,
+    searchName = "",
+    workLocationId = "",
+  ) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}patrol-point/get`);
+      const response = await axios.get(
+        `patrol-point/get?page=${page}&limit=${limit}&searchName=${searchName}&workLocationId=${workLocationId}`,
+      );
       set({
         patrolPoints: response.data.patrolPoints,
         message: response.data.message,
         isLoading: false,
+        pagination: response.data.pagination,
       });
       toast.success(response.data.message);
     } catch (error) {
@@ -41,7 +48,7 @@ export const usePatrolPointStore = create((set, get) => ({
   fetchPatrolPointDetail: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}patrol-point/${id}`);
+      const response = await axios.get(`patrol-point/${id}`);
       set({
         patrolPointDetail: response.data.patrolPoint,
         message: response.data.message,
@@ -62,7 +69,7 @@ export const usePatrolPointStore = create((set, get) => ({
   createPatrolPoint: async (name, latitude, longitude, workLocationId) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.post(`${API_URL}patrol-point/create`, {
+      const response = await axios.post("patrol-point/create", {
         name,
         latitude,
         longitude,
@@ -84,7 +91,7 @@ export const usePatrolPointStore = create((set, get) => ({
   updatePatrolPoint: async (id, name, latitude, longitude, workLocationId) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.put(`${API_URL}patrol-point/update/${id}`, {
+      const response = await axios.put(`patrol-point/update/${id}`, {
         name,
         latitude,
         longitude,
@@ -106,9 +113,7 @@ export const usePatrolPointStore = create((set, get) => ({
   deletePatrolPoint: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.delete(
-        `${API_URL}patrol-point/delete/${id}`,
-      );
+      const response = await axios.delete(`patrol-point/delete/${id}`);
       set({ message: response.data.message, isLoading: false });
       toast.success(response.data.message);
     } catch (error) {
@@ -125,7 +130,7 @@ export const usePatrolPointStore = create((set, get) => ({
   generateQRCode: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.post(`${API_URL}patrol-point/generate-qr`, {
+      const response = await axios.post("patrol-point/generate-qr", {
         id,
       });
       set({

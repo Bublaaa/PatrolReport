@@ -109,11 +109,14 @@ const RedirectAuthenticatedUser = ({ children }) => {
     useAuthStore();
   if (isCheckingAuth) return null;
   if (isAuthenticated) {
-    switch (loggedInUserDetail.position) {
-      case "admin":
-        return <Navigate to="/admin" replace />;
-      case "security":
-        return <Navigate to="/security" replace />;
+    const position = loggedInUserDetail?.position;
+
+    if (position === "admin") {
+      return <Navigate to="/admin" replace />;
+    }
+
+    if (position === "security") {
+      return <Navigate to="/security" replace />;
     }
   }
   return children;

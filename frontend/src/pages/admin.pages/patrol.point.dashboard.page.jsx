@@ -10,6 +10,7 @@ import { useWorkLocationStore } from "../../stores/work.location.store.js";
 import { useTranslation } from "react-i18next";
 import Modal from "../../components/modal";
 import Button from "../../components/button";
+import Pagination from "../../components/pagination.jsx";
 
 const PatrolPointPageDashboard = () => {
   const { t } = useTranslation();
@@ -19,8 +20,11 @@ const PatrolPointPageDashboard = () => {
     title: "",
     body: "",
   });
+  const [currentPage, setCurrentPage] = useState(1);
   const [filterName, setFilterName] = useState("");
   const [selectedWorkLocation, setSelectedWorkLocation] = useState("");
+  const [debounceSearch, setDebouncedSearch] = useState(filterName);
+
   // * MODAL FUNCTION
   const openModal = (title, body) =>
     setModalState({ isOpen: true, title, body });
@@ -28,8 +32,13 @@ const PatrolPointPageDashboard = () => {
     setModalState({ isOpen: false, title: "", body: null });
 
   // * USE STORE
-  const { isLoading, patrolPoints, deletePatrolPoint, fetchPatrolPoints } =
-    usePatrolPointStore();
+  const {
+    isLoading,
+    patrolPoints,
+    pagination,
+    deletePatrolPoint,
+    fetchPatrolPoints,
+  } = usePatrolPointStore();
 
   const {
     workLocations,
@@ -38,10 +47,29 @@ const PatrolPointPageDashboard = () => {
     error: workLocationError,
   } = useWorkLocationStore();
 
+  const fetchPatrolPoint = () => {
+    fetchPatrolPoints(
+      currentPage,
+      pagination.limit,
+      debounceSearch,
+      selectedWorkLocation,
+    );
+  };
+
   useEffect(() => {
-    fetchPatrolPoints();
-    fetchWorkLocations();
+    fetchPatrolPoint();
+  }, [currentPage, debounceSearch, selectedWorkLocation]);
+  useEffect(() => {
+    fetchWorkLocations(1, 1000);
   }, []);
+  // * DEBOUNCE SEARCH
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(filterName);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [filterName]);
 
   // * DELETE ACTION HANDLER
   const handleDeleteAction = (e) => {
@@ -55,7 +83,7 @@ const PatrolPointPageDashboard = () => {
           itemId={deleteButton.dataset.id}
           onClose={() => {
             closeModal();
-            fetchPatrolPoints();
+            fetchPatrolPoint();
           }}
         />,
       );
@@ -64,10 +92,12 @@ const PatrolPointPageDashboard = () => {
   };
 
   const handleFilterName = (e) => {
+    setCurrentPage(1);
     setFilterName(e.target.value);
   };
 
   const handleFilterWorkLocation = (e) => {
+    setCurrentPage(1);
     setSelectedWorkLocation(e.target.value);
   };
 
@@ -78,18 +108,6 @@ const PatrolPointPageDashboard = () => {
       allValue: "",
     }),
   );
-
-  // * FILTERED LIST
-  const filteredPatrolPoints = patrolPoints.filter((point) => {
-    const matchWorkLocation =
-      !selectedWorkLocation ||
-      point.workLocationId._id === selectedWorkLocation;
-
-    const matchName =
-      !filterName || point.name.includes(filterName.toLowerCase());
-
-    return matchWorkLocation && matchName;
-  });
 
   if (isLoading || isWorkLocationLoading) {
     return <Loader className="w-6h-6 animate-spin mx-auto" />;
@@ -111,7 +129,7 @@ const PatrolPointPageDashboard = () => {
         </NavLink>
       </div>
 
-      <div className="grid md:grid-cols-3 grid-cols-2 gap-5 items-center pt-4 pb-2">
+      <div className="grid md:grid-cols-2 grid-cols-1 gap-5 items-center pt-4 pb-2">
         <DropdownInput
           className="span-2"
           name="workLocation"
@@ -128,7 +146,7 @@ const PatrolPointPageDashboard = () => {
         />
       </div>
 
-      {filteredPatrolPoints.length === 0 && (
+      {patrolPoints.length === 0 && (
         <p className="text-center mt-4">
           {t("patrol_point_dashboard_page.patrol_points_not_found")}
         </p>
@@ -144,36 +162,41 @@ const PatrolPointPageDashboard = () => {
         className="flex flex-col gap-2 w-full justify-between pt-2"
         onClick={(e) => handleDeleteAction(e)}
       >
-        {filteredPatrolPoints.length > 0 &&
-          filteredPatrolPoints.map((point) => (
-            <div
-              key={point._id}
-              className="grid grid-cols-3 gap-4 px-3 py-2 hover:bg-gray-100 rounded-md justify-between items-center cursor-pointer"
-            >
-              <p>{toTitleCase(point.workLocationId.name)}</p>
-              <p>{toTitleCase(point.name)}</p>
-              <div className="flex flex-row gap-2 justify-end">
-                <Button
-                  className="delete-btn"
-                  buttonSize="small"
-                  buttonType="danger"
-                  icon={Trash2}
-                  data-id={point._id}
-                  data-name={point.name}
-                ></Button>
-                <NavLink to={`/admin/patrol-point/${point._id}`}>
-                  <Button
-                    buttonType="secondary"
-                    buttonSize="icon"
-                    icon={PenBoxIcon}
-                  />
-                </NavLink>
-              </div>
-            </div>
+        {patrolPoints.length > 0 &&
+          patrolPoints.map((point) => (
+            <PatrolPointCard key={point._id} patrolPoint={point} />
           ))}
       </div>
+      {pagination.totalPages > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={pagination.totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
     </div>
   );
 };
 
+const PatrolPointCard = ({ patrolPoint }) => {
+  return (
+    <div className="grid grid-cols-3 gap-4 px-3 py-2 hover:bg-gray-100 rounded-md justify-between items-center cursor-pointer">
+      <p>{toTitleCase(patrolPoint.workLocationId.name)}</p>
+      <p>{toTitleCase(patrolPoint.name)}</p>
+      <div className="flex flex-row gap-2 justify-end">
+        <Button
+          className="delete-btn"
+          buttonSize="small"
+          buttonType="danger"
+          icon={Trash2}
+          data-id={patrolPoint._id}
+          data-name={patrolPoint.name}
+        ></Button>
+        <NavLink to={`/admin/patrol-point/${patrolPoint._id}`}>
+          <Button buttonType="secondary" buttonSize="icon" icon={PenBoxIcon} />
+        </NavLink>
+      </div>
+    </div>
+  );
+};
 export default PatrolPointPageDashboard;

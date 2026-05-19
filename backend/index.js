@@ -31,7 +31,6 @@ app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
 app.use(express.json()); // * Allow to parse incoming requests with json "req.body"
 app.use(i18nMiddleware);
-app.use(express.json()); // Allow to parse incoming requests with json "req.body"
 app.use(cookieParser());
 
 // app.use((req, res, next) => {

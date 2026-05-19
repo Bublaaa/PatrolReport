@@ -118,6 +118,19 @@ const en = {
     delete_modal_title: "Delete Report",
     no_patrol_images_found: "No patrol images found.",
   },
+  create_report_page: {
+    title: "Create New Report",
+    patrol_point_label: "Patrol Point",
+    current_location_label: "Current Location",
+    recalibrate_button_label: "Recalibrate",
+    checking_location_permission_message: "Checking location permission",
+    location_permission_denied_message:
+      "❌ Location permission is required for create new report.",
+    report_description_label: "Report Description",
+    report_description_placeholder: "Enter report description",
+    upload_report_images_label: "Upload Report Images Max 5 images",
+    save_report_button_label: "Send Report",
+  },
   setting_page: {
     storage_setting: "Storage Setting (Google Drive)",
     language_setting: "Language Setting",

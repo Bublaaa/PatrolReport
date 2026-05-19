@@ -2,13 +2,6 @@ import { create } from "zustand";
 import axios from "../utils/axios";
 import toast from "react-hot-toast";
 
-const API_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:5003/api/"
-    : "/api/";
-
-axios.defaults.withCredentials = true;
-
 export const useSystemSettingStore = create((set, get) => ({
   systemSettings: [],
   systemSettingDetail: null,
@@ -19,7 +12,7 @@ export const useSystemSettingStore = create((set, get) => ({
   fetchAllSystemSettings: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}system-setting/get`);
+      const response = await axios.get(`system-setting/get`);
       set({ systemSettings: response.data.systemSettings, isLoading: false });
     } catch (error) {
       const errorMessage =
@@ -31,7 +24,7 @@ export const useSystemSettingStore = create((set, get) => ({
   fetchDriveFolderId: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}system-setting/get-drive-id`);
+      const response = await axios.get(`system-setting/get-drive-id`);
       set({ systemSettingDetail: response.data.folderId, isLoading: false });
     } catch (error) {
       const errorMessage =
@@ -43,12 +36,9 @@ export const useSystemSettingStore = create((set, get) => ({
   updateDriveFolderId: async (link) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.put(
-        `${API_URL}system-setting/update-drive-id`,
-        {
-          link,
-        },
-      );
+      const response = await axios.put(`system-setting/update-drive-id`, {
+        link,
+      });
       set({ message: response.data.message, isLoading: false });
       toast.success("Drive folder ID updated successfully");
     } catch (error) {
@@ -61,12 +51,9 @@ export const useSystemSettingStore = create((set, get) => ({
   createDriveFolderId: async (link) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.post(
-        `${API_URL}system-setting/create-drive-id`,
-        {
-          link,
-        },
-      );
+      const response = await axios.post(`system-setting/create-drive-id`, {
+        link,
+      });
       set({ message: response.data.message, isLoading: false });
       toast.success("Drive folder ID created successfully");
     } catch (error) {

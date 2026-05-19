@@ -16,17 +16,19 @@ const router = express.Router();
 // GET ALL REPORTS
 router.get("/get", getAllReports);
 
+// DOWNLOAD REPORT TO PDF
 router.post("/export/pdf", downloadPDF);
 
-// GET ALL REPORTS
+// GET REPORT BY DATE
 router.get("/date/:date", getReportByDate);
+
+// GET REPORT BY MONTH
 router.get("/month/:month", getReportByMonth);
 
 // GET REPORT DETAIL
 router.get("/get/:id", getReportDetail);
 
 // CREATE NEW REPORT
-// router.post("/create", createReport);
 router.post("/create", uploadReportImages.array("images", 5), createReport);
 
 // UPDATE REPORT
